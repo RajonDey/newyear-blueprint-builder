@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { WizardStepBoundary } from "@/components/wizard/WizardStepBoundary";
-import { Footer } from "@/components/Footer";
 import { OnboardingScreen } from "@/components/wizard/OnboardingScreen";
 import { ProgressIndicator } from "@/components/wizard/ProgressIndicator";
 import { Step0WheelOfLife } from "@/components/wizard/Step0WheelOfLife";
@@ -305,7 +304,6 @@ const Index = () => {
           </WizardStepBoundary>
         )}
       </div>
-      <Footer />
     </div>
   );
 };

@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { fetchWithRetry, ApiError } from "@/lib/api-client";
 import { getErrorMessage } from "@/lib/error-messages";
 import { safeLocalStorage } from "@/lib/storage";
-import { Footer } from "@/components/Footer";
 
 interface StoredWizardData {
   goals: CategoryGoal[];
@@ -275,7 +274,6 @@ const PaymentSuccess = () => {
           </p>
         </Card>
       </div>
-      <Footer />
     </div>
   );
 };

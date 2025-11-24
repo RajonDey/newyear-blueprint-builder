@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { XCircle, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Footer } from "@/components/Footer";
 
 const PaymentCancel = () => {
   const navigate = useNavigate();
@@ -43,7 +42,6 @@ const PaymentCancel = () => {
         </p>
       </Card>
       </div>
-      <Footer />
     </div>
   );
 };
