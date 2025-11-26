@@ -46,6 +46,11 @@ export const APP_CONFIG = {
   appDescription:
     "Free interactive goal-setting wizard using proven frameworks including Wheel of Life, SMART Goals, OKR, and Atomic Habits.",
   baseUrl: import.meta.env.VITE_APP_URL || "https://yearinreview.online",
+  
+  // PDF Generation Configuration
+  pdf: {
+    useReactPDF: import.meta.env.VITE_USE_REACT_PDF === 'true',
+  },
 } as const;
 
 /**

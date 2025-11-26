@@ -75,56 +75,84 @@ export function generateNotionCSV(data: NotionTemplateData): string {
  */
 export function generateNotionMarkdown(data: NotionTemplateData): string {
   const year = APP_CONFIG.year;
-  let markdown = `# ${year} Success Blueprint\n\n`;
-  markdown += `**Created for:** ${data.userName}\n`;
-  markdown += `**Email:** ${data.userEmail}\n`;
-  markdown += `**Date:** ${new Date().toLocaleDateString()}\n\n`;
+  let markdown = `# ${year} Success Blueprint 🚀\n\n`;
+  
+  // Dashboard Header
+  markdown += `> "The future depends on what you do today."\n\n`;
+  markdown += `**Owner:** ${data.userName}\n`;
+  markdown += `**Focus:** ${data.primaryCategory}\n\n`;
   markdown += `---\n\n`;
 
-  markdown += `## Focus Areas\n\n`;
-  markdown += `**Primary:** ${data.primaryCategory || 'Not set'}\n\n`;
+  // Quick Links / Navigation (Simulated)
+  markdown += `## 🧭 Dashboard\n\n`;
+  markdown += `* [Goals](#goals)\n`;
+  markdown += `* [Habit Tracker](#habit-tracker)\n`;
+  markdown += `* [Monthly Reviews](#monthly-reviews)\n\n`;
+
+  // Focus Areas
+  markdown += `## 🎯 Focus Areas\n\n`;
+  markdown += `### 🌟 Primary Focus: ${data.primaryCategory || 'Not set'}\n`;
+  markdown += `This is your "Keystone" area for ${year}. Success here will ripple elsewhere.\n\n`;
+  
   if (data.secondaryCategories.length > 0) {
-    markdown += `**Secondary:** ${data.secondaryCategories.join(', ')}\n\n`;
+    markdown += `### 🔧 Supporting Areas\n`;
+    markdown += `${data.secondaryCategories.map(c => `* ${c}`).join('\n')}\n\n`;
   }
   markdown += `---\n\n`;
 
+  // Goals Section
+  markdown += `## 🏆 Goals <a name="goals"></a>\n\n`;
+  
   data.goals.forEach((goal, index) => {
     const isPrimary = goal.category === data.primaryCategory;
-    markdown += `## ${index + 1}. ${goal.category} ${isPrimary ? '⭐ (Primary)' : ''}\n\n`;
+    const icon = isPrimary ? '⭐' : '📌';
     
-    markdown += `### Main Goal\n\n`;
-    markdown += `${goal.mainGoal || 'Not set'}\n\n`;
+    markdown += `### ${icon} ${goal.category}\n\n`;
     
-    markdown += `### Action Steps\n\n`;
-    markdown += `**Small Step:** ${goal.actions.small || 'Not set'}\n\n`;
-    markdown += `**Medium Step:** ${goal.actions.medium || 'Not set'}\n\n`;
-    markdown += `**Big Step:** ${goal.actions.big || 'Not set'}\n\n`;
+    // Main Goal Callout
+    markdown += `> **Main Goal:** ${goal.mainGoal || 'Not set'}\n\n`;
     
-    markdown += `### Monthly Check-in\n\n`;
-    markdown += `${goal.monthlyCheckIn || 'Not set'}\n\n`;
+    markdown += `#### 📝 Action Plan\n`;
+    markdown += `| Timeline | Action Step |\n`;
+    markdown += `| :--- | :--- |\n`;
+    markdown += `| **Small Step** | ${goal.actions.small || '-'} |\n`;
+    markdown += `| **Medium Step** | ${goal.actions.medium || '-'} |\n`;
+    markdown += `| **Big Step** | ${goal.actions.big || '-'} |\n\n`;
     
-    markdown += `### Motivation\n\n`;
-    markdown += `**Why it matters:** ${goal.motivation.why || 'Not set'}\n\n`;
-    markdown += `**Cost of inaction:** ${goal.motivation.consequence || 'Not set'}\n\n`;
+    markdown += `#### 🔥 Motivation\n`;
+    markdown += `* **Why it matters:** ${goal.motivation.why || '-'}\n`;
+    markdown += `* **Cost of inaction:** ${goal.motivation.consequence || '-'}\n\n`;
     
+    markdown += `#### 📅 Check-in Strategy\n`;
+    markdown += `${goal.monthlyCheckIn || '-'}\n\n`;
     markdown += `---\n\n`;
   });
 
-  markdown += `## Progress Tracking\n\n`;
-  markdown += `Use this section to track your progress throughout the year.\n\n`;
-  markdown += `### Monthly Reviews\n\n`;
-  markdown += `- [ ] January Review\n`;
-  markdown += `- [ ] February Review\n`;
-  markdown += `- [ ] March Review\n`;
-  markdown += `- [ ] April Review\n`;
-  markdown += `- [ ] May Review\n`;
-  markdown += `- [ ] June Review\n`;
-  markdown += `- [ ] July Review\n`;
-  markdown += `- [ ] August Review\n`;
-  markdown += `- [ ] September Review\n`;
-  markdown += `- [ ] October Review\n`;
-  markdown += `- [ ] November Review\n`;
-  markdown += `- [ ] December Review\n\n`;
+  // Habit Tracker
+  markdown += `## 📊 Habit Tracker <a name="habit-tracker"></a>\n\n`;
+  markdown += `Copy this table for each month to track your daily habits.\n\n`;
+  markdown += `| Habit | M | T | W | T | F | S | S |\n`;
+  markdown += `| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n`;
+  markdown += `| [Small Step Action] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |\n`;
+  markdown += `| [Medium Step Action] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |\n`;
+  markdown += `| Read 10 pages | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |\n`;
+  markdown += `| Meditate 5 mins | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |\n\n`;
+
+  // Monthly Reviews
+  markdown += `## 📅 Monthly Reviews <a name="monthly-reviews"></a>\n\n`;
+  markdown += `Schedule these on the last Sunday of every month.\n\n`;
+  
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June', 
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  months.forEach(month => {
+    markdown += `### ${month}\n`;
+    markdown += `- [ ] Review Goals\n`;
+    markdown += `- [ ] Check Habit Progress\n`;
+    markdown += `- [ ] Adjust Plan if needed\n\n`;
+  });
 
   return markdown;
 }

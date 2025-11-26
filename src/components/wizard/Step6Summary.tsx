@@ -5,11 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { CategoryGoal, LifeCategory } from "@/types/wizard";
 import { useState } from "react";
-import { Mail, User, Download, CreditCard, Loader2 } from "lucide-react";
+import { Mail, User, Download, CreditCard, Loader2, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { safeLocalStorage } from "@/lib/storage";
 import { APP_CONFIG } from "@/lib/config";
+import { generateSuccessPDF } from "@/utils/pdfGenerator";
 import { logger } from "@/lib/logger";
 import { validateEmail, validateName } from "@/lib/validation";
 
@@ -40,6 +41,7 @@ export const Step6Summary = ({
   onBack,
 }: Step6SummaryProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const primaryGoal = goals.find(g => g.category === primaryCategory);
   const secondaryGoals = goals.filter(g => secondaryCategories.includes(g.category));
@@ -71,6 +73,7 @@ export const Step6Summary = ({
   };
 
   const handleProceedToPayment = () => {
+    setIsLoading(true);
     try {
       const paymentData = {
         goals,
@@ -83,6 +86,7 @@ export const Step6Summary = ({
       const saved = safeLocalStorage.setItem("wizard_payment_data", paymentData);
       if (!saved) {
         toast.error("Failed to prepare payment data. Please try again.");
+        setIsLoading(false);
         return;
       }
 
@@ -95,6 +99,7 @@ export const Step6Summary = ({
     } catch (error) {
       logger.error('Failed to proceed to payment:', error);
       toast.error("Failed to proceed to checkout. Please try again.");
+      setIsLoading(false);
     }
   };
 
@@ -246,23 +251,41 @@ export const Step6Summary = ({
               </div>
 
               <Button
-                onClick={handleProceedToPayment}
-                size="lg"
-                disabled={isPdfGenerating}
-                className="bg-gradient-primary hover:opacity-90 hover-scale h-14 px-8 w-full sm:w-auto"
+              onClick={handleProceedToPayment}
+              disabled={isLoading}
+              size="lg"
+              className="w-full bg-gradient-primary hover:opacity-90 hover-scale text-lg h-14 shadow-elegant animate-pulse-subtle"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Lock className="w-5 h-5 mr-2" />
+                  Unlock Full Blueprint ($9)
+                </>
+              )}
+            </Button>
+            
+            {/* DEV ONLY: Preview PDF Button */}
+            {process.env.NODE_ENV === 'development' && (
+              <Button
+                onClick={() => generateSuccessPDF({
+                  userName,
+                  userEmail,
+                  goals,
+                  primaryCategory: primaryCategory!,
+                  secondaryCategories
+                })}
+                variant="outline"
+                size="sm"
+                className="w-full mt-4 border-dashed border-muted-foreground/50 text-muted-foreground"
               >
-                {isPdfGenerating ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    Unlock Full Blueprint — $9
-                  </>
-                )}
+                🛠️ Dev: Preview PDF
               </Button>
+            )}
               
               <p className="text-sm text-muted-foreground mt-4">
                 One-time payment • Instant download • Sent to {userEmail}
