@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
+import { APP_CONFIG } from "@/lib/config";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="mt-auto border-t border-border bg-card/80 backdrop-blur-sm safe-area-bottom">
-      <div className="container mx-auto px-4 py-8 md:py-10">
+      <div className="container mx-auto px-4 py-8 md:py-10 !pb-24">
         <div className="flex flex-col items-center gap-4 md:gap-6">
           {/* Legal Links */}
           <nav className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm">
@@ -34,7 +35,9 @@ export const Footer = () => {
 
           {/* Copyright */}
           <div className="text-center text-xs md:text-sm text-muted-foreground space-y-1">
-            <p>© {currentYear} Success Blueprint. All rights reserved.</p>
+            <p>
+              © {currentYear} {APP_CONFIG.appName}. All rights reserved.
+            </p>
             <p className="opacity-75">Digital products delivered instantly.</p>
           </div>
         </div>

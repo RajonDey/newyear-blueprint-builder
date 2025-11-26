@@ -4,11 +4,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { APP_CONFIG } from "@/lib/config";
 
 const faqs = [
   {
     question: "Is this really free to use?",
-    answer: "Yes! The entire planning process is completely free. You can create your full 2025 plan at no cost. The optional premium PDF and Notion template are available for $12 (early access price) if you want a beautifully formatted version to keep and track.",
+    answer: `Yes! The entire planning process is completely free. You can create your full ${APP_CONFIG.year} plan at no cost. The optional premium PDF and Notion template are available for $12 (early access price) if you want a beautifully formatted version to keep and track.`,
   },
   {
     question: "How is this different from other planning tools?",
@@ -28,7 +29,7 @@ const faqs = [
   },
   {
     question: "What exactly do I get in the premium PDF?",
-    answer: "The premium PDF includes your complete 2025 plan beautifully formatted: Wheel of Life assessment, SMART goals, action breakdown, daily habits, motivation plan, and progress tracking sections. Plus the Notion template to track everything digitally.",
+    answer: `The premium PDF includes your complete ${APP_CONFIG.year} plan beautifully formatted: Wheel of Life assessment, SMART goals, action breakdown, daily habits, motivation plan, and progress tracking sections. Plus the Notion template to track everything digitally.`,
   },
   {
     question: "Is there a refund policy?",
@@ -36,7 +37,7 @@ const faqs = [
   },
   {
     question: "Can I use this for business goals too?",
-    answer: "Absolutely! The frameworks work for personal goals, business objectives, career development, health targets - any area where you want structured progress in 2025.",
+    answer: `Absolutely! The frameworks work for personal goals, business objectives, career development, health targets - any area where you want structured progress in ${APP_CONFIG.year}.`,
   },
 ];
 

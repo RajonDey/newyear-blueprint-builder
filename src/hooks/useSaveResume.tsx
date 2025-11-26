@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { logger } from "@/lib/logger";
 
 export const useSaveResume = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -42,7 +43,7 @@ export const useSaveResume = () => {
       const saved = localStorage.getItem(`wizard_${sessionId}`);
       return saved ? JSON.parse(saved) : null;
     } catch (error) {
-      console.error("Failed to load session:", error);
+      logger.error("Failed to load session:", error);
       return null;
     }
   };
@@ -52,7 +53,7 @@ export const useSaveResume = () => {
     try {
       localStorage.setItem(`wizard_${sessionId}`, JSON.stringify(data));
     } catch (error) {
-      console.error("Failed to save session:", error);
+      logger.error("Failed to save session:", error);
     }
   };
 

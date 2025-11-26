@@ -1,4 +1,5 @@
 import { toast } from 'sonner';
+import { logger } from './logger';
 
 export class StorageError extends Error {
   constructor(
@@ -17,7 +18,7 @@ export const safeLocalStorage = {
       if (!item) return defaultValue;
       return JSON.parse(item) as T;
     } catch (error) {
-      console.error(`Failed to read from localStorage (${key}):`, error);
+      logger.error(`Failed to read from localStorage (${key}):`, error);
 
       if (error instanceof Error && error.name === 'QuotaExceededError') {
         toast.error('Storage full. Please clear some space.');
@@ -32,7 +33,7 @@ export const safeLocalStorage = {
       localStorage.setItem(key, JSON.stringify(value));
       return true;
     } catch (error) {
-      console.error(`Failed to write to localStorage (${key}):`, error);
+      logger.error(`Failed to write to localStorage (${key}):`, error);
 
       if (error instanceof Error && error.name === 'QuotaExceededError') {
         toast.error('Storage full. Clearing old data...');
@@ -60,7 +61,7 @@ export const safeLocalStorage = {
     try {
       localStorage.removeItem(key);
     } catch (error) {
-      console.error(`Failed to delete from localStorage (${key}):`, error);
+      logger.error(`Failed to delete from localStorage (${key}):`, error);
     }
   },
 
@@ -88,9 +89,9 @@ export const safeLocalStorage = {
         localStorage.removeItem(key);
       });
 
-      console.log(`Cleared ${Math.max(0, sorted.length - 3)} old sessions`);
+      logger.log(`Cleared ${Math.max(0, sorted.length - 3)} old sessions`);
     } catch (error) {
-      console.error('Failed to clear old sessions:', error);
+      logger.error('Failed to clear old sessions:', error);
     }
   },
 

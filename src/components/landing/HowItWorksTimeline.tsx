@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Target, Zap, CheckCircle2, Rocket } from "lucide-react";
+import { APP_CONFIG } from "@/lib/config";
 
 const steps = [
   {
@@ -38,7 +39,7 @@ export const HowItWorksTimeline = () => {
       <div className="max-w-5xl mx-auto px-4">
         <div className="text-center mb-8 md:mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Your 2025 Plan in 4 Simple Steps
+            Your {APP_CONFIG.year} Plan in 4 Simple Steps
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Guided process using world-class frameworks. No guessing, no overwhelm.

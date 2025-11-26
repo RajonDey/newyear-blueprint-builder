@@ -4,6 +4,7 @@ import { LifeCategory } from "@/types/wizard";
 import { Heart, Briefcase, DollarSign, Users, Sparkles, Flame, Star, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { APP_CONFIG } from "@/lib/config";
 
 interface Step1PrimarySecondaryProps {
   primaryCategory: LifeCategory | null;
@@ -84,7 +85,7 @@ export const Step1PrimarySecondary = ({
           <div className="flex items-center justify-center gap-2 mb-3">
             <Star className="w-6 h-6 md:w-8 md:h-8 text-focus-primary" />
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-              Choose Your Primary Focus for 2025
+              Choose Your Primary Focus for {APP_CONFIG.year}
             </h2>
           </div>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">

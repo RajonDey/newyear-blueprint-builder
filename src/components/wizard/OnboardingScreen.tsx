@@ -94,7 +94,7 @@ export const OnboardingScreen = ({ onStart }: OnboardingScreenProps) => {
         <TrustBadges />
 
         {/* Final CTA */}
-        <div className="container mx-auto px-4 mb-8 md:mb-12">
+        <div className="container mx-auto px-4">
           <FinalCTA onStart={handleStartClick} />
         </div>
 

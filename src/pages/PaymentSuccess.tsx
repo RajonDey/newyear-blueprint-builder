@@ -1,14 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Download, CheckCircle, Loader2, AlertCircle, Share2 } from "lucide-react";
+import { Download, CheckCircle, Loader2, AlertCircle, Share2, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { generateSuccessPDF } from "@/utils/pdfGenerator";
+import { downloadNotionTemplate } from "@/utils/notionTemplate";
 import { CategoryGoal, LifeCategory } from "@/types/wizard";
 import { toast } from "sonner";
 import { fetchWithRetry, ApiError } from "@/lib/api-client";
 import { getErrorMessage } from "@/lib/error-messages";
 import { safeLocalStorage } from "@/lib/storage";
+import { APP_CONFIG } from "@/lib/config";
+import { logger } from "@/lib/logger";
 
 interface StoredWizardData {
   goals: CategoryGoal[];
@@ -68,7 +71,7 @@ const PaymentSuccess = () => {
       setIsVerified(true);
       toast.success('Payment verified successfully!');
     } catch (error) {
-      console.error('Payment verification error:', error);
+      logger.error('Payment verification error:', error);
       
       let errorMessage: string;
       if (error instanceof ApiError) {
@@ -106,7 +109,26 @@ const PaymentSuccess = () => {
       toast.success('PDF downloaded successfully!');
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-      console.error('PDF download error:', error);
+      logger.error('PDF download error:', error);
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleDownloadNotionTemplate = () => {
+    if (!wizardData) return;
+
+    try {
+      downloadNotionTemplate({
+        userName: wizardData.userName,
+        userEmail: wizardData.userEmail,
+        primaryCategory: wizardData.primaryCategory,
+        secondaryCategories: wizardData.secondaryCategories,
+        goals: wizardData.goals,
+      }, 'markdown');
+      toast.success('Notion template downloaded successfully!');
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      logger.error('Notion template download error:', error);
       toast.error(errorMessage);
     }
   };
@@ -117,7 +139,7 @@ const PaymentSuccess = () => {
   };
 
   const handleShareTwitter = () => {
-    const text = encodeURIComponent("Just created my 2025 Success Blueprint! 🎯 Ready to achieve my goals with a clear action plan. Check it out!");
+    const text = encodeURIComponent(`Just created my ${APP_CONFIG.year} Success Blueprint! 🎯 Ready to achieve my goals with a clear action plan. Check it out!`);
     const url = encodeURIComponent(window.location.origin);
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
   };
@@ -215,7 +237,7 @@ const PaymentSuccess = () => {
           </h1>
           
           <p className="text-muted-foreground text-lg mb-8">
-            Thank you for your purchase, {wizardData.userName}! Your 2025 Success Blueprint is ready.
+            Thank you for your purchase, {wizardData.userName}! Your {APP_CONFIG.year} Success Blueprint is ready.
           </p>
 
           <div className="space-y-4">
@@ -226,6 +248,16 @@ const PaymentSuccess = () => {
             >
               <Download className="w-5 h-5 mr-2" />
               Download Your Premium PDF
+            </Button>
+
+            <Button
+              onClick={handleDownloadNotionTemplate}
+              size="lg"
+              variant="outline"
+              className="w-full border-primary hover:bg-primary/5 h-14"
+            >
+              <FileText className="w-5 h-5 mr-2" />
+              Download Notion Template
             </Button>
 
             <Button

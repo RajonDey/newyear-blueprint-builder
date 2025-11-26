@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Target, TrendingUp, Zap, Brain } from "lucide-react";
+import { APP_CONFIG } from "@/lib/config";
 
 const frameworks = [
   {
@@ -74,7 +75,7 @@ export const FrameworksSection = () => {
 
         <div className="mt-12 text-center">
           <p className="text-sm text-muted-foreground italic">
-            "The 2025 Blueprint combines methodologies from Fortune 500 companies, best-selling authors, and certified life coaches into one streamlined process."
+            `The ${APP_CONFIG.year} Blueprint combines methodologies from Fortune 500 companies, best-selling authors, and certified life coaches into one streamlined process.`
           </p>
         </div>
       </div>

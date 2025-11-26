@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, ArrowRight } from "lucide-react";
+import { APP_CONFIG } from "@/lib/config";
 
 interface FinalCTAProps {
   onStart: () => void;
@@ -12,7 +13,7 @@ export const FinalCTA = ({ onStart }: FinalCTAProps) => {
       <Card className="max-w-3xl mx-auto p-6 md:p-8 lg:p-12 bg-gradient-subtle border-primary/20 shadow-elegant">
         <div className="text-center">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4 md:mb-6">
-            Ready to Make 2025 Your Best Year?
+            Ready to Make {APP_CONFIG.year} Your Best Year?
           </h2>
           <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto">
             Join 2,347+ people who've already created their blueprint. 
@@ -42,7 +43,7 @@ export const FinalCTA = ({ onStart }: FinalCTAProps) => {
             size="lg"
             className="w-full md:w-auto bg-gradient-primary hover:opacity-90 hover-scale text-base md:text-lg h-12 md:h-14 px-8 md:px-12 shadow-elegant mb-4 animate-pulse-subtle"
           >
-            Start Your 2025 Plan Now
+            Start Your {APP_CONFIG.year} Plan Now
             <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-2" />
           </Button>
 

@@ -2,6 +2,8 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { logger } from '@/lib/logger';
+import { captureException } from '@/lib/error-tracking';
 
 interface Props {
   children: ReactNode;
@@ -33,7 +35,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    logger.error('ErrorBoundary caught an error:', error, errorInfo);
+    captureException(error, {
+      componentStack: errorInfo.componentStack,
+    });
     this.setState({
       error,
       errorInfo,
@@ -61,7 +66,7 @@ export class ErrorBoundary extends Component<Props, State> {
       // Reload the page
       window.location.href = '/';
     } catch (error) {
-      console.error('Failed to clear data:', error);
+      logger.error('Failed to clear data:', error);
       window.location.href = '/';
     }
   };

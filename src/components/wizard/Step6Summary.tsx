@@ -9,6 +9,9 @@ import { Mail, User, Download, CreditCard, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { safeLocalStorage } from "@/lib/storage";
+import { APP_CONFIG } from "@/lib/config";
+import { logger } from "@/lib/logger";
+import { validateEmail, validateName } from "@/lib/validation";
 
 interface Step6SummaryProps {
   goals: CategoryGoal[];
@@ -42,9 +45,29 @@ export const Step6Summary = ({
   const secondaryGoals = goals.filter(g => secondaryCategories.includes(g.category));
 
   const handleSubmit = () => {
-    if (userName && userEmail) {
-      setIsSubmitted(true);
+    // Validate name
+    const nameValidation = validateName(userName);
+    if (!nameValidation.valid) {
+      toast.error(nameValidation.error || 'Please enter a valid name');
+      return;
     }
+
+    // Validate email
+    const emailValidation = validateEmail(userEmail);
+    if (!emailValidation.valid) {
+      toast.error(emailValidation.error || 'Please enter a valid email address');
+      return;
+    }
+
+    // Update with sanitized values
+    if (nameValidation.sanitized) {
+      onUpdateUserInfo('name', nameValidation.sanitized);
+    }
+    if (emailValidation.sanitized) {
+      onUpdateUserInfo('email', emailValidation.sanitized);
+    }
+
+    setIsSubmitted(true);
   };
 
   const handleProceedToPayment = () => {
@@ -70,7 +93,7 @@ export const Step6Summary = ({
       
       window.location.href = `${LEMON_SQUEEZY_CHECKOUT_URL}?checkout[custom][success_url]=${encodeURIComponent(successUrl)}&checkout[custom][cancel_url]=${encodeURIComponent(cancelUrl)}`;
     } catch (error) {
-      console.error('Failed to proceed to payment:', error);
+      logger.error('Failed to proceed to payment:', error);
       toast.error("Failed to proceed to checkout. Please try again.");
     }
   };
@@ -79,7 +102,7 @@ export const Step6Summary = ({
     <div className="max-w-4xl mx-auto px-4">
       <div className="mb-6 md:mb-8 text-center animate-fade-in">
         <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-          🎉 Your 2025 Success Blueprint
+          🎉 Your {APP_CONFIG.year} Success Blueprint
         </h2>
         <p className="text-muted-foreground text-base md:text-lg">
           Review your complete plan below

@@ -134,10 +134,10 @@ export const Step0WheelOfLife = ({
                   className="cursor-pointer touch-none h-8"
                 />
                 
-                <div className="flex justify-between text-xs text-muted-foreground">
+                {/* <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Needs Work</span>
                   <span>Excellent</span>
-                </div>
+                </div> */}
               </div>
             );
           })}

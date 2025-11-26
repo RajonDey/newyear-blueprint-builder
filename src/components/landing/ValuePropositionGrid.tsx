@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Brain, FileText, Lightbulb, TrendingUp, Shield, Sparkles } from "lucide-react";
+import { APP_CONFIG } from "@/lib/config";
 
 const benefits = [
   {
@@ -20,7 +21,7 @@ const benefits = [
   {
     icon: TrendingUp,
     title: "Actionable Daily Steps",
-    description: "Break big goals into tiny habits. Know exactly what to do today to reach your 2025 vision.",
+    description: `Break big goals into tiny habits. Know exactly what to do today to reach your ${APP_CONFIG.year} vision.`,
   },
   {
     icon: Shield,
@@ -43,7 +44,7 @@ export const ValuePropositionGrid = () => {
             Why This System Works
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Everything you need to make 2025 your best year yet
+            Everything you need to make {APP_CONFIG.year} your best year yet
           </p>
         </div>
 

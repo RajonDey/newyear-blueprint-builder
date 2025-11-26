@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Clock, Sparkles, Target } from "lucide-react";
+import { APP_CONFIG } from "@/lib/config";
 
 interface CommitmentModalProps {
   open: boolean;
@@ -29,7 +30,7 @@ export const CommitmentModal = ({ open, onCommit, onClose }: CommitmentModalProp
             <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-primary" />
           </DialogTitle>
           <DialogDescription className="text-center text-sm md:text-base mt-3 md:mt-4">
-            You're about to create your 2025 Blueprint. This is a moment for you—to dream, plan, and commit to your best year yet.
+            You're about to create your {APP_CONFIG.year} Blueprint. This is a moment for you—to dream, plan, and commit to your best year yet.
           </DialogDescription>
         </DialogHeader>
 
@@ -66,7 +67,7 @@ export const CommitmentModal = ({ open, onCommit, onClose }: CommitmentModalProp
               htmlFor="commitment"
               className="text-sm leading-relaxed cursor-pointer select-none"
             >
-              I commit to giving myself <span className="font-semibold">10 focused minutes</span> to build my 2025 Blueprint. I understand this is an investment in my future self.
+              I commit to giving myself <span className="font-semibold">10 focused minutes</span> to build my {APP_CONFIG.year} Blueprint. I understand this is an investment in my future self.
             </label>
           </div>
 
@@ -76,7 +77,7 @@ export const CommitmentModal = ({ open, onCommit, onClose }: CommitmentModalProp
             size="lg"
             className="w-full bg-gradient-primary hover:opacity-90 hover-scale transition-all text-base md:text-lg h-12 md:h-14 tap-target"
           >
-            Let's Begin My 2025 Journey →
+            Let's Begin My {APP_CONFIG.year} Journey →
           </Button>
         </div>
       </DialogContent>

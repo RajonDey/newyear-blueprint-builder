@@ -8,6 +8,7 @@ import { LifeCategory, ActionStep } from "@/types/wizard";
 import { useState } from "react";
 import { useRotatingPlaceholder } from "@/hooks/useRotatingPlaceholder";
 import { toast } from "sonner";
+import { APP_CONFIG } from "@/lib/config";
 
 interface Step3ActionsProps {
   primaryCategory: LifeCategory | null;
@@ -130,7 +131,7 @@ export const Step3Actions = ({
           <div>
             <Label htmlFor="big" className="text-lg font-semibold mb-3 block flex items-center gap-2">
               <span className="text-2xl">🏆</span>
-              Big Milestone - By End of 2025
+              Big Milestone - By End of {APP_CONFIG.year}
             </Label>
             <p className="text-sm text-muted-foreground mb-3">
               What's your ultimate achievement for this goal this year?

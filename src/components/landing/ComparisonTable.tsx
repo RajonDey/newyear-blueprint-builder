@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Check, X } from "lucide-react";
+import { APP_CONFIG } from "@/lib/config";
 
 const comparisons = [
   {
@@ -57,7 +58,7 @@ export const ComparisonTable = () => {
                     DIY Planning
                   </th>
                   <th className="text-center p-3 md:p-4 font-semibold text-primary bg-primary/5 text-sm md:text-base">
-                    2025 Blueprint
+                    {APP_CONFIG.year} Blueprint
                   </th>
                 </tr>
               </thead>

@@ -59,13 +59,35 @@ export default async function handler(
     });
 
     try {
-      // Here you could:
-      // 1. Send confirmation email via Resend/SendGrid
+      // Send confirmation email
+      if (order.user_email) {
+        try {
+          const emailResponse = await fetch(`${process.env.VERCEL_URL || 'http://localhost:3000'}/api/send-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              to: order.user_email,
+              userName: order.user_email.split('@')[0], // Extract name from email
+              year: new Date().getFullYear() + (new Date().getMonth() >= 9 ? 1 : 0), // Target year
+            }),
+          });
+
+          if (!emailResponse.ok) {
+            console.error('Failed to send email:', await emailResponse.text());
+          }
+        } catch (emailError) {
+          console.error('Email sending error:', emailError);
+          // Don't fail the webhook if email fails
+        }
+      }
+
+      // Here you could also:
       // 2. Store order in database
-      // 3. Trigger PDF email delivery
+      // 3. Trigger PDF email delivery with attachments
       // 4. Update analytics
 
-      // For now, just log it
       return res.status(200).json({ received: true });
     } catch (webhookError) {
       console.error('Error processing order webhook:', {

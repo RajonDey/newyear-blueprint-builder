@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { XCircle, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { APP_CONFIG } from "@/lib/config";
 
 const PaymentCancel = () => {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ const PaymentCancel = () => {
         </div>
 
         <p className="text-sm text-muted-foreground mt-6">
-          Your 2025 Success Blueprint data is still available
+          Your {APP_CONFIG.year} Success Blueprint data is still available
         </p>
       </Card>
       </div>

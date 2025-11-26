@@ -1,8 +1,18 @@
-# Welcome to your Lovable project
+# New Year Blueprint Builder
 
-## Project info
+A production-ready goal-setting wizard that helps users create personalized success blueprints using proven frameworks (Wheel of Life, SMART Goals, OKRs, Atomic Habits).
 
-**URL**: https://lovable.dev/projects/36b67127-a29e-42db-bc47-4fe770ccc45f
+## Features
+
+- **Dynamic Year Support**: Automatically adapts to current/next year
+- **Interactive Wizard**: 7-step guided process
+- **PDF Export**: Beautiful, professional PDF generation
+- **Notion Template**: Downloadable template for progress tracking
+- **Email Delivery**: Automated email with PDF and template
+- **Payment Integration**: Secure payment via Lemon Squeezy
+- **Analytics**: Built-in tracking for conversions
+- **Error Tracking**: Production-ready error monitoring
+- **Security**: Input validation, security headers, XSS protection
 
 ## How can I edit this code?
 
@@ -60,9 +70,35 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/36b67127-a29e-42db-bc47-4fe770ccc45f) and click on Share -> Publish.
+This project is configured for deployment on Vercel. See `DEPLOYMENT.md` for detailed instructions.
+
+### Quick Deploy
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy
+vercel --prod
+```
+
+### Environment Variables
+
+See `ENV-SETUP.md` for required environment variables.
+
+## Production Readiness
+
+This project has been optimized for production with:
+- Security hardening (input validation, security headers)
+- Performance optimization (code splitting, lazy loading)
+- Error tracking setup
+- Analytics integration
+- SEO optimization
+- Accessibility improvements
+
+See `LAUNCH-CHECKLIST.md` for pre-launch verification steps.
 
 ## Can I connect a custom domain to my Lovable project?
 

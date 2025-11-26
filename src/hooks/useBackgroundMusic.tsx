@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { logger } from "@/lib/logger";
 
 export const useBackgroundMusic = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -25,7 +26,7 @@ export const useBackgroundMusic = () => {
     if (audioRef.current && isEnabled) {
       if (isPlaying) {
         audioRef.current.play().catch((e) => {
-          console.log("Audio play prevented:", e);
+          logger.log("Audio play prevented:", e);
         });
       } else {
         audioRef.current.pause();

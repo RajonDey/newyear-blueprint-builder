@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Clock, Star, Users } from "lucide-react";
+import { APP_CONFIG } from "@/lib/config";
 
 interface HeroSectionProps {
   onStart: () => void;
@@ -18,7 +19,7 @@ export const HeroSection = ({ onStart }: HeroSectionProps) => {
 
       {/* Main Headline */}
       <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight px-4">
-        Transform Your 2025
+        Transform Your {APP_CONFIG.year}
         <span className="block text-primary mt-2">In Just 10 Minutes</span>
       </h1>
 
@@ -49,7 +50,7 @@ export const HeroSection = ({ onStart }: HeroSectionProps) => {
         size="lg"
         className="w-full md:w-auto bg-gradient-primary hover:opacity-90 hover-scale text-lg h-14 px-12 shadow-elegant animate-pulse-subtle"
       >
-        Start Building Your 2025 Plan →
+        Start Building Your {APP_CONFIG.year} Plan →
       </Button>
 
       {/* Trust Line */}

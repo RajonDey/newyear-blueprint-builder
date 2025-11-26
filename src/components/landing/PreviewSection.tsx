@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { FileText, Target, CheckSquare, TrendingUp } from "lucide-react";
+import { APP_CONFIG } from "@/lib/config";
 
 const previewItems = [
   {
@@ -30,7 +31,7 @@ export const PreviewSection = () => {
       <div className="max-w-5xl mx-auto px-4">
         <div className="text-center mb-8 md:mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            What's Inside Your 2025 Blueprint
+            What's Inside Your {APP_CONFIG.year} Blueprint
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             A comprehensive, professional plan tailored to your goals

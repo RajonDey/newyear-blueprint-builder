@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Shield, RefreshCw, Clock, CheckCircle2 } from "lucide-react";
+import { APP_CONFIG } from "@/lib/config";
 
 export const GuaranteeSection = () => {
   return (
@@ -14,7 +15,7 @@ export const GuaranteeSection = () => {
               100% Satisfaction Guarantee
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              We're so confident you'll love your 2025 Blueprint that we offer a no-questions-asked 30-day money-back guarantee
+              We're so confident you'll love your {APP_CONFIG.year} Blueprint that we offer a no-questions-asked 30-day money-back guarantee
             </p>
           </div>
 
@@ -58,7 +59,7 @@ export const GuaranteeSection = () => {
 
           <div className="bg-card border border-border rounded-lg p-6">
             <p className="text-foreground text-center">
-              <strong>Here's the deal:</strong> Complete your free 2025 Blueprint. If you love it and want the premium PDF + Notion template, it's just $12. Don't love it? Get a full refund within 30 days. The free plan you created is yours to keep forever.
+              <strong>Here's the deal:</strong> Complete your free {APP_CONFIG.year} Blueprint. If you love it and want the premium PDF + Notion template, it's just $12. Don't love it? Get a full refund within 30 days. The free plan you created is yours to keep forever.
             </p>
           </div>
         </Card>

@@ -8,6 +8,7 @@ import { Confetti } from "@/components/ui/confetti";
 import { LifeCategory } from "@/types/wizard";
 import { useState } from "react";
 import { useRotatingPlaceholder } from "@/hooks/useRotatingPlaceholder";
+import { APP_CONFIG } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -25,13 +26,13 @@ interface Step2GoalsProps {
 
 const goalPlaceholders: Record<LifeCategory, string[]> = {
   Health: [
-    "Run a half marathon by September 2025",
+    `Run a half marathon by September ${APP_CONFIG.year}`,
     "Lose 20 pounds and maintain it throughout the year",
     "Practice yoga 3 times per week for 12 months",
     "Complete a 30-day fitness challenge every quarter"
   ],
   Career: [
-    "Get promoted to Senior Manager by Q3 2025",
+    `Get promoted to Senior Manager by Q3 ${APP_CONFIG.year}`,
     "Launch my side business and earn $5,000 in revenue",
     "Earn a professional certification in data analytics",
     "Speak at 3 industry conferences this year"
@@ -152,7 +153,7 @@ export const Step2Goals = ({
       )}>
         <Label htmlFor="goal" className="text-base md:text-lg font-semibold mb-3 block">
           {isPrimary 
-            ? `What's your main ${currentCategory.toLowerCase()} transformation goal for 2025?`
+            ? `What's your main ${currentCategory.toLowerCase()} transformation goal for ${APP_CONFIG.year}?`
             : `What would you like to maintain or improve in ${currentCategory.toLowerCase()}?`
           }
         </Label>
@@ -186,7 +187,7 @@ export const Step2Goals = ({
               <li>✓ <strong>Measurable:</strong> Track your progress</li>
               <li>✓ <strong>Achievable:</strong> Realistic yet challenging</li>
               <li>✓ <strong>Relevant:</strong> Aligns with your values</li>
-              <li>✓ <strong>Time-bound:</strong> Has a deadline (2025)</li>
+              <li>✓ <strong>Time-bound:</strong> Has a deadline ({APP_CONFIG.year})</li>
             </ul>
           </div>
         )}

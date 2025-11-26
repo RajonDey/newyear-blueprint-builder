@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import { APP_CONFIG } from "@/lib/config";
 
 interface StickyCTABarProps {
   onStart: () => void;
@@ -28,7 +29,7 @@ export const StickyCTABar = ({ onStart }: StickyCTABarProps) => {
           <div className="flex items-center justify-between gap-3 md:gap-4">
             <div className="hidden sm:block">
               <p className="text-xs sm:text-sm font-semibold text-primary-foreground">
-                Ready to transform your 2025?
+                Ready to transform your {APP_CONFIG.year}?
               </p>
               <p className="text-[10px] sm:text-xs text-primary-foreground/80 hidden md:block">
                 Join 2,347+ people who've created their blueprint

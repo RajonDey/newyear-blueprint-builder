@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { LifeCategory } from "@/types/wizard";
 import { Heart, Briefcase, DollarSign, Users, Sparkles, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { APP_CONFIG } from "@/lib/config";
 
 interface Step1CategoriesProps {
   selectedCategories: LifeCategory[];
@@ -31,7 +32,7 @@ export const Step1Categories = ({
           Choose Your Focus Categories
         </h2>
         <p className="text-muted-foreground text-lg">
-          Select the life areas you want to focus on in 2025
+          Select the life areas you want to focus on in {APP_CONFIG.year}
         </p>
       </div>
 

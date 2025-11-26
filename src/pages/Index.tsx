@@ -22,6 +22,7 @@ import { useSaveResume } from "@/hooks/useSaveResume";
 import { generateSuccessPDF } from "@/utils/pdfGenerator";
 import { getErrorMessage } from "@/lib/error-messages";
 import { safeLocalStorage } from "@/lib/storage";
+import { logger } from "@/lib/logger";
 
 const Index = () => {
   const [hasStarted, setHasStarted] = useState(false);
@@ -89,7 +90,7 @@ const Index = () => {
           }
         }
       } catch (error) {
-        console.error('Failed to load saved progress:', error);
+        logger.error('Failed to load saved progress:', error);
         toast.error('Failed to load saved progress. Starting fresh.');
       } finally {
         setIsLoadingSession(false);
@@ -108,7 +109,7 @@ const Index = () => {
       setPrimaryCategory(category);
       setSelectedCategories([category, ...secondaryCategories.filter(c => c !== category)]);
     } catch (error) {
-      console.error('Failed to select primary category:', error);
+      logger.error('Failed to select primary category:', error);
       toast.error('Failed to save selection. Please try again.');
     }
   };
@@ -123,7 +124,7 @@ const Index = () => {
         return newSecondary;
       });
     } catch (error) {
-      console.error('Failed to toggle secondary category:', error);
+      logger.error('Failed to toggle secondary category:', error);
       toast.error('Failed to save selection. Please try again.');
     }
   };
@@ -132,7 +133,7 @@ const Index = () => {
     try {
       setLifeWheelRatings((prev) => ({ ...prev, [category]: rating }));
     } catch (error) {
-      console.error('Failed to update rating:', error);
+      logger.error('Failed to update rating:', error);
       toast.error('Failed to save rating. Please try again.');
     }
   };
@@ -153,7 +154,7 @@ const Index = () => {
       toast.success(`PDF downloaded: ${result.fileName}`);
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-      console.error('PDF generation error:', error);
+      logger.error('PDF generation error:', error);
       toast.error(errorMessage);
     } finally {
       setIsPdfGenerating(false);
