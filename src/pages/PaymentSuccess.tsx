@@ -12,6 +12,7 @@ import { getErrorMessage } from "@/lib/error-messages";
 import { safeLocalStorage } from "@/lib/storage";
 import { APP_CONFIG } from "@/lib/config";
 import { logger } from "@/lib/logger";
+import { Footer } from "@/components/Footer";
 
 interface StoredWizardData {
   goals: CategoryGoal[];
@@ -261,6 +262,15 @@ const PaymentSuccess = () => {
             </Button>
 
             <Button
+              onClick={() => navigate('/')}
+              variant="ghost"
+              size="lg"
+              className="w-full hover:bg-secondary"
+            >
+              Edit My Plan
+            </Button>
+
+            <Button
               onClick={handleReturnHome}
               variant="outline"
               size="lg"
@@ -300,9 +310,8 @@ const PaymentSuccess = () => {
               </Button>
             </div>
           </div>
-
-          <p className="text-sm text-muted-foreground mt-6">
-            A copy has also been sent to {wizardData.userEmail}
+<p className="text-sm text-muted-foreground mt-6">
+            A payment receipt has been sent to {wizardData.userEmail}
           </p>
         </Card>
       </div>

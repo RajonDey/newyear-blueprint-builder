@@ -26,7 +26,7 @@ const benefits = [
   {
     icon: Shield,
     title: "No Commitment Required",
-    description: "Complete the planning for free. Only pay if you want the premium PDF and Notion template.",
+    description: "Complete the planning for free. Only pay to unlock the full blueprint and downloads.",
   },
   {
     icon: Sparkles,

@@ -169,41 +169,52 @@ export const Step6Summary = ({
                     <p className="text-foreground">{goal.mainGoal}</p>
                   </div>
 
-                  <div>
-                    <p className="text-sm font-semibold text-muted-foreground mb-2">
-                      ACTION STEPS
-                    </p>
-                    <div className="space-y-2 pl-4">
-                      <p className="text-sm">
-                        <span className="font-medium">🎯 Small:</span> {goal.actions.small}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">📈 Medium:</span> {goal.actions.medium}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">🏆 Big:</span> {goal.actions.big}
-                      </p>
+                  <div className="relative">
+                    <div className="filter blur-[5px] select-none opacity-60 pointer-events-none">
+                      <div>
+                        <p className="text-sm font-semibold text-muted-foreground mb-2">
+                          ACTION STEPS
+                        </p>
+                        <div className="space-y-2 pl-4">
+                          <p className="text-sm">
+                            <span className="font-medium">🎯 Small:</span> {goal.actions.small}
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">📈 Medium:</span> {goal.actions.medium}
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">🏆 Big:</span> {goal.actions.big}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <p className="text-sm font-semibold text-muted-foreground mb-1">
+                          MONTHLY CHECK-IN
+                        </p>
+                        <p className="text-sm text-foreground">{goal.monthlyCheckIn}</p>
+                      </div>
+
+                      <div className="bg-secondary p-4 rounded-lg mt-4">
+                        <p className="text-sm font-semibold text-foreground mb-2">
+                          YOUR MOTIVATION
+                        </p>
+                        <p className="text-sm text-foreground mb-2">
+                          <span className="font-medium">✨ Why it matters:</span> {goal.motivation.why}
+                        </p>
+                        <p className="text-sm text-foreground">
+                          <span className="font-medium">⚠️ Cost of inaction:</span>{" "}
+                          {goal.motivation.consequence}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold text-muted-foreground mb-1">
-                      MONTHLY CHECK-IN
-                    </p>
-                    <p className="text-sm text-foreground">{goal.monthlyCheckIn}</p>
-                  </div>
-
-                  <div className="bg-secondary p-4 rounded-lg">
-                    <p className="text-sm font-semibold text-foreground mb-2">
-                      YOUR MOTIVATION
-                    </p>
-                    <p className="text-sm text-foreground mb-2">
-                      <span className="font-medium">✨ Why it matters:</span> {goal.motivation.why}
-                    </p>
-                    <p className="text-sm text-foreground">
-                      <span className="font-medium">⚠️ Cost of inaction:</span>{" "}
-                      {goal.motivation.consequence}
-                    </p>
+                    
+                    {/* Lock Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-background/80 backdrop-blur-sm p-3 rounded-full shadow-lg border border-border">
+                        <CreditCard className="w-6 h-6 text-primary" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -217,21 +228,20 @@ export const Step6Summary = ({
               </Badge>
               
               <h3 className="text-2xl font-bold text-foreground mb-3">
-                Get Your Professional PDF
+                Unlock Full Blueprint + Downloads
               </h3>
               
               <p className="text-muted-foreground mb-6">
-                Download a beautifully designed PDF with bonus templates including Monthly Review
-                Template, 90-Day Action View, and reflection spaces
+                Get instant access to your detailed action plans, motivation strategies, and professional templates.
               </p>
 
               <div className="mb-6">
                 <div className="flex items-center justify-center gap-3 mb-2">
-                  <span className="text-3xl font-bold text-foreground">$12</span>
+                  <span className="text-3xl font-bold text-foreground">$9</span>
                   <span className="text-xl text-muted-foreground line-through">$19</span>
                 </div>
                 <p className="text-sm text-primary font-semibold">
-                  Save $7 with Early Access Pricing
+                  Limited Time Launch Price
                 </p>
               </div>
 
@@ -239,17 +249,17 @@ export const Step6Summary = ({
                 onClick={handleProceedToPayment}
                 size="lg"
                 disabled={isPdfGenerating}
-                className="bg-gradient-primary hover:opacity-90 hover-scale h-14 px-8"
+                className="bg-gradient-primary hover:opacity-90 hover-scale h-14 px-8 w-full sm:w-auto"
               >
                 {isPdfGenerating ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Generating PDF...
+                    Processing...
                   </>
                 ) : (
                   <>
                     <CreditCard className="w-5 h-5 mr-2" />
-                    Get Premium PDF — $12
+                    Unlock Full Blueprint — $9
                   </>
                 )}
               </Button>

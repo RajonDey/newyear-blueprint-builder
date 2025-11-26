@@ -9,7 +9,7 @@ import { APP_CONFIG } from "@/lib/config";
 const faqs = [
   {
     question: "Is this really free to use?",
-    answer: `Yes! The entire planning process is completely free. You can create your full ${APP_CONFIG.year} plan at no cost. The optional premium PDF and Notion template are available for $12 (early access price) if you want a beautifully formatted version to keep and track.`,
+    answer: `Yes! The entire planning process is completely free. You can create your full ${APP_CONFIG.year} plan at no cost. The optional full blueprint unlock and downloads are available for $9 (early access price) if you want a beautifully formatted version to keep and track.`,
   },
   {
     question: "How is this different from other planning tools?",
@@ -28,8 +28,8 @@ const faqs = [
     answer: "Your plan is flexible! If you get the Notion template, you can update goals, add new habits, and track progress throughout the year. The system grows with you.",
   },
   {
-    question: "What exactly do I get in the premium PDF?",
-    answer: `The premium PDF includes your complete ${APP_CONFIG.year} plan beautifully formatted: Wheel of Life assessment, SMART goals, action breakdown, daily habits, motivation plan, and progress tracking sections. Plus the Notion template to track everything digitally.`,
+    question: "What exactly do I get when I unlock?",
+    answer: `The unlocked blueprint includes your complete ${APP_CONFIG.year} plan beautifully formatted: Wheel of Life assessment, SMART goals, action breakdown, daily habits, motivation plan, and progress tracking sections. Plus the Notion template to track everything digitally.`,
   },
   {
     question: "Is there a refund policy?",

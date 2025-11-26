@@ -44,7 +44,7 @@ export const Step0WheelOfLife = ({
 }: Step0WheelOfLifeProps) => {
   const chartData = categories.map((category) => ({
     category,
-    value: ratings[category] || 5,
+    value: ratings[category] || 0,
   }));
 
   const allRated = categories.every((cat) => ratings[cat] !== undefined && ratings[cat] > 0);
@@ -67,7 +67,7 @@ export const Step0WheelOfLife = ({
       <div className="grid lg:grid-cols-2 gap-6 md:gap-10 mb-8 md:mb-10">
         {/* Chart Section */}
         <Card className="p-4 md:p-8 flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20 shadow-lg">
-          <ResponsiveContainer width="100%" height={300} className="md:!h-[400px]">
+          <ResponsiveContainer width="100%" height={450} className="md:!h-[450px]">
             <RadarChart data={chartData}>
               <PolarGrid stroke="hsl(var(--border))" strokeWidth={1.5} />
               <PolarAngleAxis 
@@ -99,7 +99,7 @@ export const Step0WheelOfLife = ({
         {/* Sliders Section */}
         <div className="space-y-4 md:space-y-5">
           {categories.map((category) => {
-            const rating = ratings[category] || 5;
+            const rating = ratings[category] || 0;
             const Icon = categoryConfig[category].icon;
             
             return (
@@ -133,6 +133,12 @@ export const Step0WheelOfLife = ({
                   onValueChange={(value) => onUpdateRating(category, value[0])}
                   className="cursor-pointer touch-none h-8"
                 />
+                
+                {rating === 0 && (
+                  <p className="text-xs text-muted-foreground text-center mt-1 animate-pulse">
+                    Slide to rate
+                  </p>
+                )}
                 
                 {/* <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Needs Work</span>

@@ -13,7 +13,7 @@ export const HeroSection = ({ onStart }: HeroSectionProps) => {
       <div className="inline-flex items-center gap-2 px-4 py-2 bg-focus-primary/10 rounded-full border border-focus-primary/20 mb-6 animate-pulse">
         <Star className="w-4 h-4 text-focus-primary fill-focus-primary" />
         <span className="text-sm font-semibold text-focus-primary">
-          Early Access - Save $7 (Regular $19)
+          Early Access - Save $10 (Regular $19)
         </span>
       </div>
 
@@ -32,7 +32,7 @@ export const HeroSection = ({ onStart }: HeroSectionProps) => {
       <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 md:gap-4 mb-8 px-4">
         <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-secondary rounded-full">
           <Users className="w-4 h-4 text-primary" />
-          <span className="text-xs sm:text-sm font-medium text-foreground">2,347+ plans created</span>
+          <span className="text-xs sm:text-sm font-medium text-foreground">Join early adopters</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-secondary rounded-full">
           <Clock className="w-4 h-4 text-primary" />
@@ -40,7 +40,7 @@ export const HeroSection = ({ onStart }: HeroSectionProps) => {
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-secondary rounded-full">
           <Star className="w-4 h-4 text-focus-primary fill-focus-primary" />
-          <span className="text-xs sm:text-sm font-medium text-foreground">4.9/5 rating</span>
+          <span className="text-xs sm:text-sm font-medium text-foreground">Based on proven psychology</span>
         </div>
       </div>
 
@@ -55,7 +55,7 @@ export const HeroSection = ({ onStart }: HeroSectionProps) => {
 
       {/* Trust Line */}
       <p className="text-sm text-muted-foreground mt-4">
-        ✓ Free to complete • ✓ No credit card required • ✓ Premium PDF available ($12)
+        ✓ Free to complete • ✓ No credit card required • ✓ Full Blueprint Unlock ($9)
       </p>
     </div>
   );

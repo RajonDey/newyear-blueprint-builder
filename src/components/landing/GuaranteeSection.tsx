@@ -59,7 +59,7 @@ export const GuaranteeSection = () => {
 
           <div className="bg-card border border-border rounded-lg p-6">
             <p className="text-foreground text-center">
-              <strong>Here's the deal:</strong> Complete your free {APP_CONFIG.year} Blueprint. If you love it and want the premium PDF + Notion template, it's just $12. Don't love it? Get a full refund within 30 days. The free plan you created is yours to keep forever.
+              <strong>Here's the deal:</strong> Complete your free {APP_CONFIG.year} Blueprint. If you love it and want to unlock the full plan + Notion template, it's just $9. Don't love it? Get a full refund within 30 days. No questions asked.
             </p>
           </div>
         </Card>

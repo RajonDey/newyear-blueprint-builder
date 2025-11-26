@@ -172,8 +172,11 @@ export const Step1PrimarySecondary = ({
               </span>
             </button>
             <p className="text-sm text-muted-foreground mt-2">
-              Pick 1-2 areas to maintain while focusing on your primary goal
+              Pick 1-3 areas to maintain while focusing on your primary goal
             </p>
+            <div className="mt-2 inline-block bg-accent/10 text-accent-foreground text-xs px-3 py-1 rounded-full border border-accent/20">
+              Pro Tip: Don't overcommit. You can add more areas later in your Notion template.
+            </div>
           </div>
 
           {showSecondary && (
@@ -182,8 +185,8 @@ export const Step1PrimarySecondary = ({
                 .filter((cat) => cat.name !== primaryCategory)
                 .map(({ name, icon: Icon, description }) => {
                   const isSecondary = secondaryCategories.includes(name);
-                  const canSelect = secondaryCategories.length < 2 || isSecondary;
-                  const rating = lifeWheelRatings[name] || 5;
+                  const canSelect = secondaryCategories.length < 3 || isSecondary;
+                  const rating = lifeWheelRatings[name] || 0;
 
                   return (
                     <Card

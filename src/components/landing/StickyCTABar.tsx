@@ -32,7 +32,7 @@ export const StickyCTABar = ({ onStart }: StickyCTABarProps) => {
                 Ready to transform your {APP_CONFIG.year}?
               </p>
               <p className="text-[10px] sm:text-xs text-primary-foreground/80 hidden md:block">
-                Join 2,347+ people who've created their blueprint
+                Join thousands of people who've created their blueprint
               </p>
             </div>
             <Button

@@ -16,7 +16,7 @@ export const FinalCTA = ({ onStart }: FinalCTAProps) => {
             Ready to Make {APP_CONFIG.year} Your Best Year?
           </h2>
           <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto">
-            Join 2,347+ people who've already created their blueprint. 
+            Join thousands of people who've already created their blueprint. 
             Start for free in the next 10 minutes.
           </p>
 
@@ -26,7 +26,7 @@ export const FinalCTA = ({ onStart }: FinalCTAProps) => {
               "Complete the planning for free",
               "Proven frameworks from top achievers",
               "Personalized to your unique goals",
-              "Premium PDF available ($12)",
+              "Full Blueprint Unlock ($9)",
               "Notion template included",
               "30-day money-back guarantee",
             ].map((benefit, index) => (

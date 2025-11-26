@@ -34,15 +34,15 @@ export const ProgressIndicator = ({ currentStep, totalSteps, estimatedTimeLeft =
           </div>
           <div className="text-xs md:text-sm text-muted-foreground font-medium">Complete</div>
         </div>
-        <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-secondary/50 rounded-full border border-border/50">
+        <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-card/80 backdrop-blur-sm rounded-full border border-primary/20 shadow-sm">
           <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
           <span className="text-xs md:text-sm font-medium text-foreground">~{minutesLeft} min</span>
         </div>
       </div>
 
       {/* Current Step Label */}
-      <div className="text-center py-2 md:py-3 px-4 md:px-6 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-lg border border-primary/20">
-        <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider mb-1">Step {currentStep} of {totalSteps}</p>
+      <div className="text-center py-2 md:py-3 px-4 md:px-6 bg-card border border-primary/20 rounded-lg shadow-sm">
+        <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Step {currentStep} of {totalSteps}</p>
         <h3 className="text-xl md:text-2xl font-bold text-foreground animate-fade-in">
           {stepLabels[currentStep - 1]}
         </h3>
