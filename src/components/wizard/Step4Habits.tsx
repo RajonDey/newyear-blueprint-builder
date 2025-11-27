@@ -69,11 +69,11 @@ export const Step4Habits = ({
           value={currentHabit}
           onChange={(e) => onUpdateHabit(currentCategory, e.target.value)}
           placeholder={placeholder}
-          className="min-h-32 text-base resize-none focus-glow"
-          maxLength={200}
+          className="min-h-32 max-h-48 text-base resize-none focus-glow"
+          maxLength={400}
         />
 
-        <CharacterCounter current={currentHabit.length} max={200} className="mt-2" />
+        <CharacterCounter current={currentHabit.length} soft={150} max={400} className="mt-2" />
 
         <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
           <p className="text-sm font-semibold text-foreground mb-2">💡 Implementation Intention Formula:</p>

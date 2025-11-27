@@ -37,12 +37,17 @@ Font.register({
   family: 'Roboto',
   fonts: [
     {
-      src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf',
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf',
       fontWeight: 'normal',
     },
     {
-      src: 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlvAx05IsDqlA.ttf',
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf',
       fontWeight: 'bold',
+    },
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-italic-webfont.ttf',
+      fontStyle: 'italic',
+      fontWeight: 'normal',
     },
   ],
 });
@@ -104,15 +109,16 @@ const colors = {
 };
 
 // Category symbols - bold, professional, guaranteed to render
-const categoryTheme: Record<string, { symbol: string; color: string; lightColor: string }> = {
-  Health: { symbol: '●', color: colors.health.main, lightColor: colors.health.light },
-  Wealth: { symbol: '◆', color: colors.wealth.main, lightColor: colors.wealth.light },
-  Relationships: { symbol: '♥', color: colors.relationships.main, lightColor: colors.relationships.light },
-  Career: { symbol: '▲', color: colors.career.main, lightColor: colors.career.light },
-  Learning: { symbol: '■', color: colors.learning.main, lightColor: colors.learning.light },
-  'Personal Growth': { symbol: '★', color: colors.personal.main, lightColor: colors.personal.light },
-  Social: { symbol: '◉', color: colors.social.main, lightColor: colors.social.light },
-  'Home/Environment': { symbol: '▼', color: colors.environment.main, lightColor: colors.environment.light },
+// Category images - 100% reliable PNGs
+const categoryTheme: Record<string, { iconPath: string; color: string; lightColor: string }> = {
+  Health: { iconPath: '/assets/pdf-icons/icon-health.png', color: colors.health.main, lightColor: colors.health.light },
+  Wealth: { iconPath: '/assets/pdf-icons/icon-wealth.png', color: colors.wealth.main, lightColor: colors.wealth.light },
+  Relationships: { iconPath: '/assets/pdf-icons/icon-relationships.png', color: colors.relationships.main, lightColor: colors.relationships.light },
+  Career: { iconPath: '/assets/pdf-icons/icon-career.png', color: colors.career.main, lightColor: colors.career.light },
+  Learning: { iconPath: '/assets/pdf-icons/icon-learning.png', color: colors.learning.main, lightColor: colors.learning.light },
+  'Personal Growth': { iconPath: '/assets/pdf-icons/icon-growth.png', color: colors.personal.main, lightColor: colors.personal.light },
+  Social: { iconPath: '/assets/pdf-icons/icon-social.png', color: colors.social.main, lightColor: colors.social.light },
+  'Home/Environment': { iconPath: '/assets/pdf-icons/icon-home.png', color: colors.environment.main, lightColor: colors.environment.light },
 };
 
 // Typography Scale
@@ -158,8 +164,8 @@ const styles = StyleSheet.create({
   },
   
   coverLogo: {
-    width: 140,
-    height: 50,
+    width: 250,
+    height: 210, // Calculated from 940/788 ratio (approx 1.19)
     objectFit: 'contain',
     marginBottom: spacing.xl,
   },
@@ -321,11 +327,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   
-  goalBadgeSymbol: {
-    fontSize: 16,
-    color: colors.white,
-    marginRight: 6,
-    fontWeight: 'bold',
+
+  
+  goalBadgeIcon: {
+    width: 18,
+    height: 18,
+    marginRight: 8,
+    objectFit: 'contain',
   },
   
   goalBadgeText: {
@@ -344,6 +352,8 @@ const styles = StyleSheet.create({
   },
   
   // ========== SECTIONS ==========
+
+  
   sectionTitle: {
     fontSize: 12,
     fontWeight: 'bold',
@@ -351,12 +361,37 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.md,
     letterSpacing: 0.5,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   
-  sectionSymbol: {
-    fontSize: 14,
-    marginRight: 6,
+  sectionIcon: {
+    width: 16,
+    height: 16,
+    marginRight: 8,
+    objectFit: 'contain',
+  },
+  
+  stepCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.primary.main,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  
+  stepNumber: {
+    fontSize: 9,
+    color: colors.white,
     fontWeight: 'bold',
+  },
+  
+  stepLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '30%',
   },
   
   // ========== TABLES ==========
@@ -381,7 +416,7 @@ const styles = StyleSheet.create({
   
   tableRow: {
     flexDirection: 'row',
-    borderBottomWidth: 0.3,
+    borderBottomWidth: 1,
     borderBottomColor: colors.slate[200],
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.sm,
@@ -428,7 +463,7 @@ const styles = StyleSheet.create({
   
   motivationRow: {
     flexDirection: 'row',
-    borderBottomWidth: 0.3,
+    borderBottomWidth: 1,
     borderBottomColor: colors.slate[300],
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.sm,
@@ -489,34 +524,43 @@ const styles = StyleSheet.create({
   timeline: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: spacing.md,
+    marginVertical: spacing.xl,
     paddingHorizontal: spacing.lg,
+    backgroundColor: colors.slate[50],
+    padding: spacing.lg,
+    borderRadius: 8,
   },
   
   timelineStep: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
-    flex: 1,
+    width: 60,
   },
   
   timelineDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: spacing.sm,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    marginBottom: spacing.xs,
+    borderWidth: 2,
+    borderColor: colors.white,
   },
   
   timelineLine: {
-    height: 2,
+    height: 3,
     flex: 1,
-    backgroundColor: colors.slate[300],
-    marginHorizontal: spacing.sm,
+    backgroundColor: colors.slate[200],
+    marginHorizontal: -10,
+    zIndex: -1,
+    marginTop: -18,
   },
   
   timelineLabel: {
-    fontSize: 8,
-    color: colors.slate[500],
-    marginTop: 2,
+    fontSize: 9,
+    fontWeight: 'bold',
+    color: colors.slate[600],
+    marginTop: 4,
+    textAlign: 'center',
   },
   
   // ========== FOOTER ==========
@@ -534,9 +578,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: spacing.md,
     right: spacing['3xl'],
-    width: 60,
-    height: 20,
-    opacity: 0.3,
+    width: 40,
+    height: 34, // Calculated from 940/788 ratio
+    opacity: 0.5, // Increased opacity slightly for better visibility
+    objectFit: 'contain',
   },
 });
 
@@ -600,13 +645,19 @@ const ExecutiveSummary: React.FC<{ data: PDFData }> = ({ data }) => {
       <View style={styles.focusBox}>
         <View style={styles.focusRow}>
           <View style={styles.focusColumn}>
-            <Text style={styles.focusLabel}>★ PRIMARY FOCUS</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+              <Image src="/assets/pdf-icons/icon-star.png" style={{ width: 12, height: 12, marginRight: 6 }} />
+              <Text style={styles.focusLabel}>PRIMARY FOCUS</Text>
+            </View>
             <Text style={styles.focusText}>
               {data.primaryCategory}
             </Text>
           </View>
           <View style={styles.focusColumn}>
-            <Text style={styles.focusLabel}>▸ SUPPORTING AREAS</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+              <Image src="/assets/pdf-icons/icon-list.png" style={{ width: 12, height: 12, marginRight: 6 }} />
+              <Text style={styles.focusLabel}>SUPPORTING AREAS</Text>
+            </View>
             <Text style={styles.focusSecondary}>
               {data.secondaryCategories.join(', ')}
             </Text>
@@ -614,12 +665,21 @@ const ExecutiveSummary: React.FC<{ data: PDFData }> = ({ data }) => {
         </View>
       </View>
       
-      <Text style={styles.introText}>
+      <Text style={[styles.introText, { fontSize: 12, marginBottom: spacing['2xl'] }]}>
         This blueprint outlines your strategic path for {APP_CONFIG.year}. You have
         identified {data.primaryCategory} as your "Keystone Habit" area—the one change
         that will create a ripple effect across your life. The following pages detail
         your specific goals, action steps, and motivation systems.
       </Text>
+
+      <View style={{ marginTop: spacing.xl, padding: spacing.xl, backgroundColor: colors.slate[50], borderRadius: 8 }}>
+        <Text style={{ fontSize: 14, fontWeight: 'bold', color: colors.primary.main, marginBottom: spacing.md }}>
+          MY COMMITMENT
+        </Text>
+        <Text style={{ fontSize: 11, color: colors.slate[600], fontStyle: 'italic', lineHeight: 1.6 }}>
+          "I am committed to taking consistent action on these goals. I understand that progress is better than perfection, and I will focus on the systems and habits that lead to long-term success."
+        </Text>
+      </View>
       
       <Text style={styles.footer}>
         Your {APP_CONFIG.year} Success Blueprint • Page 2
@@ -649,9 +709,10 @@ const GoalPage: React.FC<{ goal: CategoryGoal; index: number }> = ({ goal, index
         
         <View style={styles.goalHeader}>
           <View style={[styles.goalBadge, { backgroundColor: theme.color }]}>
-            <Text style={[styles.goalBadgeSymbol, { color: colors.white }]}>
-              {theme.symbol}
-            </Text>
+            <Image 
+              src={theme.iconPath} 
+              style={styles.goalBadgeIcon}
+            />
             <Text style={styles.goalBadgeText}>
               {goal.category.toUpperCase()}
             </Text>
@@ -664,22 +725,29 @@ const GoalPage: React.FC<{ goal: CategoryGoal; index: number }> = ({ goal, index
       <View style={styles.timeline}>
         <View style={styles.timelineStep}>
           <View style={[styles.timelineDot, { backgroundColor: theme.color }]} />
-          <Text style={styles.timelineLabel}>Now</Text>
+          <Text style={styles.timelineLabel}>NOW</Text>
+          <Text style={{ fontSize: 7, color: colors.slate[400] }}>Immediate</Text>
         </View>
         <View style={styles.timelineLine} />
         <View style={styles.timelineStep}>
           <View style={[styles.timelineDot, { backgroundColor: colors.slate[300] }]} />
-          <Text style={styles.timelineLabel}>Soon</Text>
+          <Text style={styles.timelineLabel}>SOON</Text>
+          <Text style={{ fontSize: 7, color: colors.slate[400] }}>Short Term</Text>
         </View>
         <View style={styles.timelineLine} />
         <View style={styles.timelineStep}>
           <View style={[styles.timelineDot, { backgroundColor: colors.slate[300] }]} />
-          <Text style={styles.timelineLabel}>Later</Text>
+          <Text style={styles.timelineLabel}>LATER</Text>
+          <Text style={{ fontSize: 7, color: colors.slate[400] }}>Long Term</Text>
         </View>
       </View>
       
       {/* Action Plan */}
-      <Text style={styles.sectionTitle}>▶ ACTION PLAN</Text>
+      {/* Action Plan */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.xl, marginBottom: spacing.md }}>
+        <Image src="/assets/pdf-icons/icon-target.png" style={styles.sectionIcon} />
+        <Text style={{ fontSize: 12, fontWeight: 'bold', color: colors.primary.main }}>ACTION PLAN</Text>
+      </View>
       <View style={styles.table}>
         <View style={styles.tableHeader}>
           <Text style={[styles.tableHeaderCell, { width: '30%' }]}>Timeline</Text>
@@ -687,21 +755,36 @@ const GoalPage: React.FC<{ goal: CategoryGoal; index: number }> = ({ goal, index
         </View>
         
         <View style={styles.tableRow}>
-          <Text style={styles.tableCellLabel}>① Small Step (Now)</Text>
+          <View style={styles.stepLabelContainer}>
+            <View style={styles.stepCircle}>
+              <Text style={styles.stepNumber}>1</Text>
+            </View>
+            <Text style={{ fontWeight: 'bold', color: colors.slate[600], fontSize: 10 }}>Small Step</Text>
+          </View>
           <Text style={[styles.tableCell, styles.tableCellContent]}>
             {goal.actions.small}
           </Text>
         </View>
         
         <View style={[styles.tableRow, styles.tableRowAlt]}>
-          <Text style={styles.tableCellLabel}>② Medium Step (Soon)</Text>
+          <View style={styles.stepLabelContainer}>
+            <View style={styles.stepCircle}>
+              <Text style={styles.stepNumber}>2</Text>
+            </View>
+            <Text style={{ fontWeight: 'bold', color: colors.slate[600], fontSize: 10 }}>Medium Step</Text>
+          </View>
           <Text style={[styles.tableCell, styles.tableCellContent]}>
             {goal.actions.medium}
           </Text>
         </View>
         
         <View style={styles.tableRow}>
-          <Text style={styles.tableCellLabel}>③ Big Step (Later)</Text>
+          <View style={styles.stepLabelContainer}>
+            <View style={styles.stepCircle}>
+              <Text style={styles.stepNumber}>3</Text>
+            </View>
+            <Text style={{ fontWeight: 'bold', color: colors.slate[600], fontSize: 10 }}>Big Step</Text>
+          </View>
           <Text style={[styles.tableCell, styles.tableCellContent]}>
             {goal.actions.big}
           </Text>
@@ -709,11 +792,15 @@ const GoalPage: React.FC<{ goal: CategoryGoal; index: number }> = ({ goal, index
       </View>
       
       {/* Motivation System */}
-      <Text style={styles.sectionTitle}>◈ MOTIVATION SYSTEM</Text>
+      {/* Motivation System */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.xl, marginBottom: spacing.md }}>
+        <Image src="/assets/pdf-icons/icon-bulb.png" style={styles.sectionIcon} />
+        <Text style={{ fontSize: 12, fontWeight: 'bold', color: colors.primary.main }}>MOTIVATION SYSTEM</Text>
+      </View>
       <View style={styles.motivationTable}>
         <View style={styles.motivationHeader}>
-          <Text style={styles.motivationHeaderCell}>✓ Why it Matters (Gain)</Text>
-          <Text style={styles.motivationHeaderCell}>⚠️ Cost of Inaction (Pain)</Text>
+          <Text style={styles.motivationHeaderCell}>Why it Matters (Gain)</Text>
+          <Text style={styles.motivationHeaderCell}>Cost of Inaction (Pain)</Text>
         </View>
         <View style={styles.motivationRow}>
           <Text style={styles.motivationCell}>{goal.motivation.why}</Text>
@@ -723,7 +810,10 @@ const GoalPage: React.FC<{ goal: CategoryGoal; index: number }> = ({ goal, index
       
       {/* Monthly Check-in */}
       <View style={styles.checkInBox}>
-        <Text style={styles.checkInTitle}>✓ MONTHLY CHECK-IN STRATEGY</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
+          <Image src="/assets/pdf-icons/icon-calendar.png" style={{ width: 12, height: 12, marginRight: 6 }} />
+          <Text style={styles.checkInTitle}>MONTHLY CHECK-IN STRATEGY</Text>
+        </View>
         <Text style={styles.checkInText}>{goal.monthlyCheckIn}</Text>
       </View>
       

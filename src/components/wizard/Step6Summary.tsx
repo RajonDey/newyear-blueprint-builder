@@ -13,6 +13,7 @@ import { APP_CONFIG } from "@/lib/config";
 import { generateSuccessPDF } from "@/utils/pdfGenerator";
 import { logger } from "@/lib/logger";
 import { validateEmail, validateName } from "@/lib/validation";
+import { NotionModal } from "@/components/NotionModal";
 
 interface Step6SummaryProps {
   goals: CategoryGoal[];
@@ -42,6 +43,7 @@ export const Step6Summary = ({
 }: Step6SummaryProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isNotionModalOpen, setIsNotionModalOpen] = useState(false);
 
   const primaryGoal = goals.find(g => g.category === primaryCategory);
   const secondaryGoals = goals.filter(g => secondaryCategories.includes(g.category));
@@ -271,20 +273,30 @@ export const Step6Summary = ({
             
             {/* DEV ONLY: Preview PDF Button */}
             {process.env.NODE_ENV === 'development' && (
-              <Button
-                onClick={() => generateSuccessPDF({
-                  userName,
-                  userEmail,
-                  goals,
-                  primaryCategory: primaryCategory!,
-                  secondaryCategories
-                })}
-                variant="outline"
-                size="sm"
-                className="w-full mt-4 border-dashed border-muted-foreground/50 text-muted-foreground"
-              >
-                🛠️ Dev: Preview PDF
-              </Button>
+              <div className="space-y-2 mt-4">
+                <Button
+                  onClick={() => generateSuccessPDF({
+                    userName,
+                    userEmail,
+                    goals,
+                    primaryCategory: primaryCategory!,
+                    secondaryCategories
+                  })}
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-dashed border-muted-foreground/50 text-muted-foreground"
+                >
+                  🛠️ Dev: Preview PDF
+                </Button>
+                <Button
+                  onClick={() => setIsNotionModalOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-dashed border-muted-foreground/50 text-muted-foreground"
+                >
+                  🛠️ Dev: Preview Notion
+                </Button>
+              </div>
             )}
               
               <p className="text-sm text-muted-foreground mt-4">
@@ -300,6 +312,18 @@ export const Step6Summary = ({
           </div>
         </>
       )}
+      
+      <NotionModal 
+        isOpen={isNotionModalOpen} 
+        onClose={() => setIsNotionModalOpen(false)} 
+        data={{
+          userName,
+          userEmail,
+          goals,
+          primaryCategory,
+          secondaryCategories
+        }} 
+      />
     </div>
   );
 };

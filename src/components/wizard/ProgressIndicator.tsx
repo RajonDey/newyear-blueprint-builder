@@ -8,6 +8,7 @@ interface ProgressIndicatorProps {
 }
 
 const stepLabels = [
+  "Wheel of Life",
   "Categories",
   "Goals",
   "Actions",

@@ -196,7 +196,7 @@ const Index = () => {
           <SaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
           <MusicToggle isPlaying={isPlaying} onToggle={toggleMusic} className="ml-4" />
         </div>
-        <ProgressIndicator currentStep={currentStep === 0 ? 1 : currentStep + 1} totalSteps={7} estimatedTimeLeft={12} />
+        <ProgressIndicator currentStep={currentStep + 1} totalSteps={7} estimatedTimeLeft={12} />
 
         {currentStep === 0 && (
           <WizardStepBoundary stepName="Wheel of Life" onSkip={() => setCurrentStep(1)}>

@@ -89,7 +89,8 @@ export const Step2Goals = ({
 
     try {
       const minLength = isPrimary ? 10 : 5;
-      const maxLength = isPrimary ? 300 : 200;
+      const softLimit = isPrimary ? 200 : 150;
+      const hardLimit = isPrimary ? 800 : 350;
 
       if (currentGoal.length < minLength) {
         const message = `Goal must be at least ${minLength} characters`;
@@ -98,8 +99,8 @@ export const Step2Goals = ({
         return;
       }
 
-      if (currentGoal.length > maxLength) {
-        const message = ERROR_MESSAGES.GOAL_TOO_LONG;
+      if (currentGoal.length > hardLimit) {
+        const message = `Goal cannot exceed ${hardLimit} characters`;
         setValidationError(message);
         toast.error(message);
         return;
@@ -163,14 +164,16 @@ export const Step2Goals = ({
           value={currentGoal}
           onChange={(e) => onUpdateGoal(currentCategory, e.target.value)}
           placeholder={placeholder}
-          className={cn(
-            "resize-none focus-glow",
-            isPrimary ? "min-h-32 md:min-h-40" : "min-h-24 md:min-h-32"
-          )}
-          maxLength={isPrimary ? 300 : 200}
+          className="resize-none focus-glow min-h-32 max-h-64"
+          maxLength={isPrimary ? 800 : 350}
         />
 
-        <CharacterCounter current={currentGoal.length} max={isPrimary ? 300 : 200} className="mt-2" />
+        <CharacterCounter 
+          current={currentGoal.length} 
+          soft={isPrimary ? 200 : 150} 
+          max={isPrimary ? 800 : 350} 
+          className="mt-2" 
+        />
 
         {validationError && (
           <Alert variant="destructive" className="mt-4">

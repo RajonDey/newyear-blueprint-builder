@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { CharacterCounter } from "@/components/ui/character-counter";
 import { Confetti } from "@/components/ui/confetti";
@@ -98,14 +98,16 @@ export const Step3Actions = ({
             <p className="text-xs md:text-sm text-muted-foreground mb-3">
               What's one tiny action you can do consistently? (This builds the habit)
             </p>
-            <Input
+            <Textarea
               id="small"
               value={currentActions.small}
               onChange={(e) => updateAction("small", e.target.value)}
               placeholder={smallPlaceholder}
-              className="focus-glow h-11 md:h-12"
-              maxLength={150}
+              className="resize-none focus-glow min-h-[60px] max-h-[120px]"
+              rows={2}
+              maxLength={250}
             />
+            <CharacterCounter current={currentActions.small.length} soft={100} max={250} className="mt-2" />
           </div>
 
           {/* Medium Step */}
@@ -117,14 +119,16 @@ export const Step3Actions = ({
             <p className="text-sm text-muted-foreground mb-3">
               What's a significant action that builds on your small step?
             </p>
-            <Input
+            <Textarea
               id="medium"
               value={currentActions.medium}
               onChange={(e) => updateAction("medium", e.target.value)}
               placeholder={mediumPlaceholder}
-              className="text-base focus-glow"
-              maxLength={150}
+              className="resize-none focus-glow min-h-[60px] max-h-[120px]"
+              rows={2}
+              maxLength={250}
             />
+            <CharacterCounter current={currentActions.medium.length} soft={100} max={250} className="mt-2" />
           </div>
 
           {/* Big Milestone */}
@@ -136,14 +140,16 @@ export const Step3Actions = ({
             <p className="text-sm text-muted-foreground mb-3">
               What's your ultimate achievement for this goal this year?
             </p>
-            <Input
+            <Textarea
               id="big"
               value={currentActions.big}
               onChange={(e) => updateAction("big", e.target.value)}
               placeholder={bigPlaceholder}
-              className="text-base focus-glow"
-              maxLength={150}
+              className="resize-none focus-glow min-h-[60px] max-h-[120px]"
+              rows={2}
+              maxLength={250}
             />
+            <CharacterCounter current={currentActions.big.length} soft={100} max={250} className="mt-2" />
           </div>
         </div>
 

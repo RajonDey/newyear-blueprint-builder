@@ -20,14 +20,14 @@ interface NotionTemplateData {
  */
 export function generateNotionCSV(data: NotionTemplateData): string {
   const headers = [
-    'Category',
+    'Goal Category',
     'Type',
     'Main Goal',
-    'Small Action',
-    'Medium Action',
-    'Big Action',
+    'Small Step',
+    'Medium Step',
+    'Big Step',
     'Monthly Check-in',
-    'Why It Matters',
+    'Why it Matters',
     'Cost of Inaction',
     'Status',
     'Priority'

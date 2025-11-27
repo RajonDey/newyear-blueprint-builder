@@ -13,6 +13,7 @@ import { safeLocalStorage } from "@/lib/storage";
 import { APP_CONFIG } from "@/lib/config";
 import { logger } from "@/lib/logger";
 import { Footer } from "@/components/Footer";
+import { NotionModal } from "@/components/NotionModal";
 
 interface StoredWizardData {
   goals: CategoryGoal[];
@@ -29,6 +30,7 @@ const PaymentSuccess = () => {
   const [isVerifying, setIsVerifying] = useState(true);
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [isVerified, setIsVerified] = useState(false);
+  const [isNotionModalOpen, setIsNotionModalOpen] = useState(false);
 
   useEffect(() => {
     const checkoutId = searchParams.get("checkout_id");
@@ -115,23 +117,9 @@ const PaymentSuccess = () => {
     }
   };
 
-  const handleDownloadNotionTemplate = () => {
+  const handleOpenNotionModal = () => {
     if (!wizardData) return;
-
-    try {
-      downloadNotionTemplate({
-        userName: wizardData.userName,
-        userEmail: wizardData.userEmail,
-        primaryCategory: wizardData.primaryCategory,
-        secondaryCategories: wizardData.secondaryCategories,
-        goals: wizardData.goals,
-      }, 'markdown');
-      toast.success('Notion template downloaded successfully!');
-    } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      logger.error('Notion template download error:', error);
-      toast.error(errorMessage);
-    }
+    setIsNotionModalOpen(true);
   };
 
   const handleReturnHome = () => {
@@ -252,13 +240,13 @@ const PaymentSuccess = () => {
             </Button>
 
             <Button
-              onClick={handleDownloadNotionTemplate}
+              onClick={handleOpenNotionModal}
               size="lg"
               variant="outline"
               className="w-full border-primary hover:bg-primary/5 h-14"
             >
               <FileText className="w-5 h-5 mr-2" />
-              Download Notion Template
+              Get Notion Template
             </Button>
 
             <Button
@@ -310,11 +298,21 @@ const PaymentSuccess = () => {
               </Button>
             </div>
           </div>
-<p className="text-sm text-muted-foreground mt-6">
+          <p className="text-sm text-muted-foreground mt-6">
             A payment receipt has been sent to {wizardData.userEmail}
           </p>
         </Card>
       </div>
+
+      <Footer />
+
+      {wizardData && (
+        <NotionModal 
+          isOpen={isNotionModalOpen} 
+          onClose={() => setIsNotionModalOpen(false)} 
+          data={wizardData} 
+        />
+      )}
     </div>
   );
 };

@@ -83,10 +83,10 @@ export const Step5Motivation = ({
               value={currentMotivation.why}
               onChange={(e) => onUpdateMotivation(currentCategory, "why", e.target.value)}
               placeholder={whyPlaceholder}
-              className="min-h-28 md:min-h-32 resize-none focus-glow"
-              maxLength={300}
+              className="min-h-28 md:min-h-32 max-h-48 resize-none focus-glow"
+              maxLength={600}
             />
-            <CharacterCounter current={currentMotivation.why.length} max={300} className="mt-2" />
+            <CharacterCounter current={currentMotivation.why.length} soft={200} max={600} className="mt-2" />
           </div>
 
           {/* Consequence Section */}
@@ -103,10 +103,10 @@ export const Step5Motivation = ({
               value={currentMotivation.consequence}
               onChange={(e) => onUpdateMotivation(currentCategory, "consequence", e.target.value)}
               placeholder={consequencePlaceholder}
-              className="min-h-32 text-base resize-none focus-glow"
-              maxLength={300}
+              className="min-h-32 max-h-48 text-base resize-none focus-glow"
+              maxLength={600}
             />
-            <CharacterCounter current={currentMotivation.consequence.length} max={300} className="mt-2" />
+            <CharacterCounter current={currentMotivation.consequence.length} soft={200} max={600} className="mt-2" />
           </div>
         </div>
 
