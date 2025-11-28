@@ -275,6 +275,28 @@ export const Step6Summary = ({
             {process.env.NODE_ENV === 'development' && (
               <div className="space-y-2 mt-4">
                 <Button
+                  onClick={() => {
+                    // Save wizard data to localStorage
+                    const paymentData = {
+                      goals,
+                      primaryCategory,
+                      secondaryCategories,
+                      userName,
+                      userEmail,
+                    };
+                    safeLocalStorage.setItem("wizard_payment_data", paymentData);
+                    
+                    // Redirect to success page with dummy checkout_id
+                    window.location.href = "/success?checkout_id=DEV_TEST";
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-dashed border-green-500/50 text-green-600"
+                >
+                  🛠️ Dev: Simulate Payment Success
+                </Button>
+
+                <Button
                   onClick={() => generateSuccessPDF({
                     userName,
                     userEmail,
