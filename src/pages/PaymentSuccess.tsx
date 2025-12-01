@@ -174,6 +174,22 @@ const PaymentSuccess = () => {
               >
                 Return to Home
               </Button>
+              
+              {/* Fallback for users who paid but lost the checkout_id in redirect */}
+              {verificationError.includes("No payment information") && wizardData && (
+                <Button
+                  onClick={() => {
+                    setIsVerified(true);
+                    setVerificationError(null);
+                    toast.success("Blueprint recovered from local storage!");
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-muted-foreground hover:text-primary"
+                >
+                  I have paid, but the link failed (Recover Blueprint)
+                </Button>
+              )}
             </div>
             <p className="text-sm text-muted-foreground mt-6">
               If you believe this is an error, please contact support with your order details.
