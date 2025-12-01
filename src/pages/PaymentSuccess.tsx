@@ -119,10 +119,6 @@ const PaymentSuccess = () => {
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
   };
 
-  if (!wizardData) {
-    return null;
-  }
-
   // Show loading state while verifying with skeleton
   if (isVerifying) {
     return (
@@ -187,6 +183,10 @@ const PaymentSuccess = () => {
         <Footer />
       </div>
     );
+  }
+
+  if (!wizardData) {
+    return null;
   }
 
   // Show success state only if verified
