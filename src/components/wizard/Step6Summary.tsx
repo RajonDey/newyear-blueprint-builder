@@ -28,7 +28,7 @@ interface Step6SummaryProps {
 }
 
 // Replace this with your actual Lemon Squeezy checkout URL
-const LEMON_SQUEEZY_CHECKOUT_URL = "https://yourstorename.lemonsqueezy.com/checkout/buy/YOUR-PRODUCT-ID";
+const LEMON_SQUEEZY_CHECKOUT_URL = "https://yearinreview.lemonsqueezy.com/buy/a28c090f-08e9-4a5f-bde8-d636f9444fff";
 
 export const Step6Summary = ({
   goals,
@@ -97,6 +97,7 @@ export const Step6Summary = ({
       const successUrl = `${window.location.origin}/success`;
       const cancelUrl = `${window.location.origin}/cancel`;
       
+      // Use the checkout URL with redirect parameters
       window.location.href = `${LEMON_SQUEEZY_CHECKOUT_URL}?checkout[custom][success_url]=${encodeURIComponent(successUrl)}&checkout[custom][cancel_url]=${encodeURIComponent(cancelUrl)}`;
     } catch (error) {
       logger.error('Failed to proceed to payment:', error);
@@ -274,28 +275,6 @@ export const Step6Summary = ({
             {/* DEV ONLY: Preview PDF Button */}
             {process.env.NODE_ENV === 'development' && (
               <div className="space-y-2 mt-4">
-                <Button
-                  onClick={() => {
-                    // Save wizard data to localStorage
-                    const paymentData = {
-                      goals,
-                      primaryCategory,
-                      secondaryCategories,
-                      userName,
-                      userEmail,
-                    };
-                    safeLocalStorage.setItem("wizard_payment_data", paymentData);
-                    
-                    // Redirect to success page with dummy checkout_id
-                    window.location.href = "/success?checkout_id=DEV_TEST";
-                  }}
-                  variant="outline"
-                  size="sm"
-                  className="w-full border-dashed border-green-500/50 text-green-600"
-                >
-                  🛠️ Dev: Simulate Payment Success
-                </Button>
-
                 <Button
                   onClick={() => generateSuccessPDF({
                     userName,
