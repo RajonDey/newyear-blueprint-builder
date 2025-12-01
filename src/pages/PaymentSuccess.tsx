@@ -35,15 +35,20 @@ const PaymentSuccess = () => {
   useEffect(() => {
     const checkoutId = searchParams.get("checkout_id");
     
+    // Check for checkout_id
     if (!checkoutId) {
-      navigate("/");
+      logger.warn("Missing checkout_id in URL");
+      setVerificationError("No payment information found. Please contact support if you have paid.");
+      setIsVerifying(false);
       return;
     }
 
     // Retrieve wizard data from localStorage
     const data = safeLocalStorage.getItem<StoredWizardData | null>("wizard_payment_data", null);
     if (!data) {
-      navigate("/");
+      logger.warn("Missing wizard_payment_data in localStorage");
+      setVerificationError("We couldn't find your blueprint data. This usually happens if you switched browsers or devices during checkout. Please try creating your blueprint again on this device.");
+      setIsVerifying(false);
       return;
     }
 
