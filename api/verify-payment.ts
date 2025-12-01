@@ -1,4 +1,4 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
+import { VercelRequest, VercelResponse } from "@vercel/node";
 
 interface LemonSqueezyOrder {
   data: {
@@ -14,64 +14,70 @@ interface LemonSqueezyOrder {
   };
 }
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { checkoutId } = req.body;
+  const { orderId, checkoutId } = req.body;
 
-  if (!checkoutId) {
-    return res.status(400).json({ error: 'Missing checkout ID' });
+  // Support both order_id (preferred) and checkout_id (legacy)
+  const paymentIdentifier = orderId || checkoutId;
+  const isOrderId = !!orderId;
+
+  if (!paymentIdentifier) {
+    return res.status(400).json({ error: "Missing order ID or checkout ID" });
   }
 
   const apiKey = process.env.LEMON_SQUEEZY_API_KEY;
 
   if (!apiKey) {
-    console.error('Missing LEMON_SQUEEZY_API_KEY environment variable');
-    return res.status(500).json({ error: 'Payment verification unavailable' });
+    console.error("Missing LEMON_SQUEEZY_API_KEY environment variable");
+    return res.status(500).json({ error: "Payment verification unavailable" });
   }
 
   try {
     // Verify payment with Lemon Squeezy API
-    const response = await fetch(
-      `https://api.lemonsqueezy.com/v1/checkouts/${checkoutId}`,
-      {
-        headers: {
-          'Accept': 'application/vnd.api+json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-      }
-    );
+    // Use order endpoint if order_id provided, otherwise use checkout endpoint
+    const apiEndpoint = isOrderId
+      ? `https://api.lemonsqueezy.com/v1/orders/${paymentIdentifier}`
+      : `https://api.lemonsqueezy.com/v1/checkouts/${paymentIdentifier}`;
+
+    const response = await fetch(apiEndpoint, {
+      headers: {
+        Accept: "application/vnd.api+json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Lemon Squeezy API error:', {
+      console.error("Lemon Squeezy API error:", {
         status: response.status,
         statusText: response.statusText,
         body: errorText,
-        checkoutId,
+        paymentIdentifier,
+        isOrderId,
       });
 
       if (response.status === 404) {
         return res.status(404).json({
-          error: 'Checkout not found. Please contact support.',
-          checkoutId,
+          error: isOrderId
+            ? "Order not found. Please contact support."
+            : "Checkout not found. Please contact support.",
+          paymentIdentifier,
         });
       }
 
       if (response.status === 401) {
         return res.status(500).json({
-          error: 'Payment service configuration error. Please contact support.',
+          error: "Payment service configuration error. Please contact support.",
         });
       }
 
       return res.status(400).json({
-        error: 'Unable to verify payment. Please try again or contact support.',
+        error: "Unable to verify payment. Please try again or contact support.",
         statusCode: response.status,
       });
     }
@@ -80,12 +86,12 @@ export default async function handler(
 
     // Check if payment is complete
     const status = data.data.attributes.status;
-    const isPaid = status === 'paid' || status === 'success';
+    const isPaid = status === "paid" || status === "success";
 
     if (!isPaid) {
-      return res.status(402).json({ 
-        error: 'Payment not completed',
-        status 
+      return res.status(402).json({
+        error: "Payment not completed",
+        status,
       });
     }
 
@@ -103,17 +109,18 @@ export default async function handler(
       email: data.data.attributes.user_email,
     });
   } catch (error) {
-    console.error('Payment verification exception:', error);
+    console.error("Payment verification exception:", error);
 
     // Check for network errors
-    if (error instanceof TypeError && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes("fetch")) {
       return res.status(503).json({
-        error: 'Payment service temporarily unavailable. Please try again in a moment.',
+        error:
+          "Payment service temporarily unavailable. Please try again in a moment.",
       });
     }
 
     return res.status(500).json({
-      error: 'Verification failed. Please contact support if issue persists.',
+      error: "Verification failed. Please contact support if issue persists.",
     });
   }
 }
