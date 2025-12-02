@@ -14,6 +14,7 @@ import { generateSuccessPDF } from "@/utils/pdfGenerator";
 import { logger } from "@/lib/logger";
 import { validateEmail, validateName } from "@/lib/validation";
 import { NotionModal } from "@/components/NotionModal";
+import { trackPaymentInitiated } from "@/lib/analytics";
 
 interface Step6SummaryProps {
   goals: CategoryGoal[];
@@ -102,6 +103,9 @@ export const Step6Summary = ({
       }
 
       toast.info("Redirecting to secure checkout...");
+
+      // Track payment initiation for analytics
+      trackPaymentInitiated();
 
       // Build dynamic success/cancel URLs for this deployment
       // Success URL MUST include the {checkout_id} placeholder so Lemon Squeezy

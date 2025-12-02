@@ -21,6 +21,11 @@ import { APP_CONFIG } from "@/lib/config";
 import { logger } from "@/lib/logger";
 import { Footer } from "@/components/Footer";
 import { NotionModal } from "@/components/NotionModal";
+import {
+  trackPaymentSuccess,
+  trackPDFDownload,
+  trackNotionDownload,
+} from "@/lib/analytics";
 
 interface StoredWizardData {
   goals: CategoryGoal[];
@@ -74,28 +79,64 @@ const PaymentSuccess = () => {
 
     setWizardData(data);
 
-    // Verify payment (Client-side check for MVP)
-    // In a real production app with a backend, we would verify the order_id/checkout_id with the Lemon Squeezy API
-    // For this static export, we trust the redirect from Lemon Squeezy
-    if (paymentIdentifier) {
-      // Simulate API verification delay for UX
-      const timer = setTimeout(() => {
-        setIsVerified(true);
+    // Verify payment with Lemon Squeezy API
+    const verifyPayment = async () => {
+      if (!paymentIdentifier) {
+        setVerificationError("Invalid payment session.");
         setIsVerifying(false);
-        toast.success("Payment verified successfully!");
-      }, 1500);
+        return;
+      }
 
-      return () => clearTimeout(timer);
-    } else {
-      setVerificationError("Invalid payment session.");
-      setIsVerifying(false);
-    }
+      try {
+        // Call our API to verify the payment with Lemon Squeezy
+        const response = await fetchWithRetry("/api/verify-payment", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderId: orderId,
+            checkoutId: checkoutId,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new ApiError(
+            error.error || "Payment verification failed",
+            response.status
+          );
+        }
+
+        const result = await response.json();
+
+        // Verify payment status
+        if (result.verified && result.status === "paid") {
+          setIsVerified(true);
+          setIsVerifying(false);
+          toast.success("Payment verified successfully!");
+
+          // Track successful payment conversion
+          trackPaymentSuccess(result.total || 9);
+        } else {
+          throw new Error(
+            result.status === "refunded"
+              ? "This order has been refunded"
+              : "Payment not completed"
+          );
+        }
+      } catch (error) {
+        logger.error("Payment verification error:", error);
+        const errorMessage = getErrorMessage(error);
+        setVerificationError(
+          errorMessage || "Unable to verify payment. Please contact support."
+        );
+        setIsVerifying(false);
+      }
+    };
+
+    verifyPayment();
   }, [searchParams, navigate]);
-
-  // Removed backend verification logic for static export MVP
-  /* 
-  const verifyPayment = async (checkoutId: string) => { ... } 
-  */
 
   const handleDownloadPDF = () => {
     if (!wizardData) return;
@@ -109,6 +150,9 @@ const PaymentSuccess = () => {
         goals: wizardData.goals,
       });
 
+      // Track PDF download
+      trackPDFDownload();
+
       safeLocalStorage.removeItem("wizard_payment_data");
       toast.success("PDF downloaded successfully!");
     } catch (error) {
@@ -120,6 +164,10 @@ const PaymentSuccess = () => {
 
   const handleOpenNotionModal = () => {
     if (!wizardData) return;
+
+    // Track Notion template download
+    trackNotionDownload();
+
     setIsNotionModalOpen(true);
   };
 
