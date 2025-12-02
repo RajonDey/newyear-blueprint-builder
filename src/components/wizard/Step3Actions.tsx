@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useRotatingPlaceholder } from "@/hooks/useRotatingPlaceholder";
 import { toast } from "sonner";
 import { APP_CONFIG } from "@/lib/config";
+import { logger } from "@/lib/logger";
 
 interface Step3ActionsProps {
   primaryCategory: LifeCategory | null;
@@ -29,7 +30,11 @@ export const Step3Actions = ({
 
   // Only primary category gets full action breakdown
   const currentCategory = primaryCategory!;
-  const currentActions = actions[currentCategory] || { small: "", medium: "", big: "" };
+  const currentActions = actions[currentCategory] || {
+    small: "",
+    medium: "",
+    big: "",
+  };
 
   const smallPlaceholder = useRotatingPlaceholder([
     "Start a daily 10-minute morning routine",
@@ -64,12 +69,13 @@ export const Step3Actions = ({
     try {
       onUpdateActions(currentCategory, { ...currentActions, [key]: value });
     } catch (error) {
-      console.error('Failed to update action:', error);
-      toast.error('Failed to save action. Please try again.');
+      logger.error("Failed to update action:", error);
+      toast.error("Failed to save action. Please try again.");
     }
   };
 
-  const isValid = currentActions.small && currentActions.medium && currentActions.big;
+  const isValid =
+    currentActions.small && currentActions.medium && currentActions.big;
 
   return (
     <div className="max-w-2xl mx-auto px-4">
@@ -82,7 +88,9 @@ export const Step3Actions = ({
           </h2>
         </div>
         <p className="text-muted-foreground text-base md:text-lg">
-          <span className="text-focus-primary font-semibold">Primary Focus: </span>
+          <span className="text-focus-primary font-semibold">
+            Primary Focus:{" "}
+          </span>
           Create progressive action steps for your main goal
         </p>
       </div>
@@ -91,12 +99,16 @@ export const Step3Actions = ({
         <div className="space-y-6 md:space-y-8">
           {/* Small Step */}
           <div>
-            <Label htmlFor="small" className="text-base md:text-lg font-semibold mb-3 block flex items-center gap-2">
+            <Label
+              htmlFor="small"
+              className="text-base md:text-lg font-semibold mb-3 block flex items-center gap-2"
+            >
               <span className="text-xl md:text-2xl">🌱</span>
               Small Step - Start This Week
             </Label>
             <p className="text-xs md:text-sm text-muted-foreground mb-3">
-              What's one tiny action you can do consistently? (This builds the habit)
+              What's one tiny action you can do consistently? (This builds the
+              habit)
             </p>
             <Textarea
               id="small"
@@ -107,12 +119,20 @@ export const Step3Actions = ({
               rows={2}
               maxLength={250}
             />
-            <CharacterCounter current={currentActions.small.length} soft={100} max={250} className="mt-2" />
+            <CharacterCounter
+              current={currentActions.small.length}
+              soft={100}
+              max={250}
+              className="mt-2"
+            />
           </div>
 
           {/* Medium Step */}
           <div>
-            <Label htmlFor="medium" className="text-lg font-semibold mb-3 block flex items-center gap-2">
+            <Label
+              htmlFor="medium"
+              className="text-lg font-semibold mb-3 block flex items-center gap-2"
+            >
               <span className="text-2xl">🚀</span>
               Medium Step - Within 3 Months
             </Label>
@@ -128,12 +148,20 @@ export const Step3Actions = ({
               rows={2}
               maxLength={250}
             />
-            <CharacterCounter current={currentActions.medium.length} soft={100} max={250} className="mt-2" />
+            <CharacterCounter
+              current={currentActions.medium.length}
+              soft={100}
+              max={250}
+              className="mt-2"
+            />
           </div>
 
           {/* Big Milestone */}
           <div>
-            <Label htmlFor="big" className="text-lg font-semibold mb-3 block flex items-center gap-2">
+            <Label
+              htmlFor="big"
+              className="text-lg font-semibold mb-3 block flex items-center gap-2"
+            >
               <span className="text-2xl">🏆</span>
               Big Milestone - By End of {APP_CONFIG.year}
             </Label>
@@ -149,12 +177,19 @@ export const Step3Actions = ({
               rows={2}
               maxLength={250}
             />
-            <CharacterCounter current={currentActions.big.length} soft={100} max={250} className="mt-2" />
+            <CharacterCounter
+              current={currentActions.big.length}
+              soft={100}
+              max={250}
+              className="mt-2"
+            />
           </div>
         </div>
 
         <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-          <p className="text-sm font-semibold text-foreground mb-2">💡 Progressive Action Framework:</p>
+          <p className="text-sm font-semibold text-foreground mb-2">
+            💡 Progressive Action Framework:
+          </p>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>✓ Start small to build momentum and consistency</li>
             <li>✓ Scale up gradually as habits become automatic</li>

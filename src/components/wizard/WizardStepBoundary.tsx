@@ -1,8 +1,9 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle, SkipForward } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, SkipForward } from "lucide-react";
+import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 interface Props {
   children: ReactNode;
@@ -32,7 +33,11 @@ export class WizardStepBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error(`Error in wizard step ${this.props.stepName}:`, error, errorInfo);
+    logger.error(
+      `Error in wizard step ${this.props.stepName}:`,
+      error,
+      errorInfo
+    );
     toast.error(`Error in ${this.props.stepName} step`);
   }
 
@@ -63,7 +68,8 @@ export class WizardStepBoundary extends Component<Props, State> {
               Error in {this.props.stepName}
             </AlertTitle>
             <AlertDescription className="mt-2">
-              {this.state.error?.message || 'An unexpected error occurred in this step.'}
+              {this.state.error?.message ||
+                "An unexpected error occurred in this step."}
             </AlertDescription>
           </Alert>
 
@@ -76,11 +82,7 @@ export class WizardStepBoundary extends Component<Props, State> {
               Try Again
             </Button>
             {this.props.onSkip && (
-              <Button
-                onClick={this.handleSkip}
-                variant="outline"
-                size="lg"
-              >
+              <Button onClick={this.handleSkip} variant="outline" size="lg">
                 <SkipForward className="w-4 h-4 mr-2" />
                 Skip This Step
               </Button>

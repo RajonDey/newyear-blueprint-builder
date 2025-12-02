@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/lib/error-messages";
+import { logger } from "@/lib/logger";
 
 interface Step2GoalsProps {
   selectedCategories: LifeCategory[];
@@ -29,38 +30,38 @@ const goalPlaceholders: Record<LifeCategory, string[]> = {
     `Run a half marathon by September ${APP_CONFIG.year}`,
     "Lose 20 pounds and maintain it throughout the year",
     "Practice yoga 3 times per week for 12 months",
-    "Complete a 30-day fitness challenge every quarter"
+    "Complete a 30-day fitness challenge every quarter",
   ],
   Career: [
     `Get promoted to Senior Manager by Q3 ${APP_CONFIG.year}`,
     "Launch my side business and earn $5,000 in revenue",
     "Earn a professional certification in data analytics",
-    "Speak at 3 industry conferences this year"
+    "Speak at 3 industry conferences this year",
   ],
   Finance: [
     "Save $15,000 for emergency fund by December",
     "Invest $500 monthly in index funds",
     "Pay off $10,000 in credit card debt",
-    "Increase income by 20% through raises or side income"
+    "Increase income by 20% through raises or side income",
   ],
   Relationships: [
     "Plan monthly date nights with my partner",
     "Reconnect with 5 old friends through quarterly meet-ups",
     "Spend quality 1-on-1 time with each child weekly",
-    "Host family gathering every other month"
+    "Host family gathering every other month",
   ],
   Spirituality: [
     "Meditate for 15 minutes daily for 6 consecutive months",
     "Attend weekly spiritual or mindfulness sessions",
     "Read 12 books on spirituality and personal philosophy",
-    "Volunteer 2 hours weekly at a local charity"
+    "Volunteer 2 hours weekly at a local charity",
   ],
   Passion: [
     "Master guitar and perform 3 songs at an open mic night",
     "Learn conversational Spanish and hold 10 conversations",
     "Complete 12 creative projects (art, writing, or crafts)",
-    "Start a photography hobby and build a portfolio of 50 photos"
-  ]
+    "Start a photography hobby and build a portfolio of 50 photos",
+  ],
 };
 
 export const Step2Goals = ({
@@ -76,12 +77,16 @@ export const Step2Goals = ({
   const [showConfetti, setShowConfetti] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const allCategories = [primaryCategory, ...secondaryCategories].filter(Boolean) as LifeCategory[];
+  const allCategories = [primaryCategory, ...secondaryCategories].filter(
+    Boolean
+  ) as LifeCategory[];
   const currentCategory = allCategories[currentIndex];
   const currentGoal = goals[currentCategory] || "";
   const isPrimary = currentCategory === primaryCategory;
 
-  const placeholders = goalPlaceholders[currentCategory] || ["Enter your goal..."];
+  const placeholders = goalPlaceholders[currentCategory] || [
+    "Enter your goal...",
+  ];
   const placeholder = useRotatingPlaceholder(placeholders);
 
   const handleNext = () => {
@@ -116,8 +121,8 @@ export const Step2Goals = ({
         }, 2000);
       }
     } catch (error) {
-      console.error('Error in goal validation:', error);
-      toast.error('Failed to save goal. Please try again.');
+      logger.error("Error in goal validation:", error);
+      toast.error("Failed to save goal. Please try again.");
     }
   };
 
@@ -141,22 +146,33 @@ export const Step2Goals = ({
         </div>
         <p className="text-muted-foreground text-base md:text-lg">
           {isPrimary ? (
-            <span className="text-focus-primary font-semibold">Primary Focus</span>
+            <span className="text-focus-primary font-semibold">
+              Primary Focus
+            </span>
           ) : (
-            <span className="text-focus-secondary font-semibold">Supporting Area</span>
-          )} • Category {currentIndex + 1} of {allCategories.length}
+            <span className="text-focus-secondary font-semibold">
+              Supporting Area
+            </span>
+          )}{" "}
+          • Category {currentIndex + 1} of {allCategories.length}
         </p>
       </div>
 
-      <Card className={cn(
-        "p-6 md:p-8 shadow-elegant hover-lift",
-        isPrimary ? "border-focus-primary border-2" : "border-focus-secondary"
-      )}>
-        <Label htmlFor="goal" className="text-base md:text-lg font-semibold mb-3 block">
-          {isPrimary 
-            ? `What's your main ${currentCategory.toLowerCase()} transformation goal for ${APP_CONFIG.year}?`
-            : `What would you like to maintain or improve in ${currentCategory.toLowerCase()}?`
-          }
+      <Card
+        className={cn(
+          "p-6 md:p-8 shadow-elegant hover-lift",
+          isPrimary ? "border-focus-primary border-2" : "border-focus-secondary"
+        )}
+      >
+        <Label
+          htmlFor="goal"
+          className="text-base md:text-lg font-semibold mb-3 block"
+        >
+          {isPrimary
+            ? `What's your main ${currentCategory.toLowerCase()} transformation goal for ${
+                APP_CONFIG.year
+              }?`
+            : `What would you like to maintain or improve in ${currentCategory.toLowerCase()}?`}
         </Label>
 
         <Textarea
@@ -168,11 +184,11 @@ export const Step2Goals = ({
           maxLength={isPrimary ? 800 : 350}
         />
 
-        <CharacterCounter 
-          current={currentGoal.length} 
-          soft={isPrimary ? 200 : 150} 
-          max={isPrimary ? 800 : 350} 
-          className="mt-2" 
+        <CharacterCounter
+          current={currentGoal.length}
+          soft={isPrimary ? 200 : 150}
+          max={isPrimary ? 800 : 350}
+          className="mt-2"
         />
 
         {validationError && (
@@ -184,22 +200,35 @@ export const Step2Goals = ({
 
         {isPrimary && (
           <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-            <p className="text-sm font-semibold text-foreground mb-2">💡 SMART Goal Tips:</p>
+            <p className="text-sm font-semibold text-foreground mb-2">
+              💡 SMART Goal Tips:
+            </p>
             <ul className="text-sm text-muted-foreground space-y-1">
-              <li>✓ <strong>Specific:</strong> Clear and well-defined</li>
-              <li>✓ <strong>Measurable:</strong> Track your progress</li>
-              <li>✓ <strong>Achievable:</strong> Realistic yet challenging</li>
-              <li>✓ <strong>Relevant:</strong> Aligns with your values</li>
-              <li>✓ <strong>Time-bound:</strong> Has a deadline ({APP_CONFIG.year})</li>
+              <li>
+                ✓ <strong>Specific:</strong> Clear and well-defined
+              </li>
+              <li>
+                ✓ <strong>Measurable:</strong> Track your progress
+              </li>
+              <li>
+                ✓ <strong>Achievable:</strong> Realistic yet challenging
+              </li>
+              <li>
+                ✓ <strong>Relevant:</strong> Aligns with your values
+              </li>
+              <li>
+                ✓ <strong>Time-bound:</strong> Has a deadline ({APP_CONFIG.year}
+                )
+              </li>
             </ul>
           </div>
         )}
       </Card>
 
       <div className="flex justify-between mt-8">
-        <Button 
-          onClick={handleBack} 
-          variant="outline" 
+        <Button
+          onClick={handleBack}
+          variant="outline"
           size="lg"
           className="hover-scale"
         >
@@ -207,11 +236,15 @@ export const Step2Goals = ({
         </Button>
         <Button
           onClick={handleNext}
-          disabled={isPrimary ? currentGoal.length < 10 : currentGoal.length < 5}
+          disabled={
+            isPrimary ? currentGoal.length < 10 : currentGoal.length < 5
+          }
           size="lg"
           className="bg-gradient-primary hover:opacity-90 hover-scale"
         >
-          {currentIndex < allCategories.length - 1 ? "Next Category →" : "Continue →"}
+          {currentIndex < allCategories.length - 1
+            ? "Next Category →"
+            : "Continue →"}
         </Button>
       </div>
     </div>
