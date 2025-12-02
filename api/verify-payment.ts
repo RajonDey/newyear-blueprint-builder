@@ -103,10 +103,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // For now, we'll trust the frontend to validate
     return res.status(200).json({
       verified: true,
+      status: status,
       downloadToken,
       expiresAt,
       orderNumber: data.data.attributes.order_number,
       email: data.data.attributes.user_email,
+      total: data.data.attributes.total,
     });
   } catch (error) {
     console.error("Payment verification exception:", error);
