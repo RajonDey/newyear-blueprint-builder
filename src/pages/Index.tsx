@@ -15,7 +15,12 @@ import { Step6Summary } from "@/components/wizard/Step6Summary";
 import { SaveIndicator } from "@/components/ui/save-indicator";
 import { MusicToggle } from "@/components/ui/music-toggle";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { WizardStep, LifeCategory, ActionStep, CategoryGoal } from "@/types/wizard";
+import {
+  WizardStep,
+  LifeCategory,
+  ActionStep,
+  CategoryGoal,
+} from "@/types/wizard";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useBackgroundMusic } from "@/hooks/useBackgroundMusic";
 import { useSaveResume } from "@/hooks/useSaveResume";
@@ -27,14 +32,30 @@ import { logger } from "@/lib/logger";
 const Index = () => {
   const [hasStarted, setHasStarted] = useState(false);
   const [currentStep, setCurrentStep] = useState<WizardStep>(0);
-  const [primaryCategory, setPrimaryCategory] = useState<LifeCategory | null>(null);
-  const [secondaryCategories, setSecondaryCategories] = useState<LifeCategory[]>([]);
-  const [lifeWheelRatings, setLifeWheelRatings] = useState<Record<LifeCategory, number>>({} as Record<LifeCategory, number>);
-  const [selectedCategories, setSelectedCategories] = useState<LifeCategory[]>([]);
-  const [goals, setGoals] = useState<Record<LifeCategory, string>>({} as Record<LifeCategory, string>);
-  const [actions, setActions] = useState<Record<LifeCategory, ActionStep>>({} as Record<LifeCategory, ActionStep>);
-  const [habits, setHabits] = useState<Record<LifeCategory, string>>({} as Record<LifeCategory, string>);
-  const [motivation, setMotivation] = useState<Record<LifeCategory, { why: string; consequence: string }>>({} as Record<LifeCategory, { why: string; consequence: string }>);
+  const [primaryCategory, setPrimaryCategory] = useState<LifeCategory | null>(
+    null
+  );
+  const [secondaryCategories, setSecondaryCategories] = useState<
+    LifeCategory[]
+  >([]);
+  const [lifeWheelRatings, setLifeWheelRatings] = useState<
+    Record<LifeCategory, number>
+  >({} as Record<LifeCategory, number>);
+  const [selectedCategories, setSelectedCategories] = useState<LifeCategory[]>(
+    []
+  );
+  const [goals, setGoals] = useState<Record<LifeCategory, string>>(
+    {} as Record<LifeCategory, string>
+  );
+  const [actions, setActions] = useState<Record<LifeCategory, ActionStep>>(
+    {} as Record<LifeCategory, ActionStep>
+  );
+  const [habits, setHabits] = useState<Record<LifeCategory, string>>(
+    {} as Record<LifeCategory, string>
+  );
+  const [motivation, setMotivation] = useState<
+    Record<LifeCategory, { why: string; consequence: string }>
+  >({} as Record<LifeCategory, { why: string; consequence: string }>);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isLoadingSession, setIsLoadingSession] = useState(true);
@@ -58,7 +79,10 @@ const Index = () => {
     userEmail,
   };
 
-  const { lastSaved, isSaving } = useAutoSave(wizardData, `wizard_${sessionId}`);
+  const { lastSaved, isSaving } = useAutoSave(
+    wizardData,
+    `wizard_${sessionId}`
+  );
 
   useEffect(() => {
     const loadData = async () => {
@@ -77,12 +101,22 @@ const Index = () => {
             setCurrentStep(saved.currentStep || 0);
             setPrimaryCategory(saved.primaryCategory || null);
             setSecondaryCategories(saved.secondaryCategories || []);
-            setLifeWheelRatings(saved.lifeWheelRatings || ({} as Record<LifeCategory, number>));
+            setLifeWheelRatings(
+              saved.lifeWheelRatings || ({} as Record<LifeCategory, number>)
+            );
             setSelectedCategories(saved.selectedCategories || []);
             setGoals(saved.goals || ({} as Record<LifeCategory, string>));
-            setActions(saved.actions || ({} as Record<LifeCategory, ActionStep>));
+            setActions(
+              saved.actions || ({} as Record<LifeCategory, ActionStep>)
+            );
             setHabits(saved.habits || ({} as Record<LifeCategory, string>));
-            setMotivation(saved.motivation || ({} as Record<LifeCategory, { why: string; consequence: string }>));
+            setMotivation(
+              saved.motivation ||
+                ({} as Record<
+                  LifeCategory,
+                  { why: string; consequence: string }
+                >)
+            );
             setUserName(saved.userName || "");
             setUserEmail(saved.userEmail || "");
             setHasStarted(true);
@@ -90,8 +124,8 @@ const Index = () => {
           }
         }
       } catch (error) {
-        logger.error('Failed to load saved progress:', error);
-        toast.error('Failed to load saved progress. Starting fresh.');
+        logger.error("Failed to load saved progress:", error);
+        toast.error("Failed to load saved progress. Starting fresh.");
       } finally {
         setIsLoadingSession(false);
       }
@@ -107,10 +141,13 @@ const Index = () => {
   const handleSelectPrimary = (category: LifeCategory) => {
     try {
       setPrimaryCategory(category);
-      setSelectedCategories([category, ...secondaryCategories.filter(c => c !== category)]);
+      setSelectedCategories([
+        category,
+        ...secondaryCategories.filter((c) => c !== category),
+      ]);
     } catch (error) {
-      logger.error('Failed to select primary category:', error);
-      toast.error('Failed to save selection. Please try again.');
+      logger.error("Failed to select primary category:", error);
+      toast.error("Failed to save selection. Please try again.");
     }
   };
 
@@ -120,29 +157,34 @@ const Index = () => {
         const newSecondary = prev.includes(category)
           ? prev.filter((c) => c !== category)
           : [...prev, category];
-        setSelectedCategories([primaryCategory!, ...newSecondary].filter(Boolean) as LifeCategory[]);
+        setSelectedCategories(
+          [primaryCategory!, ...newSecondary].filter(Boolean) as LifeCategory[]
+        );
         return newSecondary;
       });
     } catch (error) {
-      logger.error('Failed to toggle secondary category:', error);
-      toast.error('Failed to save selection. Please try again.');
+      logger.error("Failed to toggle secondary category:", error);
+      toast.error("Failed to save selection. Please try again.");
     }
   };
 
-  const handleUpdateLifeWheelRating = (category: LifeCategory, rating: number) => {
+  const handleUpdateLifeWheelRating = (
+    category: LifeCategory,
+    rating: number
+  ) => {
     try {
       setLifeWheelRatings((prev) => ({ ...prev, [category]: rating }));
     } catch (error) {
-      logger.error('Failed to update rating:', error);
-      toast.error('Failed to save rating. Please try again.');
+      logger.error("Failed to update rating:", error);
+      toast.error("Failed to save rating. Please try again.");
     }
   };
 
   const handleDownloadPDF = async () => {
     setIsPdfGenerating(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 300)); // Smooth UX
-      
+      await new Promise((resolve) => setTimeout(resolve, 300)); // Smooth UX
+
       const result = generateSuccessPDF({
         userName,
         userEmail,
@@ -150,11 +192,11 @@ const Index = () => {
         primaryCategory,
         secondaryCategories,
       });
-      
+
       toast.success(`PDF downloaded: ${result.fileName}`);
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-      logger.error('PDF generation error:', error);
+      logger.error("PDF generation error:", error);
       toast.error(errorMessage);
     } finally {
       setIsPdfGenerating(false);
@@ -194,12 +236,23 @@ const Index = () => {
         <div className="flex justify-between items-center mb-4">
           <div className="flex-1" />
           <SaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
-          <MusicToggle isPlaying={isPlaying} onToggle={toggleMusic} className="ml-4" />
+          <MusicToggle
+            isPlaying={isPlaying}
+            onToggle={toggleMusic}
+            className="ml-4"
+          />
         </div>
-        <ProgressIndicator currentStep={currentStep + 1} totalSteps={7} estimatedTimeLeft={12} />
+        <ProgressIndicator
+          currentStep={currentStep + 1}
+          totalSteps={7}
+          estimatedTimeLeft={12}
+        />
 
         {currentStep === 0 && (
-          <WizardStepBoundary stepName="Wheel of Life" onSkip={() => setCurrentStep(1)}>
+          <WizardStepBoundary
+            stepName="Wheel of Life"
+            onSkip={() => setCurrentStep(1)}
+          >
             <Step0WheelOfLife
               ratings={lifeWheelRatings}
               onUpdateRating={handleUpdateLifeWheelRating}
@@ -209,7 +262,10 @@ const Index = () => {
         )}
 
         {currentStep === 1 && (
-          <WizardStepBoundary stepName="Category Selection" onSkip={() => setCurrentStep(2)}>
+          <WizardStepBoundary
+            stepName="Category Selection"
+            onSkip={() => setCurrentStep(2)}
+          >
             <Step1PrimarySecondary
               primaryCategory={primaryCategory}
               secondaryCategories={secondaryCategories}
