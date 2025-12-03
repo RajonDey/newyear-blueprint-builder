@@ -17,6 +17,11 @@ import {
   pdf,
   Font,
   Image,
+  Svg,
+  Polygon,
+  Line,
+  Circle,
+  G,
 } from "@react-pdf/renderer";
 import { logger } from "@/lib/logger";
 import { CategoryGoal, LifeCategory } from "@/types/wizard";
@@ -29,6 +34,7 @@ export interface PDFData {
   goals: CategoryGoal[];
   primaryCategory: LifeCategory | null;
   secondaryCategories: LifeCategory[];
+  lifeWheelRatings: Record<LifeCategory, number>;
 }
 
 // Register Roboto font for Unicode symbol support
@@ -189,7 +195,7 @@ const styles = StyleSheet.create({
   },
 
   pageCover: {
-    backgroundColor: colors.slate[50],
+    backgroundColor: colors.white,
     padding: 0,
   },
 
@@ -619,6 +625,163 @@ const styles = StyleSheet.create({
 });
 
 // ============================================================================
+// HELPER COMPONENTS
+// ============================================================================
+
+/**
+ * Radar Chart Component for Wheel of Life
+ */
+const RadarChart: React.FC<{
+  ratings: Record<LifeCategory, number>;
+  size: number;
+}> = ({ ratings, size }) => {
+  const categories = Object.keys(ratings) as LifeCategory[];
+  const numPoints = categories.length;
+  const radius = size / 2;
+  const center = size / 2;
+  const angleStep = (Math.PI * 2) / numPoints;
+
+  // Calculate points
+  const points = categories.map((cat, i) => {
+    const score = ratings[cat] || 0;
+    const r = (radius / 10) * score; // Scale 1-10
+    const angle = i * angleStep - Math.PI / 2;
+    return {
+      x: center + Math.cos(angle) * r,
+      y: center + Math.sin(angle) * r,
+    };
+  });
+
+  const pointsString = points.map((p) => `${p.x},${p.y}`).join(" ");
+
+  // Grid levels
+  const levels = [1, 2, 3, 4, 5];
+
+  return (
+    <View style={{ width: size, height: size, marginVertical: 20 }}>
+      <Svg width={size} height={size}>
+        {/* Grid Lines */}
+        {levels.map((level) => {
+          const r = (radius / 5) * level;
+          const levelPoints = categories
+            .map((_, i) => {
+              const angle = i * angleStep - Math.PI / 2;
+              const x = center + Math.cos(angle) * r;
+              const y = center + Math.sin(angle) * r;
+              return `${x},${y}`;
+            })
+            .join(" ");
+          return (
+            <Polygon
+              key={`level-${level}`}
+              points={levelPoints}
+              stroke="#E2E8F0"
+              strokeWidth={1}
+              fill="none"
+            />
+          );
+        })}
+
+        {/* Axes */}
+        {categories.map((_, i) => {
+          const angle = i * angleStep - Math.PI / 2;
+          const x = center + Math.cos(angle) * radius;
+          const y = center + Math.sin(angle) * radius;
+          return (
+            <Line
+              key={`axis-${i}`}
+              x1={center}
+              y1={center}
+              x2={x}
+              y2={y}
+              stroke="#E2E8F0"
+              strokeWidth={1}
+            />
+          );
+        })}
+
+        {/* Data Polygon */}
+        <Polygon
+          points={pointsString}
+          fill="#6366F1"
+          fillOpacity={0.2}
+          stroke="#6366F1"
+          strokeWidth={2}
+        />
+
+        {/* Data Points */}
+        {points.map((p, i) => (
+          <Circle key={`dot-${i}`} cx={p.x} cy={p.y} r={3} fill="#6366F1" />
+        ))}
+      </Svg>
+      
+      {/* Labels (Overlayed Views for better text handling) */}
+      {categories.map((cat, i) => {
+        const angle = i * angleStep - Math.PI / 2;
+        // Push labels out a bit
+        const labelRadius = radius + 25; 
+        const x = center + Math.cos(angle) * labelRadius;
+        const y = center + Math.sin(angle) * labelRadius;
+        
+        // Adjust position based on quadrant to center text
+        const left = x - 30; // Center 60px wide box
+        const top = y - 10; // Center 20px high box
+        
+        // Score Label Position (Slightly above the data point)
+        const score = ratings[cat] || 0;
+        const r = (radius / 10) * score;
+        const px = center + Math.cos(angle) * r;
+        const py = center + Math.sin(angle) * r;
+        
+        return (
+          <React.Fragment key={`label-group-${i}`}>
+            {/* Category Label */}
+            <View
+              style={{
+                position: "absolute",
+                left: left,
+                top: top,
+                width: 60,
+                height: 20,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 8,
+                  color: "#64748B",
+                  textAlign: "center",
+                }}
+              >
+                {cat}
+              </Text>
+            </View>
+
+            {/* Score Label (Overlay) */}
+            <View
+              style={{
+                position: "absolute",
+                left: px - 10,
+                top: py - 12, // Above the dot
+                width: 20,
+                height: 10,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ fontSize: 7, fontWeight: "bold", color: "#4F46E5" }}>
+                {score}
+              </Text>
+            </View>
+          </React.Fragment>
+        );
+      })}
+    </View>
+  );
+};
+
+// ============================================================================
 // COMPONENTS
 // ============================================================================
 
@@ -634,6 +797,29 @@ const CoverPage: React.FC<{ data: PDFData }> = ({ data }) => {
 
   return (
     <Page size="A4" style={styles.pageCover}>
+      {/* Constellation Background */}
+      <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+        <Svg width="100%" height="100%">
+          {/* Stars */}
+          {[
+            { x: 30, y: 40, r: 1.5 }, { x: 180, y: 50, r: 2 },
+            { x: 50, y: 250, r: 1.8 }, { x: 160, y: 270, r: 1.5 },
+            { x: 105, y: 20, r: 2.5 }, { x: 20, y: 150, r: 1.2 },
+            { x: 190, y: 140, r: 1.2 }, { x: 105, y: 280, r: 2 },
+            { x: 400, y: 100, r: 1.5 }, { x: 500, y: 300, r: 2 },
+            { x: 350, y: 500, r: 1.8 }, { x: 450, y: 600, r: 1.5 },
+          ].map((star, i) => (
+            <Circle key={i} cx={star.x} cy={star.y} r={star.r} fill="#CBD5E1" opacity={0.6} />
+          ))}
+          
+          {/* Constellation Lines */}
+          <Line x1="40" y1="60" x2="60" y2="75" stroke="#CBD5E1" strokeWidth={0.5} opacity={0.5} />
+          <Line x1="60" y1="75" x2="55" y2="95" stroke="#CBD5E1" strokeWidth={0.5} opacity={0.5} />
+          <Line x1="150" y1="220" x2="170" y2="235" stroke="#CBD5E1" strokeWidth={0.5} opacity={0.5} />
+          <Line x1="170" y1="235" x2="165" y2="205" stroke="#CBD5E1" strokeWidth={0.5} opacity={0.5} />
+        </Svg>
+      </View>
+
       <View style={styles.coverTopBar} />
       <View style={styles.coverContainer}>
         {/* Logo */}
@@ -753,6 +939,24 @@ const ExecutiveSummary: React.FC<{ data: PDFData }> = ({ data }) => {
           on the systems and habits that lead to long-term success."
         </Text>
       </View>
+
+      {/* Wheel of Life Chart */}
+      {data.lifeWheelRatings && Object.keys(data.lifeWheelRatings).length > 0 && (
+        <View style={{ alignItems: "center", marginTop: spacing.xl, marginBottom: spacing.xl }}>
+          <Text
+            style={{
+              fontSize: 10,
+              fontWeight: "bold",
+              color: colors.slate[400],
+              marginBottom: spacing.sm,
+              letterSpacing: 1,
+            }}
+          >
+            YOUR WHEEL OF LIFE
+          </Text>
+          <RadarChart ratings={data.lifeWheelRatings} size={200} />
+        </View>
+      )}
 
       <Text style={styles.footer}>
         Your {APP_CONFIG.year} Success Blueprint • Page 2

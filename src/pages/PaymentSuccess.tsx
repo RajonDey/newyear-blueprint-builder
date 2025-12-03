@@ -33,6 +33,7 @@ interface StoredWizardData {
   secondaryCategories: LifeCategory[];
   userName: string;
   userEmail: string;
+  lifeWheelRatings: Record<LifeCategory, number>;
 }
 
 const PaymentSuccess = () => {
@@ -148,6 +149,7 @@ const PaymentSuccess = () => {
         primaryCategory: wizardData.primaryCategory,
         secondaryCategories: wizardData.secondaryCategories,
         goals: wizardData.goals,
+        lifeWheelRatings: wizardData.lifeWheelRatings,
       });
 
       // Track PDF download

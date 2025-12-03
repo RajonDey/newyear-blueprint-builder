@@ -26,6 +26,7 @@ interface Step6SummaryProps {
   onUpdateUserInfo: (field: "name" | "email", value: string) => void;
   onDownloadPDF: () => void;
   onBack: () => void;
+  lifeWheelRatings: Record<LifeCategory, number>;
 }
 
 // Replace this with your actual Lemon Squeezy checkout URL
@@ -43,6 +44,7 @@ export const Step6Summary = ({
   onUpdateUserInfo,
   onDownloadPDF,
   onBack,
+  lifeWheelRatings,
 }: Step6SummaryProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -90,6 +92,7 @@ export const Step6Summary = ({
         secondaryCategories,
         userName,
         userEmail,
+        lifeWheelRatings,
       };
 
       const saved = safeLocalStorage.setItem(
@@ -316,6 +319,7 @@ export const Step6Summary = ({
                         goals,
                         primaryCategory: primaryCategory!,
                         secondaryCategories,
+                        lifeWheelRatings,
                       })
                     }
                     variant="outline"

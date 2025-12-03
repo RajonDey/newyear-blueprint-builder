@@ -103,7 +103,7 @@ export const Step0WheelOfLife = ({
             const Icon = categoryConfig[category].icon;
             
             return (
-              <div key={category} className="space-y-2 touch-feedback p-2 rounded-lg -m-2">
+              <div key={category} className="space-y-2 touch-feedback p-4 rounded-lg -m-2 bg-secondary border-radius-md">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 md:gap-3">
                     <div className={cn(
@@ -134,11 +134,11 @@ export const Step0WheelOfLife = ({
                   className="cursor-pointer touch-none h-8"
                 />
                 
-                {rating === 0 && (
+                {/* {rating === 0 && (
                   <p className="text-xs text-muted-foreground text-center mt-1 animate-pulse">
                     Slide to rate
                   </p>
-                )}
+                )} */}
                 
                 {/* <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Needs Work</span>

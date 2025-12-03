@@ -19,6 +19,7 @@ export interface PDFData {
   goals: CategoryGoal[];
   primaryCategory: LifeCategory | null;
   secondaryCategories: LifeCategory[];
+  lifeWheelRatings: Record<LifeCategory, number>;
 }
 
 // Import both implementations

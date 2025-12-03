@@ -185,12 +185,13 @@ const Index = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 300)); // Smooth UX
 
-      const result = generateSuccessPDF({
+      const result = await generateSuccessPDF({
         userName,
         userEmail,
         goals: compiledGoals,
         primaryCategory,
         secondaryCategories,
+        lifeWheelRatings,
       });
 
       toast.success(`PDF downloaded: ${result.fileName}`);
@@ -357,6 +358,7 @@ const Index = () => {
               }}
               onDownloadPDF={handleDownloadPDF}
               onBack={() => setCurrentStep(5)}
+              lifeWheelRatings={lifeWheelRatings}
             />
           </WizardStepBoundary>
         )}
