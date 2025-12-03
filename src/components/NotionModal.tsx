@@ -7,7 +7,7 @@ import { CategoryGoal, LifeCategory } from "@/types/wizard";
 import { toast } from "sonner";
 
 // Placeholder URL - The developer (Rajon) needs to replace this with their actual public Notion template
-const NOTION_TEMPLATE_URL = "https://rajon.notion.site/2026-In-Review-2b8a990090a0809dbd60f447462726ad"; 
+const NOTION_TEMPLATE_URL = "https://rajon.notion.site/2026-In-Review-2bea990090a081ed8ee4fb327814a04f"; 
 
 interface NotionModalProps {
   isOpen: boolean;
@@ -89,7 +89,7 @@ export const NotionModal: React.FC<NotionModalProps> = ({ isOpen, onClose, data 
             </div>
             <div className="pl-11">
               <p className="text-sm text-muted-foreground mb-3">
-                Copy your personalized blueprint to paste into Notion.
+                Copy your personalized blueprint for your Notion template.
               </p>
               <Button 
                 className="w-full gap-2" 
@@ -103,7 +103,7 @@ export const NotionModal: React.FC<NotionModalProps> = ({ isOpen, onClose, data 
           </div>
 
           {/* Step 3: Paste */}
-          <div className={`space-y-3 transition-opacity ${step === 2 ? 'opacity-100' : 'opacity-50'}`}>
+          {/* <div className={`space-y-3 transition-opacity ${step === 2 ? 'opacity-100' : 'opacity-50'}`}>
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                 3
@@ -117,7 +117,7 @@ export const NotionModal: React.FC<NotionModalProps> = ({ isOpen, onClose, data 
                 <p>3. Your goals will appear beautifully formatted with all details!</p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <DialogFooter>

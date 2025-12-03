@@ -83,11 +83,6 @@ export function generateNotionMarkdown(data: NotionTemplateData): string {
   markdown += `**Focus:** ${data.primaryCategory}\n\n`;
   markdown += `---\n\n`;
 
-  // Quick Links / Navigation (Simulated)
-  markdown += `## 🧭 Dashboard\n\n`;
-  markdown += `* [Goals](#goals)\n`;
-  markdown += `* [Habit Tracker](#habit-tracker)\n`;
-  markdown += `* [Monthly Reviews](#monthly-reviews)\n\n`;
 
   // Focus Areas
   markdown += `## 🎯 Focus Areas\n\n`;
@@ -101,7 +96,7 @@ export function generateNotionMarkdown(data: NotionTemplateData): string {
   markdown += `---\n\n`;
 
   // Goals Section
-  markdown += `## 🏆 Goals <a name="goals"></a>\n\n`;
+  markdown += `## 🏆 Goals \n\n`;
   
   data.goals.forEach((goal, index) => {
     const isPrimary = goal.category === data.primaryCategory;
@@ -126,32 +121,6 @@ export function generateNotionMarkdown(data: NotionTemplateData): string {
     markdown += `#### 📅 Check-in Strategy\n`;
     markdown += `${goal.monthlyCheckIn || '-'}\n\n`;
     markdown += `---\n\n`;
-  });
-
-  // Habit Tracker
-  markdown += `## 📊 Habit Tracker <a name="habit-tracker"></a>\n\n`;
-  markdown += `Copy this table for each month to track your daily habits.\n\n`;
-  markdown += `| Habit | M | T | W | T | F | S | S |\n`;
-  markdown += `| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n`;
-  markdown += `| [Small Step Action] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |\n`;
-  markdown += `| [Medium Step Action] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |\n`;
-  markdown += `| Read 10 pages | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |\n`;
-  markdown += `| Meditate 5 mins | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |\n\n`;
-
-  // Monthly Reviews
-  markdown += `## 📅 Monthly Reviews <a name="monthly-reviews"></a>\n\n`;
-  markdown += `Schedule these on the last Sunday of every month.\n\n`;
-  
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June', 
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
-  months.forEach(month => {
-    markdown += `### ${month}\n`;
-    markdown += `- [ ] Review Goals\n`;
-    markdown += `- [ ] Check Habit Progress\n`;
-    markdown += `- [ ] Adjust Plan if needed\n\n`;
   });
 
   return markdown;
