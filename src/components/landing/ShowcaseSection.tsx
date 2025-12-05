@@ -30,7 +30,7 @@ export const ShowcaseSection = () => {
             transition={{ delay: 0.1 }}
             className="text-lg md:text-xl text-muted-foreground"
           >
-            Your comprehensive 2025 Blueprint includes a personalized PDF Report and an interactive Notion Template. 
+            Your comprehensive 2026 Blueprint includes a personalized PDF Report and an interactive Notion Template. 
             Everything you need to turn your dreams into reality.
           </motion.p>
         </div>

@@ -38,7 +38,7 @@ export const Footer = () => {
             <p>
               © {currentYear} {APP_CONFIG.appName}. All rights reserved.
             </p>
-            <p className="opacity-75">Digital products delivered instantly.</p>
+            <p className="opacity-75">Instant access • 30-Day Guarantee • Secure Payment</p>
           </div>
         </div>
       </div>

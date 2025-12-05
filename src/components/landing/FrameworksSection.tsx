@@ -47,7 +47,7 @@ export const FrameworksSection = () => {
             Built on 4 World-Class Frameworks
           </h2>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Don't reinvent the wheel. We've combined the best goal-setting methodologies used by top performers worldwide.
+            Don't reinvent the wheel. We combined the world's best goal-setting frameworks.
           </p>
         </div>
 

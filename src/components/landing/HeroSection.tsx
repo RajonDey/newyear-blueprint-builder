@@ -13,7 +13,7 @@ export const HeroSection = ({ onStart }: HeroSectionProps) => {
       <div className="inline-flex items-center gap-2 px-4 py-2 bg-focus-primary/10 rounded-full border border-focus-primary/20 mb-6 animate-pulse">
         <Star className="w-4 h-4 text-focus-primary fill-focus-primary" />
         <span className="text-sm font-semibold text-focus-primary">
-          Early Access - Save $10 (Regular $19)
+          New Year, New System
         </span>
       </div>
 
