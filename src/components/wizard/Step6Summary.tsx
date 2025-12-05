@@ -39,9 +39,8 @@ interface Step6SummaryProps {
 }
 
 // Replace this with your actual Lemon Squeezy checkout URL
-// const LEMON_SQUEEZY_CHECKOUT_URL = "https://yearinreview.lemonsqueezy.com/buy/a28c090f-08e9-4a5f-bde8-d636f9444fff";
-const LEMON_SQUEEZY_CHECKOUT_URL =
-  "https://yearinreview.lemonsqueezy.com/buy/8dfc00df-8928-427c-817a-cea9de16fc32";
+const LEMON_SQUEEZY_CHECKOUT_URL = "https://yearinreview.lemonsqueezy.com/buy/a28c090f-08e9-4a5f-bde8-d636f9444fff";
+// const LEMON_SQUEEZY_CHECKOUT_URL = "https://yearinreview.lemonsqueezy.com/buy/8dfc00df-8928-427c-817a-cea9de16fc32";
 
 export const Step6Summary = ({
   goals,
