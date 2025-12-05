@@ -16,6 +16,15 @@ import { validateEmail, validateName } from "@/lib/validation";
 import { NotionModal } from "@/components/NotionModal";
 import { trackPaymentInitiated } from "@/lib/analytics";
 
+const posters = [
+  "/assets/posters/yearinreview-poster-1.png",
+  "/assets/posters/yearinreview-poster-2.png",
+  "/assets/posters/yearinreview-poster-3.png",
+  "/assets/posters/yearinreview-poster-4.png",
+  "/assets/posters/yearinreview-poster-5.png",
+  "/assets/posters/yearinreview-poster-6.png",
+];
+
 interface Step6SummaryProps {
   goals: CategoryGoal[];
   primaryCategory: LifeCategory | null;
@@ -344,6 +353,31 @@ export const Step6Summary = ({
               </p>
             </div>
           </Card>
+
+          {/* Poster Showcase */}
+          <div className="mb-8 animate-fade-in delay-100">
+            <h3 className="text-xl font-semibold text-center mb-6">
+              What You'll Receive
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {posters.map((poster, index) => (
+                <div 
+                  key={index}
+                  className="relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] aspect-[1587/2245]"
+                >
+                  <img 
+                    src={poster} 
+                    alt={`Blueprint Bundle Preview ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-sm text-muted-foreground mt-4">
+              Includes your personalized PDF Blueprint and interactive Notion Template.
+            </p>
+          </div>
 
           <div className="flex justify-start mt-8">
             <Button

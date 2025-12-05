@@ -14,6 +14,7 @@ import { FAQSection } from "@/components/landing/FAQSection";
 import { TrustBadges } from "@/components/landing/TrustBadges";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { StickyCTABar } from "@/components/landing/StickyCTABar";
+import { ShowcaseSection } from "@/components/landing/ShowcaseSection";
 import { Footer } from "@/components/Footer";
 
 interface OnboardingScreenProps {
@@ -81,6 +82,9 @@ export const OnboardingScreen = ({ onStart }: OnboardingScreenProps) => {
         <div className="container mx-auto px-4">
           <PreviewSection />
         </div>
+
+        {/* Showcase Section */}
+        <ShowcaseSection />
 
         {/* Guarantee Section (Risk Reversal) */}
         <div className="container mx-auto px-4">
