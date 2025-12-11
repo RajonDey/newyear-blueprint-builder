@@ -7,7 +7,7 @@ const steps = [
     icon: Target,
     step: "Step 1",
     title: "Rate Your Life",
-    description: "Assess 8 key life categories using the Wheel of Life framework. See where you are now.",
+    description: "Assess 6 key life categories using the Wheel of Life framework. See where you are now.",
     time: "2 min",
   },
   {
@@ -87,7 +87,7 @@ export const HowItWorksTimeline = () => {
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-success/10 rounded-full border border-success/20">
             <CheckCircle2 className="w-5 h-5 text-success" />
             <span className="font-semibold text-success">
-              Total Time: Just 10 Minutes
+              Approx. Time: ~10 Minutes
             </span>
           </div>
         </div>

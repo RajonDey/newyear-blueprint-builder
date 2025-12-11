@@ -26,7 +26,7 @@ export const HeroSection = ({ onStart }: HeroSectionProps) => {
       {/* Subheadline */}
       <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed px-4">
         Complete the guided process free. Unlock your custom PDF + Notion
-        Template for $9.
+        Template + Guided eBook for $9.
       </p>
 
       {/* Social Proof Pills */}
@@ -40,7 +40,7 @@ export const HeroSection = ({ onStart }: HeroSectionProps) => {
         <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-secondary rounded-full">
           <Clock className="w-4 h-4 text-primary" />
           <span className="text-xs sm:text-sm font-medium text-foreground">
-            Avg time: 10 mins
+            Avg time: 10 mins 
           </span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-secondary rounded-full">

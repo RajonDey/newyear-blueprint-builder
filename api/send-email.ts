@@ -1,4 +1,4 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
+import { VercelRequest, VercelResponse } from "@vercel/node";
 
 interface EmailData {
   to: string;
@@ -14,49 +14,51 @@ interface EmailData {
  * Sends a confirmation email to the user after successful payment
  * Supports Resend and SendGrid email services
  */
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   const { to, userName, year, downloadLinks }: EmailData = req.body;
 
   if (!to || !userName) {
-    return res.status(400).json({ error: 'Missing required fields: to, userName' });
+    return res
+      .status(400)
+      .json({ error: "Missing required fields: to, userName" });
   }
 
-  const emailService = process.env.EMAIL_SERVICE || 'resend'; // 'resend' or 'sendgrid'
-  const apiKey = emailService === 'resend' 
-    ? process.env.RESEND_API_KEY 
-    : process.env.SENDGRID_API_KEY;
+  const emailService = process.env.EMAIL_SERVICE || "resend"; // 'resend' or 'sendgrid'
+  const apiKey =
+    emailService === "resend"
+      ? process.env.RESEND_API_KEY
+      : process.env.SENDGRID_API_KEY;
 
   if (!apiKey) {
-    console.error(`Missing ${emailService.toUpperCase()}_API_KEY environment variable`);
-    return res.status(500).json({ 
-      error: 'Email service not configured',
-      service: emailService 
+    console.error(
+      `Missing ${emailService.toUpperCase()}_API_KEY environment variable`
+    );
+    return res.status(500).json({
+      error: "Email service not configured",
+      service: emailService,
     });
   }
 
   try {
-    if (emailService === 'resend') {
+    if (emailService === "resend") {
       await sendWithResend(to, userName, year, downloadLinks, apiKey);
     } else {
       await sendWithSendGrid(to, userName, year, downloadLinks, apiKey);
     }
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       success: true,
-      message: 'Email sent successfully' 
+      message: "Email sent successfully",
     });
   } catch (error) {
-    console.error('Email sending error:', error);
-    return res.status(500).json({ 
-      error: 'Failed to send email',
-      details: error instanceof Error ? error.message : 'Unknown error'
+    console.error("Email sending error:", error);
+    return res.status(500).json({
+      error: "Failed to send email",
+      details: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }
@@ -65,16 +67,17 @@ async function sendWithResend(
   to: string,
   userName: string,
   year: number,
-  downloadLinks: EmailData['downloadLinks'],
+  downloadLinks: EmailData["downloadLinks"],
   apiKey: string
 ) {
-  const fromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@yearinreview.online';
-  
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
+  const fromEmail =
+    process.env.RESEND_FROM_EMAIL || "noreply@yearinreview.online";
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       from: fromEmail,
@@ -87,7 +90,9 @@ async function sendWithResend(
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(`Resend API error: ${error.message || response.statusText}`);
+    throw new Error(
+      `Resend API error: ${error.message || response.statusText}`
+    );
   }
 
   return await response.json();
@@ -97,30 +102,33 @@ async function sendWithSendGrid(
   to: string,
   userName: string,
   year: number,
-  downloadLinks: EmailData['downloadLinks'],
+  downloadLinks: EmailData["downloadLinks"],
   apiKey: string
 ) {
-  const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@yearinreview.online';
-  
-  const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
-    method: 'POST',
+  const fromEmail =
+    process.env.SENDGRID_FROM_EMAIL || "noreply@yearinreview.online";
+
+  const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      personalizations: [{
-        to: [{ email: to }],
-        subject: `Your ${year} Success Blueprint is Ready! 🎉`,
-      }],
+      personalizations: [
+        {
+          to: [{ email: to }],
+          subject: `Your ${year} Success Blueprint is Ready! 🎉`,
+        },
+      ],
       from: { email: fromEmail },
       content: [
         {
-          type: 'text/plain',
+          type: "text/plain",
           value: generateEmailText(userName, year, downloadLinks),
         },
         {
-          type: 'text/html',
+          type: "text/html",
           value: generateEmailHTML(userName, year, downloadLinks),
         },
       ],
@@ -138,7 +146,7 @@ async function sendWithSendGrid(
 function generateEmailHTML(
   userName: string,
   year: number,
-  downloadLinks?: EmailData['downloadLinks']
+  downloadLinks?: EmailData["downloadLinks"]
 ): string {
   return `
     <!DOCTYPE html>
@@ -162,25 +170,34 @@ function generateEmailHTML(
             <ul style="padding-left: 20px;">
               <li>📄 Premium PDF with your complete plan</li>
               <li>📝 Notion template for progress tracking</li>
+              <li>📚 The 10X Execution Checklist eBook (bonus)</li>
               <li>✅ All your goals, actions, and habits organized</li>
             </ul>
           </div>
           
-          ${downloadLinks?.pdf ? `
+          ${
+            downloadLinks?.pdf
+              ? `
             <div style="text-align: center; margin: 30px 0;">
               <a href="${downloadLinks.pdf}" style="display: inline-block; background: #6366f1; color: white; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px;">
                 Download PDF
               </a>
             </div>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${downloadLinks?.notion ? `
+          ${
+            downloadLinks?.notion
+              ? `
             <div style="text-align: center; margin: 30px 0;">
               <a href="${downloadLinks.notion}" style="display: inline-block; background: #8b5cf6; color: white; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px;">
                 Download Notion Template
               </a>
             </div>
-          ` : ''}
+          `
+              : ""
+          }
           
           <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
             If you have any questions or need support, please don't hesitate to reach out to us.
@@ -203,7 +220,7 @@ function generateEmailHTML(
 function generateEmailText(
   userName: string,
   year: number,
-  downloadLinks?: EmailData['downloadLinks']
+  downloadLinks?: EmailData["downloadLinks"]
 ): string {
   let text = `🎉 Your ${year} Success Blueprint is Ready!\n\n`;
   text += `Hi ${userName},\n\n`;
@@ -211,21 +228,21 @@ function generateEmailText(
   text += `What's Included:\n`;
   text += `- Premium PDF with your complete plan\n`;
   text += `- Notion template for progress tracking\n`;
+  text += `- The 10X Execution Checklist eBook (bonus)\n`;
   text += `- All your goals, actions, and habits organized\n\n`;
-  
+
   if (downloadLinks?.pdf) {
     text += `Download PDF: ${downloadLinks.pdf}\n\n`;
   }
-  
+
   if (downloadLinks?.notion) {
     text += `Download Notion Template: ${downloadLinks.notion}\n\n`;
   }
-  
+
   text += `If you have any questions or need support, please don't hesitate to reach out to us.\n\n`;
   text += `Here's to making ${year} your best year yet! 🚀\n\n`;
   text += `Best regards,\n`;
   text += `The ${year} Success Blueprint Team\n`;
-  
+
   return text;
 }
-

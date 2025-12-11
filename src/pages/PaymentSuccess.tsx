@@ -25,6 +25,7 @@ import {
   trackPaymentSuccess,
   trackPDFDownload,
   trackNotionDownload,
+  trackEBookDownload,
 } from "@/lib/analytics";
 
 interface StoredWizardData {
@@ -173,6 +174,27 @@ const PaymentSuccess = () => {
     setIsNotionModalOpen(true);
   };
 
+  const handleDownloadEBook = () => {
+    try {
+      // Create download link for static PDF
+      const ebookUrl = "/assets/ebooks/The 10X Execution Checklist eBook.pdf";
+      const link = document.createElement("a");
+      link.href = ebookUrl;
+      link.download = "The 10X Execution Checklist eBook.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Track eBook download
+      trackEBookDownload();
+
+      toast.success("eBook downloaded successfully!");
+    } catch (error) {
+      logger.error("eBook download error:", error);
+      toast.error("Failed to download eBook. Please try again.");
+    }
+  };
+
   const handleReturnHome = () => {
     safeLocalStorage.removeItem("wizard_payment_data");
     navigate("/");
@@ -302,7 +324,7 @@ const PaymentSuccess = () => {
 
           <p className="text-muted-foreground text-lg mb-8">
             Thank you for your purchase, {wizardData.userName}! Your{" "}
-            {APP_CONFIG.year} Success Blueprint is ready.
+            {APP_CONFIG.year} Success Blueprint and bonus eBook are ready.
           </p>
 
           <div className="space-y-4">
@@ -323,6 +345,16 @@ const PaymentSuccess = () => {
             >
               <FileText className="w-5 h-5 mr-2" />
               Get Notion Template
+            </Button>
+
+            <Button
+              onClick={handleDownloadEBook}
+              size="lg"
+              variant="outline"
+              className="w-full border-primary hover:bg-primary/5 hover:text-black h-14"
+            >
+              <FileText className="w-5 h-5 mr-2" />
+              Download 10X Execution Checklist eBook
             </Button>
 
             <Button

@@ -6,7 +6,7 @@ const previewItems = [
   {
     icon: Target,
     title: "Wheel of Life Assessment",
-    description: "Visual rating of 8 key life areas with current scores and target goals",
+    description: "Visual rating of 6 key life areas with current scores and target goals",
   },
   {
     icon: CheckSquare,
@@ -71,7 +71,7 @@ export const PreviewSection = () => {
             <FileText className="w-8 h-8 text-primary flex-shrink-0" />
             <div>
               <h3 className="text-xl font-bold text-foreground mb-2">
-                Premium PDF + Notion Template
+                Premium Custom PDF + Notion Template + Guided eBook
               </h3>
               <p className="text-muted-foreground mb-4">
                 Get your complete plan in a beautifully designed PDF, plus an interactive Notion template to track progress all year.

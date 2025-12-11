@@ -16,7 +16,7 @@ export const FinalCTA = ({ onStart }: FinalCTAProps) => {
             Ready to Make {APP_CONFIG.year} Your Best Year?
           </h2>
           <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto">
-            Join thousands of people who've already created their blueprint. 
+            Join thousands of people who've already created their blueprint.
             Start for free in the next 10 minutes.
           </p>
 
@@ -28,17 +28,20 @@ export const FinalCTA = ({ onStart }: FinalCTAProps) => {
               "Personalized to your unique goals",
               "Full Blueprint Unlock ($9)",
               "Notion template included",
+              "10X Execution Checklist eBook (bonus)",
               "30-day money-back guarantee",
             ].map((benefit, index) => (
               <div key={index} className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                <span className="text-sm md:text-base text-foreground">{benefit}</span>
+                <span className="text-sm md:text-base text-foreground">
+                  {benefit}
+                </span>
               </div>
             ))}
           </div>
 
           {/* CTA Button */}
-          <Button 
+          <Button
             onClick={onStart}
             size="lg"
             className="w-full md:w-auto bg-gradient-primary hover:opacity-90 hover-scale text-base md:text-lg h-12 md:h-14 px-8 md:px-12 shadow-elegant mb-4 animate-pulse-subtle"
@@ -48,7 +51,7 @@ export const FinalCTA = ({ onStart }: FinalCTAProps) => {
           </Button>
 
           <p className="text-xs md:text-sm text-muted-foreground">
-            No credit card required • Takes only 10 minutes
+            No credit card required • Typically ~10 minutes (no rush) • Take your time
           </p>
         </div>
       </Card>

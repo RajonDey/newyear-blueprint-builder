@@ -1,12 +1,15 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { APP_CONFIG } from "@/lib/config";
 
 const posters = [
   "/assets/posters/yearinreview-poster-1.png",
   "/assets/posters/yearinreview-poster-2.png",
+  "/assets/ebooks/The 10X Execution Checklist eBook Cover.png",
   "/assets/posters/yearinreview-poster-3.png",
   "/assets/posters/yearinreview-poster-4.png",
   "/assets/posters/yearinreview-poster-5.png",
+  "/assets/ebooks/The 10X Execution Checklist eBook Cover.png",
   "/assets/posters/yearinreview-poster-6.png",
 ];
 
@@ -15,7 +18,7 @@ export const ShowcaseSection = () => {
     <section className="py-20 md:py-32 bg-gradient-to-b from-background to-secondary/20 overflow-hidden">
       <div className="container mx-auto px-4 mb-12 md:mb-20">
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -23,15 +26,17 @@ export const ShowcaseSection = () => {
           >
             What You'll Receive
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
             className="text-lg md:text-xl text-muted-foreground"
           >
-            Your comprehensive 2026 Blueprint includes a personalized PDF Report and an interactive Notion Template. 
-            Everything you need to turn your dreams into reality.
+            Your comprehensive {APP_CONFIG.year} Blueprint includes a
+            personalized PDF Report, an interactive Notion Template, and The 10X
+            Execution Checklist eBook. Everything you need to turn your dreams
+            into reality.
           </motion.p>
         </div>
       </div>
@@ -40,11 +45,11 @@ export const ShowcaseSection = () => {
       <div className="relative w-full">
         <div className="absolute left-0 top-0 bottom-0 w-20 md:w-40 bg-gradient-to-r from-background to-transparent z-10" />
         <div className="absolute right-0 top-0 bottom-0 w-20 md:w-40 bg-gradient-to-l from-background to-transparent z-10" />
-        
+
         <div className="flex gap-6 md:gap-8 animate-scroll-left hover:[animation-play-state:paused] w-max px-4">
           {/* Double the posters for seamless loop */}
           {[...posters, ...posters].map((poster, index) => (
-            <div 
+            <div
               key={index}
               className={cn(
                 "relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex-shrink-0 transition-transform hover:scale-[1.02] duration-300",
@@ -52,8 +57,8 @@ export const ShowcaseSection = () => {
                 "h-[400px] md:h-[600px] w-auto aspect-[1587/2245]"
               )}
             >
-              <img 
-                src={poster} 
+              <img
+                src={poster}
                 alt={`Blueprint Bundle Preview ${index + 1}`}
                 className="w-full h-full object-cover"
                 loading="lazy"

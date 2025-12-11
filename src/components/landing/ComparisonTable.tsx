@@ -31,7 +31,7 @@ const comparisons = [
   {
     feature: "Professional Output",
     diy: "Scattered notes",
-    blueprint: "Beautiful PDF + Notion template",
+    blueprint: "Beautiful PDF + Notion template + 10X Execution eBook",
   },
 ];
 
@@ -80,7 +80,9 @@ export const ComparisonTable = () => {
                     <td className="p-4 text-center bg-primary/5">
                       <div className="flex items-center justify-center gap-2 text-foreground">
                         <Check className="w-4 h-4 text-success flex-shrink-0" />
-                        <span className="text-sm font-medium">{item.blueprint}</span>
+                        <span className="text-sm font-medium">
+                          {item.blueprint}
+                        </span>
                       </div>
                     </td>
                   </tr>

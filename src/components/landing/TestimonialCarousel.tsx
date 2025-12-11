@@ -31,7 +31,7 @@ const testimonials = [
     role: "Entrepreneur",
     image: "JP",
     rating: 5,
-    text: "Best $12 I spent this year. The frameworks used are proven and the execution is flawless. Already seeing results in week 1.",
+    text: "Best $9 I spent this year. The frameworks used are proven and the execution is flawless. Already seeing results in week 1.",
   },
 ];
 

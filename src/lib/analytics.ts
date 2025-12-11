@@ -76,6 +76,16 @@ export function trackNotionDownload() {
 }
 
 /**
+ * Track eBook download
+ */
+export function trackEBookDownload() {
+  trackEvent("ebook_downloaded", {
+    event_category: "Downloads",
+    event_label: "10X Execution Checklist eBook",
+  });
+}
+
+/**
  * Track payment initiation
  */
 export function trackPaymentInitiated() {

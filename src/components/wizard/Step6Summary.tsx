@@ -19,8 +19,9 @@ import { trackPaymentInitiated } from "@/lib/analytics";
 const posters = [
   "/assets/posters/yearinreview-poster-1.png",
   "/assets/posters/yearinreview-poster-2.png",
+  "/assets/ebooks/The 10X Execution Checklist eBook Cover.png",
   "/assets/posters/yearinreview-poster-3.png",
-  "/assets/posters/yearinreview-poster-4.png",
+  // "/assets/posters/yearinreview-poster-4.png",
   "/assets/posters/yearinreview-poster-5.png",
   "/assets/posters/yearinreview-poster-6.png",
 ];
@@ -39,7 +40,8 @@ interface Step6SummaryProps {
 }
 
 // Replace this with your actual Lemon Squeezy checkout URL
-const LEMON_SQUEEZY_CHECKOUT_URL = "https://yearinreview.lemonsqueezy.com/buy/a28c090f-08e9-4a5f-bde8-d636f9444fff";
+const LEMON_SQUEEZY_CHECKOUT_URL =
+  "https://yearinreview.lemonsqueezy.com/buy/a28c090f-08e9-4a5f-bde8-d636f9444fff";
 // const LEMON_SQUEEZY_CHECKOUT_URL = "https://yearinreview.lemonsqueezy.com/buy/8dfc00df-8928-427c-817a-cea9de16fc32";
 
 export const Step6Summary = ({
@@ -277,12 +279,13 @@ export const Step6Summary = ({
               </Badge>
 
               <h3 className="text-2xl font-bold text-foreground mb-3">
-                Unlock Full Blueprint + Downloads
+                Unlock Full Blueprint + Downloads (3-Part System)
               </h3>
 
               <p className="text-muted-foreground mb-6">
                 Get instant access to your detailed action plans, motivation
-                strategies, and professional templates.
+                strategies, professional templates, and The 10X Execution
+                Checklist eBook.
               </p>
 
               <div className="mb-6">
@@ -355,17 +358,17 @@ export const Step6Summary = ({
 
           {/* Poster Showcase */}
           <div className="mb-8 animate-fade-in delay-100">
-            <h3 className="text-xl font-semibold text-center mb-6">
+            <h3 className="text-xl font-semibold text-center mb-6 mt-4">
               What You'll Receive
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {posters.map((poster, index) => (
-                <div 
+                <div
                   key={index}
                   className="relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] aspect-[1587/2245]"
                 >
-                  <img 
-                    src={poster} 
+                  <img
+                    src={poster}
                     alt={`Blueprint Bundle Preview ${index + 1}`}
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -374,7 +377,8 @@ export const Step6Summary = ({
               ))}
             </div>
             <p className="text-center text-sm text-muted-foreground mt-4">
-              Includes your personalized PDF Blueprint and interactive Notion Template.
+              Includes your personalized PDF Blueprint, interactive Notion
+              Template, and The 10X Execution Checklist eBook.
             </p>
           </div>
 

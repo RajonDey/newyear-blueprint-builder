@@ -39,7 +39,7 @@ export const CommitmentModal = ({ open, onCommit, onClose }: CommitmentModalProp
             <div className="flex items-center gap-3">
               <Clock className="w-5 h-5 text-primary flex-shrink-0" />
               <p className="text-sm">
-                <span className="font-semibold">10 focused minutes</span> of your time
+                <span className="font-semibold">~10 focused minutes</span> of your time
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -67,7 +67,7 @@ export const CommitmentModal = ({ open, onCommit, onClose }: CommitmentModalProp
               htmlFor="commitment"
               className="text-sm leading-relaxed cursor-pointer select-none"
             >
-              I commit to giving myself <span className="font-semibold">10 focused minutes</span> to build my {APP_CONFIG.year} Blueprint. I understand this is an investment in my future self.
+              I commit to giving myself <span className="font-semibold">minimum of ~10 focused minutes</span> to build my {APP_CONFIG.year} Blueprint. I understand this is an investment in my future self.
             </label>
           </div>
 
