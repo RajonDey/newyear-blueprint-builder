@@ -299,6 +299,7 @@ const Index = () => {
           <WizardStepBoundary stepName="Actions">
             <Step3Actions
               primaryCategory={primaryCategory}
+              secondaryCategories={secondaryCategories}
               actions={actions}
               onUpdateActions={(category, categoryActions) =>
                 setActions((prev) => ({ ...prev, [category]: categoryActions }))
@@ -313,6 +314,7 @@ const Index = () => {
           <WizardStepBoundary stepName="Habits">
             <Step4Habits
               primaryCategory={primaryCategory}
+              secondaryCategories={secondaryCategories}
               habits={habits}
               onUpdateHabit={(category, habit) =>
                 setHabits((prev) => ({ ...prev, [category]: habit }))
@@ -327,6 +329,7 @@ const Index = () => {
           <WizardStepBoundary stepName="Motivation">
             <Step5Motivation
               primaryCategory={primaryCategory}
+              secondaryCategories={secondaryCategories}
               motivation={motivation}
               onUpdateMotivation={(category, type, value) =>
                 setMotivation((prev) => ({

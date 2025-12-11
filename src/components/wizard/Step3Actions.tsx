@@ -13,6 +13,7 @@ import { logger } from "@/lib/logger";
 
 interface Step3ActionsProps {
   primaryCategory: LifeCategory | null;
+  secondaryCategories: LifeCategory[];
   actions: Record<LifeCategory, ActionStep>;
   onUpdateActions: (category: LifeCategory, actions: ActionStep) => void;
   onNext: () => void;
@@ -21,15 +22,20 @@ interface Step3ActionsProps {
 
 export const Step3Actions = ({
   primaryCategory,
+  secondaryCategories,
   actions,
   onUpdateActions,
   onNext,
   onBack,
 }: Step3ActionsProps) => {
   const [showConfetti, setShowConfetti] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Only primary category gets full action breakdown
-  const currentCategory = primaryCategory!;
+  const allCategories = [primaryCategory, ...secondaryCategories].filter(
+    Boolean
+  ) as LifeCategory[];
+  const currentCategory = allCategories[currentIndex];
+  const isPrimary = currentCategory === primaryCategory;
   const currentActions = actions[currentCategory] || {
     small: "",
     medium: "",
@@ -57,7 +63,20 @@ export const Step3Actions = ({
     "Write and publish a book",
   ]);
 
+  const isValid = isPrimary
+    ? Boolean(
+        currentActions.small && currentActions.medium && currentActions.big
+      )
+    : Boolean(currentActions.small && currentActions.small.trim().length >= 5);
+
   const handleNext = () => {
+    if (!isValid) return;
+
+    if (currentIndex < allCategories.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      return;
+    }
+
     setShowConfetti(true);
     setTimeout(() => {
       setShowConfetti(false);
@@ -74,8 +93,13 @@ export const Step3Actions = ({
     }
   };
 
-  const isValid =
-    currentActions.small && currentActions.medium && currentActions.big;
+  const handleBack = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      return;
+    }
+    onBack();
+  };
 
   return (
     <div className="max-w-2xl mx-auto px-4">
@@ -83,15 +107,39 @@ export const Step3Actions = ({
       <div className="mb-6 md:mb-8 text-center animate-fade-in">
         <div className="flex items-center justify-center gap-2 mb-3">
           <span className="text-xl md:text-2xl">⭐</span>
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-            Break Down Your {currentCategory} Goal
-          </h2>
+          <div className="flex flex-col items-center gap-1">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+              Break Down Your {currentCategory} Goal
+            </h2>
+            <span
+              className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                isPrimary
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground border border-border"
+              }`}
+            >
+              {isPrimary ? "Primary Focus" : "Supporting Goal"}
+            </span>
+          </div>
         </div>
         <p className="text-muted-foreground text-base md:text-lg">
-          <span className="text-focus-primary font-semibold">
-            Primary Focus:{" "}
-          </span>
-          Create progressive action steps for your main goal
+          {isPrimary ? (
+            <>
+              <span className="text-focus-primary font-semibold">
+                Primary Focus:{" "}
+              </span>
+              Create progressive action steps for your main goal
+            </>
+          ) : (
+            <>
+              Add a quick action step for this supporting goal. Medium and big
+              steps are optional and can be expanded later.
+            </>
+          )}
+        </p>
+        <p className="text-xs text-muted-foreground mt-2">
+          Category {currentIndex + 1} of {allCategories.length}{" "}
+          {isPrimary ? "(Primary)" : "(Supporting)"}
         </p>
       </div>
 
@@ -101,7 +149,7 @@ export const Step3Actions = ({
           <div>
             <Label
               htmlFor="small"
-              className="text-base md:text-lg font-semibold mb-3 block flex items-center gap-2"
+              className="text-base md:text-lg font-semibold mb-3 flex items-center gap-2"
             >
               <span className="text-xl md:text-2xl">🌱</span>
               Small Step - Start This Week
@@ -131,7 +179,7 @@ export const Step3Actions = ({
           <div>
             <Label
               htmlFor="medium"
-              className="text-lg font-semibold mb-3 block flex items-center gap-2"
+              className="text-lg font-semibold mb-3 flex items-center gap-2"
             >
               <span className="text-2xl">🚀</span>
               Medium Step - Within 3 Months
@@ -139,6 +187,7 @@ export const Step3Actions = ({
             <p className="text-sm text-muted-foreground mb-3">
               What's a significant action that builds on your small step?
             </p>
+
             <Textarea
               id="medium"
               value={currentActions.medium}
@@ -160,7 +209,7 @@ export const Step3Actions = ({
           <div>
             <Label
               htmlFor="big"
-              className="text-lg font-semibold mb-3 block flex items-center gap-2"
+              className="text-lg font-semibold mb-3 flex items-center gap-2"
             >
               <span className="text-2xl">🏆</span>
               Big Milestone - By End of {APP_CONFIG.year}
@@ -199,7 +248,7 @@ export const Step3Actions = ({
       </Card>
 
       <div className="flex justify-between mt-8">
-        <Button onClick={onBack} variant="outline" size="lg">
+        <Button onClick={handleBack} variant="outline" size="lg">
           ← Back
         </Button>
         <Button

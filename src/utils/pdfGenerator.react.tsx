@@ -24,7 +24,7 @@ import {
   G,
 } from "@react-pdf/renderer";
 import { logger } from "@/lib/logger";
-import { CategoryGoal, LifeCategory } from "@/types/wizard";
+import { ActionStep, CategoryGoal, LifeCategory } from "@/types/wizard";
 import { APP_CONFIG } from "@/lib/config";
 
 // PDF Data Interface
@@ -161,6 +161,34 @@ const categoryTheme: Record<
     color: colors.environment.main,
     lightColor: colors.environment.light,
   },
+};
+
+// Data helpers
+const hasFullActions = (actions: ActionStep): boolean => {
+  return !!(
+    actions.small &&
+    actions.medium &&
+    actions.big &&
+    actions.small.trim() &&
+    actions.medium.trim() &&
+    actions.big.trim()
+  );
+};
+
+const hasMinimalActions = (actions: ActionStep): boolean => {
+  return !!(actions.small && actions.small.trim().length > 0);
+};
+
+const hasMotivation = (motivation: {
+  why: string;
+  consequence: string;
+}): boolean => {
+  return !!(
+    motivation.why &&
+    motivation.consequence &&
+    motivation.why.trim().length > 0 &&
+    motivation.consequence.trim().length > 0
+  );
 };
 
 // Typography Scale
@@ -355,8 +383,38 @@ const styles = StyleSheet.create({
 
   goalHeader: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: spacing.md,
+  },
+
+  primaryBadge: {
+    backgroundColor: colors.primary.main,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    marginLeft: spacing.sm,
+  },
+
+  primaryBadgeText: {
+    color: colors.white,
+    fontSize: 8,
+    fontWeight: "bold",
+    letterSpacing: 0.5,
+  },
+
+  supportBadge: {
+    backgroundColor: colors.slate[200],
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    marginLeft: spacing.sm,
+  },
+
+  supportBadgeText: {
+    color: colors.slate[700],
+    fontSize: 8,
+    fontWeight: "bold",
+    letterSpacing: 0.5,
   },
 
   goalBadge: {
@@ -602,6 +660,23 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
+  // ========== NOTES ==========
+  noteBox: {
+    marginTop: spacing.lg,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+    backgroundColor: colors.slate[50],
+    borderLeft: `4px solid ${colors.primary.main}`,
+    borderRadius: 4,
+  },
+
+  noteText: {
+    fontSize: typography.body,
+    color: colors.slate[600],
+    lineHeight: 1.5,
+    fontStyle: "italic",
+  },
+
   // ========== FOOTER ==========
   footer: {
     position: "absolute",
@@ -714,25 +789,25 @@ const RadarChart: React.FC<{
           <Circle key={`dot-${i}`} cx={p.x} cy={p.y} r={3} fill="#6366F1" />
         ))}
       </Svg>
-      
+
       {/* Labels (Overlayed Views for better text handling) */}
       {categories.map((cat, i) => {
         const angle = i * angleStep - Math.PI / 2;
         // Push labels out a bit
-        const labelRadius = radius + 25; 
+        const labelRadius = radius + 25;
         const x = center + Math.cos(angle) * labelRadius;
         const y = center + Math.sin(angle) * labelRadius;
-        
+
         // Adjust position based on quadrant to center text
         const left = x - 30; // Center 60px wide box
         const top = y - 10; // Center 20px high box
-        
+
         // Score Label Position (Slightly above the data point)
         const score = ratings[cat] || 0;
         const r = (radius / 10) * score;
         const px = center + Math.cos(angle) * r;
         const py = center + Math.sin(angle) * r;
-        
+
         return (
           <React.Fragment key={`label-group-${i}`}>
             {/* Category Label */}
@@ -770,7 +845,9 @@ const RadarChart: React.FC<{
                 justifyContent: "center",
               }}
             >
-              <Text style={{ fontSize: 7, fontWeight: "bold", color: "#4F46E5" }}>
+              <Text
+                style={{ fontSize: 7, fontWeight: "bold", color: "#4F46E5" }}
+              >
                 {score}
               </Text>
             </View>
@@ -798,25 +875,72 @@ const CoverPage: React.FC<{ data: PDFData }> = ({ data }) => {
   return (
     <Page size="A4" style={styles.pageCover}>
       {/* Constellation Background */}
-      <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+      <View
+        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+      >
         <Svg width="100%" height="100%">
           {/* Stars */}
           {[
-            { x: 30, y: 40, r: 1.5 }, { x: 180, y: 50, r: 2 },
-            { x: 50, y: 250, r: 1.8 }, { x: 160, y: 270, r: 1.5 },
-            { x: 105, y: 20, r: 2.5 }, { x: 20, y: 150, r: 1.2 },
-            { x: 190, y: 140, r: 1.2 }, { x: 105, y: 280, r: 2 },
-            { x: 400, y: 100, r: 1.5 }, { x: 500, y: 300, r: 2 },
-            { x: 350, y: 500, r: 1.8 }, { x: 450, y: 600, r: 1.5 },
+            { x: 30, y: 40, r: 1.5 },
+            { x: 180, y: 50, r: 2 },
+            { x: 50, y: 250, r: 1.8 },
+            { x: 160, y: 270, r: 1.5 },
+            { x: 105, y: 20, r: 2.5 },
+            { x: 20, y: 150, r: 1.2 },
+            { x: 190, y: 140, r: 1.2 },
+            { x: 105, y: 280, r: 2 },
+            { x: 400, y: 100, r: 1.5 },
+            { x: 500, y: 300, r: 2 },
+            { x: 350, y: 500, r: 1.8 },
+            { x: 450, y: 600, r: 1.5 },
           ].map((star, i) => (
-            <Circle key={i} cx={star.x} cy={star.y} r={star.r} fill="#CBD5E1" opacity={0.6} />
+            <Circle
+              key={i}
+              cx={star.x}
+              cy={star.y}
+              r={star.r}
+              fill="#CBD5E1"
+              opacity={0.6}
+            />
           ))}
-          
+
           {/* Constellation Lines */}
-          <Line x1="40" y1="60" x2="60" y2="75" stroke="#CBD5E1" strokeWidth={0.5} opacity={0.5} />
-          <Line x1="60" y1="75" x2="55" y2="95" stroke="#CBD5E1" strokeWidth={0.5} opacity={0.5} />
-          <Line x1="150" y1="220" x2="170" y2="235" stroke="#CBD5E1" strokeWidth={0.5} opacity={0.5} />
-          <Line x1="170" y1="235" x2="165" y2="205" stroke="#CBD5E1" strokeWidth={0.5} opacity={0.5} />
+          <Line
+            x1="40"
+            y1="60"
+            x2="60"
+            y2="75"
+            stroke="#CBD5E1"
+            strokeWidth={0.5}
+            opacity={0.5}
+          />
+          <Line
+            x1="60"
+            y1="75"
+            x2="55"
+            y2="95"
+            stroke="#CBD5E1"
+            strokeWidth={0.5}
+            opacity={0.5}
+          />
+          <Line
+            x1="150"
+            y1="220"
+            x2="170"
+            y2="235"
+            stroke="#CBD5E1"
+            strokeWidth={0.5}
+            opacity={0.5}
+          />
+          <Line
+            x1="170"
+            y1="235"
+            x2="165"
+            y2="205"
+            stroke="#CBD5E1"
+            strokeWidth={0.5}
+            opacity={0.5}
+          />
         </Svg>
       </View>
 
@@ -941,22 +1065,29 @@ const ExecutiveSummary: React.FC<{ data: PDFData }> = ({ data }) => {
       </View>
 
       {/* Wheel of Life Chart */}
-      {data.lifeWheelRatings && Object.keys(data.lifeWheelRatings).length > 0 && (
-        <View style={{ alignItems: "center", marginTop: spacing.xl, marginBottom: spacing.xl }}>
-          <Text
+      {data.lifeWheelRatings &&
+        Object.keys(data.lifeWheelRatings).length > 0 && (
+          <View
             style={{
-              fontSize: 10,
-              fontWeight: "bold",
-              color: colors.slate[400],
-              marginBottom: spacing.sm,
-              letterSpacing: 1,
+              alignItems: "center",
+              marginTop: spacing.xl,
+              marginBottom: spacing.xl,
             }}
           >
-            YOUR WHEEL OF LIFE
-          </Text>
-          <RadarChart ratings={data.lifeWheelRatings} size={200} />
-        </View>
-      )}
+            <Text
+              style={{
+                fontSize: 10,
+                fontWeight: "bold",
+                color: colors.slate[400],
+                marginBottom: spacing.sm,
+                letterSpacing: 1,
+              }}
+            >
+              YOUR WHEEL OF LIFE
+            </Text>
+            <RadarChart ratings={data.lifeWheelRatings} size={200} />
+          </View>
+        )}
 
       <Text style={styles.footer}>
         Your {APP_CONFIG.year} Success Blueprint • Page 2
@@ -968,11 +1099,17 @@ const ExecutiveSummary: React.FC<{ data: PDFData }> = ({ data }) => {
 /**
  * Goal Page Component
  */
-const GoalPage: React.FC<{ goal: CategoryGoal; index: number }> = ({
-  goal,
-  index,
-}) => {
+const GoalPage: React.FC<{
+  goal: CategoryGoal;
+  index: number;
+  isPrimary: boolean;
+}> = ({ goal, index, isPrimary }) => {
   const theme = categoryTheme[goal.category] || categoryTheme["Career"];
+  const hasFullActionPlan = hasFullActions(goal.actions);
+  const hasAnyActions = hasMinimalActions(goal.actions);
+  const hasMotivationData = hasMotivation(goal.motivation);
+  const hasCheckIn =
+    goal.monthlyCheckIn && goal.monthlyCheckIn.trim().length > 0;
 
   return (
     <Page size="A4" style={styles.page}>
@@ -991,7 +1128,16 @@ const GoalPage: React.FC<{ goal: CategoryGoal; index: number }> = ({
               {goal.category.toUpperCase()}
             </Text>
           </View>
-          <Text style={styles.goalTitle}>{goal.mainGoal}</Text>
+          <Text
+            style={[
+              styles.goalTitle,
+              isPrimary
+                ? { color: colors.primary.dark }
+                : { color: colors.slate[800]},
+            ]}
+          >
+            {goal.mainGoal}
+          </Text>
         </View>
       </View>
 
@@ -1029,7 +1175,6 @@ const GoalPage: React.FC<{ goal: CategoryGoal; index: number }> = ({
       </View>
 
       {/* Action Plan */}
-      {/* Action Plan */}
       <View
         style={{
           flexDirection: "row",
@@ -1052,131 +1197,200 @@ const GoalPage: React.FC<{ goal: CategoryGoal; index: number }> = ({
           ACTION PLAN
         </Text>
       </View>
-      <View style={styles.table}>
-        <View style={styles.tableHeader}>
-          <Text style={[styles.tableHeaderCell, { width: "30%" }]}>
-            Timeline
-          </Text>
-          <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Action Step</Text>
-        </View>
 
-        <View style={styles.tableRow}>
-          <View style={styles.stepLabelContainer}>
-            <View style={styles.stepCircle}>
-              <Text style={styles.stepNumber}>1</Text>
-            </View>
-            <Text
-              style={{
-                fontWeight: "bold",
-                color: colors.slate[600],
-                fontSize: 10,
-              }}
-            >
-              Small Step
-            </Text>
-          </View>
-          <Text style={[styles.tableCell, styles.tableCellContent]}>
-            {goal.actions.small}
-          </Text>
-        </View>
+      {hasAnyActions ? (
+        <>
+          {isPrimary || hasFullActionPlan ? (
+            <View style={styles.table}>
+              <View style={styles.tableHeader}>
+                <Text style={[styles.tableHeaderCell, { width: "30%" }]}>
+                  Timeline
+                </Text>
+                <Text style={[styles.tableHeaderCell, { flex: 1 }]}>
+                  Action Step
+                </Text>
+              </View>
 
-        <View style={[styles.tableRow, styles.tableRowAlt]}>
-          <View style={styles.stepLabelContainer}>
-            <View style={styles.stepCircle}>
-              <Text style={styles.stepNumber}>2</Text>
-            </View>
-            <Text
-              style={{
-                fontWeight: "bold",
-                color: colors.slate[600],
-                fontSize: 10,
-              }}
-            >
-              Medium Step
-            </Text>
-          </View>
-          <Text style={[styles.tableCell, styles.tableCellContent]}>
-            {goal.actions.medium}
-          </Text>
-        </View>
+              <View style={styles.tableRow}>
+                <View style={styles.stepLabelContainer}>
+                  <View style={styles.stepCircle}>
+                    <Text style={styles.stepNumber}>1</Text>
+                  </View>
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      color: colors.slate[600],
+                      fontSize: 10,
+                    }}
+                  >
+                    Small Step
+                  </Text>
+                </View>
+                <Text style={[styles.tableCell, styles.tableCellContent]}>
+                  {goal.actions.small}
+                </Text>
+              </View>
 
-        <View style={styles.tableRow}>
-          <View style={styles.stepLabelContainer}>
-            <View style={styles.stepCircle}>
-              <Text style={styles.stepNumber}>3</Text>
+              <View style={[styles.tableRow, styles.tableRowAlt]}>
+                <View style={styles.stepLabelContainer}>
+                  <View style={styles.stepCircle}>
+                    <Text style={styles.stepNumber}>2</Text>
+                  </View>
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      color: colors.slate[600],
+                      fontSize: 10,
+                    }}
+                  >
+                    Medium Step
+                  </Text>
+                </View>
+                <Text style={[styles.tableCell, styles.tableCellContent]}>
+                  {goal.actions.medium}
+                </Text>
+              </View>
+
+              <View style={styles.tableRow}>
+                <View style={styles.stepLabelContainer}>
+                  <View style={styles.stepCircle}>
+                    <Text style={styles.stepNumber}>3</Text>
+                  </View>
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      color: colors.slate[600],
+                      fontSize: 10,
+                    }}
+                  >
+                    Big Step
+                  </Text>
+                </View>
+                <Text style={[styles.tableCell, styles.tableCellContent]}>
+                  {goal.actions.big}
+                </Text>
+              </View>
             </View>
-            <Text
-              style={{
-                fontWeight: "bold",
-                color: colors.slate[600],
-                fontSize: 10,
-              }}
-            >
-              Big Step
-            </Text>
-          </View>
-          <Text style={[styles.tableCell, styles.tableCellContent]}>
-            {goal.actions.big}
+          ) : (
+            <>
+              <View style={styles.table}>
+                <View style={styles.tableHeader}>
+                  <Text style={[styles.tableHeaderCell, { width: "30%" }]}>
+                    Timeline
+                  </Text>
+                  <Text style={[styles.tableHeaderCell, { flex: 1 }]}>
+                    Action Step
+                  </Text>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={styles.stepLabelContainer}>
+                    <View style={styles.stepCircle}>
+                      <Text style={styles.stepNumber}>1</Text>
+                    </View>
+                    <Text
+                      style={{
+                        fontWeight: "bold",
+                        color: colors.slate[600],
+                        fontSize: 10,
+                      }}
+                    >
+                      Small Step
+                    </Text>
+                  </View>
+                  <Text style={[styles.tableCell, styles.tableCellContent]}>
+                    {goal.actions.small}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.noteBox}>
+                <Text style={styles.noteText}>
+                  💡 Supporting goal: expand with medium and big steps in your
+                  Notion template.
+                </Text>
+              </View>
+            </>
+          )}
+        </>
+      ) : (
+        <View style={styles.noteBox}>
+          <Text style={styles.noteText}>
+            💡 Supporting goal: focus on your primary goal first, then expand
+            this in your Notion template.
           </Text>
         </View>
-      </View>
+      )}
 
       {/* Motivation System */}
-      {/* Motivation System */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          marginTop: spacing.xl,
-          marginBottom: spacing.md,
-        }}
-      >
-        <Image
-          src="/assets/pdf-icons/icon-bulb.png"
-          style={styles.sectionIcon}
-        />
-        <Text
-          style={{
-            fontSize: 12,
-            fontWeight: "bold",
-            color: colors.primary.main,
-          }}
-        >
-          MOTIVATION SYSTEM
-        </Text>
-      </View>
-      <View style={styles.motivationTable}>
-        <View style={styles.motivationHeader}>
-          <Text style={styles.motivationHeaderCell}>Why it Matters (Gain)</Text>
-          <Text style={styles.motivationHeaderCell}>
-            Cost of Inaction (Pain)
-          </Text>
-        </View>
-        <View style={styles.motivationRow}>
-          <Text style={styles.motivationCell}>{goal.motivation.why}</Text>
-          <Text style={styles.motivationCell}>
-            {goal.motivation.consequence}
-          </Text>
-        </View>
-      </View>
+      {hasMotivationData ? (
+        <>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginTop: spacing.xl,
+              marginBottom: spacing.md,
+            }}
+          >
+            <Image
+              src="/assets/pdf-icons/icon-bulb.png"
+              style={styles.sectionIcon}
+            />
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: "bold",
+                color: colors.primary.main,
+              }}
+            >
+              MOTIVATION SYSTEM
+            </Text>
+          </View>
+          <View style={styles.motivationTable}>
+            <View style={styles.motivationHeader}>
+              <Text style={styles.motivationHeaderCell}>
+                Why it Matters (Gain)
+              </Text>
+              <Text style={styles.motivationHeaderCell}>
+                Cost of Inaction (Pain)
+              </Text>
+            </View>
+            <View style={styles.motivationRow}>
+              <Text style={styles.motivationCell}>{goal.motivation.why}</Text>
+              <Text style={styles.motivationCell}>
+                {goal.motivation.consequence}
+              </Text>
+            </View>
+          </View>
+        </>
+      ) : (
+        !isPrimary && (
+          <View style={styles.noteBox}>
+            <Text style={styles.noteText}>
+              💡 Add motivation details for this goal in your Notion template.
+            </Text>
+          </View>
+        )
+      )}
 
       {/* Monthly Check-in */}
-      <View style={styles.checkInBox}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: spacing.sm,
-          }}
-        >
-          <Image
-            src="/assets/pdf-icons/icon-calendar.png"
-            style={{ width: 12, height: 12, marginRight: 6 }}
-          />
-          <Text style={styles.checkInTitle}>MONTHLY CHECK-IN STRATEGY</Text>
+      {hasCheckIn && (
+        <View style={styles.checkInBox}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: spacing.sm,
+            }}
+          >
+            <Image
+              src="/assets/pdf-icons/icon-calendar.png"
+              style={{ width: 12, height: 12, marginRight: 6 }}
+            />
+            <Text style={styles.checkInTitle}>MONTHLY CHECK-IN STRATEGY</Text>
+          </View>
+          <Text style={styles.checkInText}>{goal.monthlyCheckIn}</Text>
         </View>
-        <Text style={styles.checkInText}>{goal.monthlyCheckIn}</Text>
-      </View>
+      )}
 
       <Text style={styles.footer}>
         Your {APP_CONFIG.year} Success Blueprint • Page {index + 3}
@@ -1194,7 +1408,12 @@ const SuccessBlueprintDocument: React.FC<{ data: PDFData }> = ({ data }) => {
       <CoverPage data={data} />
       <ExecutiveSummary data={data} />
       {data.goals.map((goal, index) => (
-        <GoalPage key={goal.category} goal={goal} index={index} />
+        <GoalPage
+          key={goal.category}
+          goal={goal}
+          index={index}
+          isPrimary={goal.category === data.primaryCategory}
+        />
       ))}
     </Document>
   );
