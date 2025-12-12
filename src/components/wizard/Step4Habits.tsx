@@ -79,17 +79,8 @@ export const Step4Habits = ({
           <span className="text-2xl">⭐</span>
           <div className="flex flex-col items-center gap-1">
             <h2 className="text-3xl font-bold text-foreground">
-              Monthly Review Habit for {currentCategory}
+              Monthly Review Habit for <span className="underline-wrapper">{currentCategory}</span>
             </h2>
-            <span
-              className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                isPrimary
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground border border-border"
-              }`}
-            >
-              {isPrimary ? "Primary Focus" : "Supporting Goal"}
-            </span>
           </div>
         </div>
         <p className="text-muted-foreground text-lg">
@@ -102,8 +93,7 @@ export const Step4Habits = ({
             </>
           ) : (
             <>
-              Optional: Add a simple habit/check-in for this supporting goal, or
-              skip for now.
+              Optional: Add a simple habit/check-in for this supporting goal.
             </>
           )}
         </p>

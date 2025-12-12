@@ -98,17 +98,9 @@ export const Step5Motivation = ({
           <span className="text-xl md:text-2xl">⭐</span>
           <div className="flex flex-col items-center gap-1">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-              Your {currentCategory} Motivation
+              Your <span className="underline-wrapper">{currentCategory}</span> Motivation
             </h2>
-            <span
-              className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                isPrimary
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground border border-border"
-              }`}
-            >
-              {isPrimary ? "Primary Focus" : "Supporting Goal"}
-            </span>
+            
           </div>
         </div>
         <p className="text-muted-foreground text-base md:text-lg">
@@ -122,7 +114,7 @@ export const Step5Motivation = ({
           ) : (
             <>
               Optional: jot a quick “why” and consequence for this supporting
-              goal, or skip for now.
+              goal.
             </>
           )}
         </p>

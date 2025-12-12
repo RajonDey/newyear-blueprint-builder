@@ -3,7 +3,7 @@ import { LiveActivityCounter } from "./LiveActivityCounter";
 
 export const SocialProofBar = () => {
   const stats = [
-    { icon: TrendingUp, value: "2,347+", label: "Plans Created" },
+    { icon: TrendingUp, value: "100+", label: "Plans Created" },
     { icon: Award, value: "94%", label: "Success Rate" },
     { icon: Target, value: "10 min", label: "Avg. Completion" },
     { icon: Sparkles, value: "4.9/5", label: "User Rating" },

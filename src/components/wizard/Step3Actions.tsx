@@ -109,17 +109,8 @@ export const Step3Actions = ({
           <span className="text-xl md:text-2xl">⭐</span>
           <div className="flex flex-col items-center gap-1">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-              Break Down Your {currentCategory} Goal
+              Break Down Your <span className="underline-wrapper">{currentCategory}</span> Goal
             </h2>
-            <span
-              className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                isPrimary
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground border border-border"
-              }`}
-            >
-              {isPrimary ? "Primary Focus" : "Supporting Goal"}
-            </span>
           </div>
         </div>
         <p className="text-muted-foreground text-base md:text-lg">
@@ -132,8 +123,7 @@ export const Step3Actions = ({
             </>
           ) : (
             <>
-              Add a quick action step for this supporting goal. Medium and big
-              steps are optional and can be expanded later.
+              Add a quick action step for this <b>supporting goal</b>. 
             </>
           )}
         </p>

@@ -250,6 +250,15 @@ All colors MUST be HSL.
   .skeleton-circle {
     @apply rounded-full bg-muted animate-pulse;
   }
+
+  .underline-wrapper {
+    position: relative;
+    display: inline;
+    background-image: linear-gradient(to top, #e25822, #ff8c42 80%, transparent 80%);
+    background-repeat: no-repeat;
+    background-size: 100% 0.4em;
+    background-position: 0 95%;
+  }
 }
 
 /* Landscape orientation optimizations */

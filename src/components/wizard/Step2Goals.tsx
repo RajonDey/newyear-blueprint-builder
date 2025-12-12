@@ -141,7 +141,7 @@ export const Step2Goals = ({
         <div className="flex items-center justify-center gap-2 mb-3">
           {isPrimary && <span className="text-xl md:text-2xl">⭐</span>}
           <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-            Define Your {currentCategory} Goal
+            Define Your <span className="underline-wrapper">{currentCategory}</span> Goal
           </h2>
         </div>
         <p className="text-muted-foreground text-base md:text-lg">
