@@ -19,7 +19,7 @@ export const HeroSection = ({ onStart }: HeroSectionProps) => {
 
       {/* Main Headline */}
       <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight px-4">
-        Build Your Actionable {APP_CONFIG.year} Plan
+        A Simple {APP_CONFIG.year} Planning Process
         <span className="block text-primary mt-2">In Just 10 Minutes</span>
       </h1>
 
@@ -40,7 +40,7 @@ export const HeroSection = ({ onStart }: HeroSectionProps) => {
         <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-secondary rounded-full">
           <Clock className="w-4 h-4 text-primary" />
           <span className="text-xs sm:text-sm font-medium text-foreground">
-            Avg time: 10 mins 
+            Avg time: 10 mins
           </span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-secondary rounded-full">
@@ -59,7 +59,7 @@ export const HeroSection = ({ onStart }: HeroSectionProps) => {
       >
         {/* Start Building Your {APP_CONFIG.year} Plan →  */}
         {/* Start Free:  */}
-        Build Your Personalized {APP_CONFIG.year} Blueprint →
+        Get the {APP_CONFIG.year} Planning Package →
       </Button>
 
       {/* Trust Line */}

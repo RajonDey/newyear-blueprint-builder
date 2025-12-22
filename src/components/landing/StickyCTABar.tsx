@@ -40,7 +40,7 @@ export const StickyCTABar = ({ onStart }: StickyCTABarProps) => {
               size="lg"
               className="bg-background text-primary hover:bg-background/90 font-semibold shadow-lg animate-pulse-subtle w-full md:w-auto"
             >
-              Start Your Free Plan
+              Get the {APP_CONFIG.year} Planning Package – $9
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </div>

@@ -46,12 +46,13 @@ export const FinalCTA = ({ onStart }: FinalCTAProps) => {
             size="lg"
             className="w-full md:w-auto bg-gradient-primary hover:opacity-90 hover-scale text-base md:text-lg h-12 md:h-14 px-8 md:px-12 shadow-elegant mb-4 animate-pulse-subtle"
           >
-            Start Your {APP_CONFIG.year} Plan Now
+            Get Instant Access to the {APP_CONFIG.year} Plan
             <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-2" />
           </Button>
 
           <p className="text-xs md:text-sm text-muted-foreground">
-            No credit card required • Typically ~10 minutes (no rush) • Take your time
+            No credit card required • Typically ~10 minutes (no rush) • Take
+            your time
           </p>
         </div>
       </Card>
