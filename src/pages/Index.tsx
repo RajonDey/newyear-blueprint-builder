@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -12,6 +12,7 @@ import { Step3Actions } from "@/components/wizard/Step3Actions";
 import { Step4Habits } from "@/components/wizard/Step4Habits";
 import { Step5Motivation } from "@/components/wizard/Step5Motivation";
 import { Step6Summary } from "@/components/wizard/Step6Summary";
+import { RestoreSessionDialog } from "@/components/wizard/RestoreSessionDialog";
 import { SaveIndicator } from "@/components/ui/save-indicator";
 import { MusicToggle } from "@/components/ui/music-toggle";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -60,6 +61,8 @@ const Index = () => {
   const [userEmail, setUserEmail] = useState("");
   const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [isPdfGenerating, setIsPdfGenerating] = useState(false);
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
+  const [savedSessionData, setSavedSessionData] = useState<any>(null);
 
   const { isPlaying, toggleMusic } = useBackgroundMusic();
   const { sessionId, loadSession } = useSaveResume();
@@ -84,6 +87,46 @@ const Index = () => {
     `wizard_${sessionId}`
   );
 
+  // Track if user has made meaningful progress (for beforeunload warning)
+  const hasProgress = useRef(false);
+
+  useEffect(() => {
+    // Check if user has made meaningful progress
+    const hasData =
+      hasStarted ||
+      Object.keys(goals).length > 0 ||
+      Object.keys(lifeWheelRatings).length > 0 ||
+      primaryCategory !== null ||
+      userName.length > 0;
+
+    hasProgress.current = hasData;
+  }, [
+    hasStarted,
+    goals,
+    lifeWheelRatings,
+    primaryCategory,
+    userName,
+  ]);
+
+  // Warn user when leaving page with unsaved progress
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasProgress.current && hasStarted) {
+        // Modern browsers require returnValue to be set
+        e.preventDefault();
+        e.returnValue =
+          "You have unsaved progress. Your work is being saved automatically, but make sure you can return to continue.";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasStarted]);
+
   useEffect(() => {
     const loadData = async () => {
       if (!sessionId) {
@@ -93,35 +136,27 @@ const Index = () => {
 
       try {
         const saved = loadSession();
-        if (saved && saved.hasStarted && !hasStarted) {
-          const shouldRestore = window.confirm(
-            "We found your saved progress. Would you like to continue where you left off?"
-          );
-          if (shouldRestore) {
-            setCurrentStep(saved.currentStep || 0);
-            setPrimaryCategory(saved.primaryCategory || null);
-            setSecondaryCategories(saved.secondaryCategories || []);
-            setLifeWheelRatings(
-              saved.lifeWheelRatings || ({} as Record<LifeCategory, number>)
-            );
-            setSelectedCategories(saved.selectedCategories || []);
-            setGoals(saved.goals || ({} as Record<LifeCategory, string>));
-            setActions(
-              saved.actions || ({} as Record<LifeCategory, ActionStep>)
-            );
-            setHabits(saved.habits || ({} as Record<LifeCategory, string>));
-            setMotivation(
-              saved.motivation ||
-                ({} as Record<
-                  LifeCategory,
-                  { why: string; consequence: string }
-                >)
-            );
-            setUserName(saved.userName || "");
-            setUserEmail(saved.userEmail || "");
-            setHasStarted(true);
-            toast.success("Progress restored!");
-          }
+
+        // Check if we have saved data with meaningful content
+        // Require hasStarted to be true OR currentStep > 0 to ensure it's actual progress
+        const hasValidSavedData =
+          saved &&
+          (saved.hasStarted ||
+            (saved.currentStep !== undefined && saved.currentStep > 0) ||
+            Object.keys(saved.goals || {}).length > 0 ||
+            Object.keys(saved.lifeWheelRatings || {}).length > 0 ||
+            saved.primaryCategory !== null ||
+            saved.userName);
+
+        // Only show restore dialog if:
+        // 1. We have valid saved data
+        // 2. User hasn't started yet (hasStarted is false)
+        if (hasValidSavedData && !hasStarted) {
+          setSavedSessionData(saved);
+          // Small delay to ensure UI is ready for dialog
+          setTimeout(() => {
+            setShowRestoreDialog(true);
+          }, 300);
         }
       } catch (error) {
         logger.error("Failed to load saved progress:", error);
@@ -132,7 +167,52 @@ const Index = () => {
     };
 
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
+
+  const handleRestoreSession = () => {
+    if (!savedSessionData) return;
+
+    setCurrentStep(savedSessionData.currentStep || 0);
+    setPrimaryCategory(savedSessionData.primaryCategory || null);
+    setSecondaryCategories(savedSessionData.secondaryCategories || []);
+    setLifeWheelRatings(
+      savedSessionData.lifeWheelRatings ||
+        ({} as Record<LifeCategory, number>)
+    );
+    setSelectedCategories(savedSessionData.selectedCategories || []);
+    setGoals(
+      savedSessionData.goals || ({} as Record<LifeCategory, string>)
+    );
+    setActions(
+      savedSessionData.actions || ({} as Record<LifeCategory, ActionStep>)
+    );
+    setHabits(
+      savedSessionData.habits || ({} as Record<LifeCategory, string>)
+    );
+    setMotivation(
+      savedSessionData.motivation ||
+        ({} as Record<LifeCategory, { why: string; consequence: string }>)
+    );
+    setUserName(savedSessionData.userName || "");
+    setUserEmail(savedSessionData.userEmail || "");
+    setHasStarted(true);
+    setShowRestoreDialog(false);
+    toast.success("✅ Progress restored! Welcome back!");
+  };
+
+  const handleCancelRestore = () => {
+    // User chose not to restore - clear the saved session to avoid asking again
+    try {
+      if (sessionId) {
+        localStorage.removeItem(`wizard_${sessionId}`);
+      }
+    } catch (error) {
+      logger.error("Failed to clear session:", error);
+    }
+    setShowRestoreDialog(false);
+    setSavedSessionData(null);
+  };
 
   const handleStart = () => {
     setHasStarted(true);
@@ -228,11 +308,28 @@ const Index = () => {
   }
 
   if (!hasStarted) {
-    return <OnboardingScreen onStart={handleStart} />;
+    return (
+      <>
+        <OnboardingScreen onStart={handleStart} />
+        <RestoreSessionDialog
+          open={showRestoreDialog}
+          onRestore={handleRestoreSession}
+          onCancel={handleCancelRestore}
+          currentStep={savedSessionData?.currentStep}
+        />
+      </>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle py-6 md:py-8 px-4 landscape-compact">
+    <>
+      <RestoreSessionDialog
+        open={showRestoreDialog}
+        onRestore={handleRestoreSession}
+        onCancel={handleCancelRestore}
+        currentStep={savedSessionData?.currentStep}
+      />
+      <div className="min-h-screen bg-gradient-subtle py-6 md:py-8 px-4 landscape-compact">
       <div className="container mx-auto max-w-full">
         <div className="flex justify-between items-center mb-4">
           <div className="flex-1" />
@@ -367,6 +464,7 @@ const Index = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 
