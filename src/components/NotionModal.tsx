@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Check, Copy, ExternalLink, FileText } from "lucide-react";
 import { generateNotionMarkdown } from "@/utils/notionTemplate";
@@ -7,7 +14,8 @@ import { CategoryGoal, LifeCategory } from "@/types/wizard";
 import { toast } from "sonner";
 
 // Placeholder URL - The developer (Rajon) needs to replace this with their actual public Notion template
-const NOTION_TEMPLATE_URL = "https://rajon.notion.site/2026-In-Review-2bea990090a081ed8ee4fb327814a04f"; 
+const NOTION_TEMPLATE_URL =
+  "https://rajon.notion.site/2026-In-Review-2bea990090a081ed8ee4fb327814a04f";
 
 interface NotionModalProps {
   isOpen: boolean;
@@ -21,7 +29,11 @@ interface NotionModalProps {
   };
 }
 
-export const NotionModal: React.FC<NotionModalProps> = ({ isOpen, onClose, data }) => {
+export const NotionModal: React.FC<NotionModalProps> = ({
+  isOpen,
+  onClose,
+  data,
+}) => {
   const [step, setStep] = useState(1);
   const [hasCopied, setHasCopied] = useState(false);
 
@@ -31,7 +43,7 @@ export const NotionModal: React.FC<NotionModalProps> = ({ isOpen, onClose, data 
       await navigator.clipboard.writeText(markdown);
       setHasCopied(true);
       toast.success("Blueprint copied to clipboard!");
-      
+
       // Reset copy icon after 2 seconds
       setTimeout(() => setHasCopied(false), 2000);
     } catch (err) {
@@ -54,22 +66,29 @@ export const NotionModal: React.FC<NotionModalProps> = ({ isOpen, onClose, data 
 
         <div className="space-y-6 py-4">
           {/* Step 1: Get Template */}
-          <div className={`space-y-3 transition-opacity ${step === 1 ? 'opacity-100' : 'opacity-50'}`}>
+          <div
+            className={`space-y-3 transition-opacity ${
+              step === 1 ? "opacity-100" : "opacity-50"
+            }`}
+          >
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                 1
               </div>
-              <h3 className="font-semibold text-foreground">Get the Template</h3>
+              <h3 className="font-semibold text-foreground">
+                Get the Template
+              </h3>
             </div>
             <div className="pl-11">
               <p className="text-sm text-muted-foreground mb-3">
-                Open our master template and click "Duplicate" to add it to your Notion workspace.
+                Open our master template and click "Duplicate" to add it to your
+                Notion workspace.
               </p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full gap-2"
                 onClick={() => {
-                  window.open(NOTION_TEMPLATE_URL, '_blank');
+                  window.open(NOTION_TEMPLATE_URL, "_blank");
                   setStep(2);
                 }}
               >
@@ -80,23 +99,33 @@ export const NotionModal: React.FC<NotionModalProps> = ({ isOpen, onClose, data 
           </div>
 
           {/* Step 2: Copy Blueprint */}
-          <div className={`space-y-3 transition-opacity ${step === 2 ? 'opacity-100' : 'opacity-50'}`}>
+          <div
+            className={`space-y-3 transition-opacity ${
+              step === 2 ? "opacity-100" : "opacity-50"
+            }`}
+          >
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                 2
               </div>
-              <h3 className="font-semibold text-foreground">Copy Your Blueprint</h3>
+              <h3 className="font-semibold text-foreground">
+                Copy Your Blueprint
+              </h3>
             </div>
             <div className="pl-11">
               <p className="text-sm text-muted-foreground mb-3">
                 Copy your personalized blueprint for your Notion template.
               </p>
-              <Button 
-                className="w-full gap-2" 
+              <Button
+                className="w-full gap-2"
                 onClick={handleCopy}
                 disabled={step < 2}
               >
-                {hasCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {hasCopied ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
                 {hasCopied ? "Copied!" : "Copy Blueprint"}
               </Button>
             </div>
@@ -121,7 +150,9 @@ export const NotionModal: React.FC<NotionModalProps> = ({ isOpen, onClose, data 
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Close</Button>
+          <Button variant="ghost" onClick={onClose}>
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

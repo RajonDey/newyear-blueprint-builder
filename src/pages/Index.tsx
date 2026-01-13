@@ -13,6 +13,7 @@ import { Step4Habits } from "@/components/wizard/Step4Habits";
 import { Step5Motivation } from "@/components/wizard/Step5Motivation";
 import { Step6Summary } from "@/components/wizard/Step6Summary";
 import { RestoreSessionDialog } from "@/components/wizard/RestoreSessionDialog";
+import { ExitConfirmationDialog } from "@/components/wizard/ExitConfirmationDialog";
 import { SaveIndicator } from "@/components/ui/save-indicator";
 import { MusicToggle } from "@/components/ui/music-toggle";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -63,6 +64,7 @@ const Index = () => {
   const [isPdfGenerating, setIsPdfGenerating] = useState(false);
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [savedSessionData, setSavedSessionData] = useState<any>(null);
+  const [showExitDialog, setShowExitDialog] = useState(false);
 
   const { isPlaying, toggleMusic } = useBackgroundMusic();
   const { sessionId, loadSession } = useSaveResume();
@@ -87,45 +89,119 @@ const Index = () => {
     `wizard_${sessionId}`
   );
 
-  // Track if user has made meaningful progress (for beforeunload warning)
-  const hasProgress = useRef(false);
+  // Track if user has made meaningful progress
+  const hasProgressRef = useRef(false);
 
   useEffect(() => {
     // Check if user has made meaningful progress
     const hasData =
-      hasStarted ||
-      Object.keys(goals).length > 0 ||
-      Object.keys(lifeWheelRatings).length > 0 ||
-      primaryCategory !== null ||
-      userName.length > 0;
+      hasStarted &&
+      (Object.keys(goals).length > 0 ||
+        Object.keys(lifeWheelRatings).length > 0 ||
+        primaryCategory !== null ||
+        userName.length > 0);
 
-    hasProgress.current = hasData;
-  }, [
-    hasStarted,
-    goals,
-    lifeWheelRatings,
-    primaryCategory,
-    userName,
-  ]);
+    hasProgressRef.current = hasData;
+  }, [hasStarted, goals, lifeWheelRatings, primaryCategory, userName]);
 
-  // Warn user when leaving page with unsaved progress
+  // Track if user explicitly wants to leave (to allow navigation)
+  const shouldAllowNavigation = useRef(false);
+  const beforeUnloadHandlerRef = useRef<
+    ((e: BeforeUnloadEvent) => void) | null
+  >(null);
+
+  // Show our custom dialog when user tries to leave (switches tabs or closes)
   useEffect(() => {
+    if (!hasStarted) return;
+
+    // Show dialog when page visibility changes (user switches tabs or closes)
+    const handleVisibilityChange = () => {
+      if (
+        document.visibilityState === "hidden" &&
+        hasProgressRef.current &&
+        !showExitDialog &&
+        !shouldAllowNavigation.current
+      ) {
+        // Show dialog when page becomes hidden
+        // Use a small delay to ensure it shows properly
+        setTimeout(() => {
+          setShowExitDialog(true);
+        }, 50);
+      }
+      // DON'T auto-close when page becomes visible again
+      // Let user explicitly close it by clicking "Stay & Continue" or "Leave Anyway"
+      // This ensures they actually see and read the message
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [hasStarted, showExitDialog]);
+
+  // Browser fallback: Use beforeunload as backup (browser's native dialog)
+  useEffect(() => {
+    if (!hasStarted) return;
+
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasProgress.current && hasStarted) {
-        // Modern browsers require returnValue to be set
+      // If user already clicked "Leave Anyway" in our custom dialog, allow navigation
+      if (shouldAllowNavigation.current) {
+        return; // Allow navigation
+      }
+
+      // If our custom dialog is showing, don't show browser dialog (avoid duplicates)
+      if (showExitDialog) {
         e.preventDefault();
-        e.returnValue =
-          "You have unsaved progress. Your work is being saved automatically, but make sure you can return to continue.";
+        e.returnValue = "";
+        return e.returnValue;
+      }
+
+      // Otherwise, show browser's dialog as fallback
+      if (hasProgressRef.current) {
+        e.preventDefault();
+        e.returnValue = "Your progress is saved! You can continue later.";
         return e.returnValue;
       }
     };
 
+    beforeUnloadHandlerRef.current = handleBeforeUnload;
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      beforeUnloadHandlerRef.current = null;
     };
-  }, [hasStarted]);
+  }, [hasStarted, showExitDialog]);
+
+  const handleStayOnPage = () => {
+    setShowExitDialog(false);
+    shouldAllowNavigation.current = false;
+
+    // Try to bring page back to focus
+    if (document.visibilityState === "hidden") {
+      window.focus();
+    }
+  };
+
+  const handleLeavePage = () => {
+    setShowExitDialog(false);
+    shouldAllowNavigation.current = true;
+
+    // Allow navigation by removing the prevention
+    // The browser's beforeunload dialog might still show as final confirmation
+    // but at least they've seen our friendly message first
+    setTimeout(() => {
+      // Try to close the window
+      // In Chrome, if window wasn't opened by script, this won't work
+      // But the user can still close manually, and they've seen our message
+      try {
+        window.close();
+      } catch (e) {
+        // Fall through - browser dialog will handle it
+      }
+    }, 50);
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -177,19 +253,14 @@ const Index = () => {
     setPrimaryCategory(savedSessionData.primaryCategory || null);
     setSecondaryCategories(savedSessionData.secondaryCategories || []);
     setLifeWheelRatings(
-      savedSessionData.lifeWheelRatings ||
-        ({} as Record<LifeCategory, number>)
+      savedSessionData.lifeWheelRatings || ({} as Record<LifeCategory, number>)
     );
     setSelectedCategories(savedSessionData.selectedCategories || []);
-    setGoals(
-      savedSessionData.goals || ({} as Record<LifeCategory, string>)
-    );
+    setGoals(savedSessionData.goals || ({} as Record<LifeCategory, string>));
     setActions(
       savedSessionData.actions || ({} as Record<LifeCategory, ActionStep>)
     );
-    setHabits(
-      savedSessionData.habits || ({} as Record<LifeCategory, string>)
-    );
+    setHabits(savedSessionData.habits || ({} as Record<LifeCategory, string>));
     setMotivation(
       savedSessionData.motivation ||
         ({} as Record<LifeCategory, { why: string; consequence: string }>)
@@ -317,6 +388,11 @@ const Index = () => {
           onCancel={handleCancelRestore}
           currentStep={savedSessionData?.currentStep}
         />
+        <ExitConfirmationDialog
+          open={showExitDialog}
+          onStay={handleStayOnPage}
+          onLeave={handleLeavePage}
+        />
       </>
     );
   }
@@ -329,141 +405,149 @@ const Index = () => {
         onCancel={handleCancelRestore}
         currentStep={savedSessionData?.currentStep}
       />
+      <ExitConfirmationDialog
+        open={showExitDialog}
+        onStay={handleStayOnPage}
+        onLeave={handleLeavePage}
+      />
       <div className="min-h-screen bg-gradient-subtle py-6 md:py-8 px-4 landscape-compact">
-      <div className="container mx-auto max-w-full">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex-1" />
-          <SaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
-          <MusicToggle
-            isPlaying={isPlaying}
-            onToggle={toggleMusic}
-            className="ml-4"
+        <div className="container mx-auto max-w-full">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex-1" />
+            <SaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
+            <MusicToggle
+              isPlaying={isPlaying}
+              onToggle={toggleMusic}
+              className="ml-4"
+            />
+          </div>
+          <ProgressIndicator
+            currentStep={currentStep + 1}
+            totalSteps={7}
+            estimatedTimeLeft={12}
           />
+
+          {currentStep === 0 && (
+            <WizardStepBoundary
+              stepName="Wheel of Life"
+              onSkip={() => setCurrentStep(1)}
+            >
+              <Step0WheelOfLife
+                ratings={lifeWheelRatings}
+                onUpdateRating={handleUpdateLifeWheelRating}
+                onNext={() => setCurrentStep(1)}
+              />
+            </WizardStepBoundary>
+          )}
+
+          {currentStep === 1 && (
+            <WizardStepBoundary
+              stepName="Category Selection"
+              onSkip={() => setCurrentStep(2)}
+            >
+              <Step1PrimarySecondary
+                primaryCategory={primaryCategory}
+                secondaryCategories={secondaryCategories}
+                lifeWheelRatings={lifeWheelRatings}
+                onSelectPrimary={handleSelectPrimary}
+                onToggleSecondary={handleToggleSecondary}
+                onNext={() => setCurrentStep(2)}
+                onBack={() => setCurrentStep(0)}
+              />
+            </WizardStepBoundary>
+          )}
+
+          {currentStep === 2 && (
+            <WizardStepBoundary stepName="Goals">
+              <Step2Goals
+                selectedCategories={selectedCategories}
+                primaryCategory={primaryCategory}
+                secondaryCategories={secondaryCategories}
+                goals={goals}
+                onUpdateGoal={(category, goal) =>
+                  setGoals((prev) => ({ ...prev, [category]: goal }))
+                }
+                onNext={() => setCurrentStep(3)}
+                onBack={() => setCurrentStep(1)}
+              />
+            </WizardStepBoundary>
+          )}
+
+          {currentStep === 3 && (
+            <WizardStepBoundary stepName="Actions">
+              <Step3Actions
+                primaryCategory={primaryCategory}
+                secondaryCategories={secondaryCategories}
+                actions={actions}
+                onUpdateActions={(category, categoryActions) =>
+                  setActions((prev) => ({
+                    ...prev,
+                    [category]: categoryActions,
+                  }))
+                }
+                onNext={() => setCurrentStep(4)}
+                onBack={() => setCurrentStep(2)}
+              />
+            </WizardStepBoundary>
+          )}
+
+          {currentStep === 4 && (
+            <WizardStepBoundary stepName="Habits">
+              <Step4Habits
+                primaryCategory={primaryCategory}
+                secondaryCategories={secondaryCategories}
+                habits={habits}
+                onUpdateHabit={(category, habit) =>
+                  setHabits((prev) => ({ ...prev, [category]: habit }))
+                }
+                onNext={() => setCurrentStep(5)}
+                onBack={() => setCurrentStep(3)}
+              />
+            </WizardStepBoundary>
+          )}
+
+          {currentStep === 5 && (
+            <WizardStepBoundary stepName="Motivation">
+              <Step5Motivation
+                primaryCategory={primaryCategory}
+                secondaryCategories={secondaryCategories}
+                motivation={motivation}
+                onUpdateMotivation={(category, type, value) =>
+                  setMotivation((prev) => ({
+                    ...prev,
+                    [category]: {
+                      ...(prev[category] || { why: "", consequence: "" }),
+                      [type]: value,
+                    },
+                  }))
+                }
+                onNext={() => setCurrentStep(6)}
+                onBack={() => setCurrentStep(4)}
+              />
+            </WizardStepBoundary>
+          )}
+
+          {currentStep === 6 && (
+            <WizardStepBoundary stepName="Summary">
+              <Step6Summary
+                goals={compiledGoals}
+                primaryCategory={primaryCategory}
+                secondaryCategories={secondaryCategories}
+                userName={userName}
+                userEmail={userEmail}
+                isPdfGenerating={isPdfGenerating}
+                onUpdateUserInfo={(field, value) => {
+                  if (field === "name") setUserName(value);
+                  else setUserEmail(value);
+                }}
+                onDownloadPDF={handleDownloadPDF}
+                onBack={() => setCurrentStep(5)}
+                lifeWheelRatings={lifeWheelRatings}
+              />
+            </WizardStepBoundary>
+          )}
         </div>
-        <ProgressIndicator
-          currentStep={currentStep + 1}
-          totalSteps={7}
-          estimatedTimeLeft={12}
-        />
-
-        {currentStep === 0 && (
-          <WizardStepBoundary
-            stepName="Wheel of Life"
-            onSkip={() => setCurrentStep(1)}
-          >
-            <Step0WheelOfLife
-              ratings={lifeWheelRatings}
-              onUpdateRating={handleUpdateLifeWheelRating}
-              onNext={() => setCurrentStep(1)}
-            />
-          </WizardStepBoundary>
-        )}
-
-        {currentStep === 1 && (
-          <WizardStepBoundary
-            stepName="Category Selection"
-            onSkip={() => setCurrentStep(2)}
-          >
-            <Step1PrimarySecondary
-              primaryCategory={primaryCategory}
-              secondaryCategories={secondaryCategories}
-              lifeWheelRatings={lifeWheelRatings}
-              onSelectPrimary={handleSelectPrimary}
-              onToggleSecondary={handleToggleSecondary}
-              onNext={() => setCurrentStep(2)}
-              onBack={() => setCurrentStep(0)}
-            />
-          </WizardStepBoundary>
-        )}
-
-        {currentStep === 2 && (
-          <WizardStepBoundary stepName="Goals">
-            <Step2Goals
-              selectedCategories={selectedCategories}
-              primaryCategory={primaryCategory}
-              secondaryCategories={secondaryCategories}
-              goals={goals}
-              onUpdateGoal={(category, goal) =>
-                setGoals((prev) => ({ ...prev, [category]: goal }))
-              }
-              onNext={() => setCurrentStep(3)}
-              onBack={() => setCurrentStep(1)}
-            />
-          </WizardStepBoundary>
-        )}
-
-        {currentStep === 3 && (
-          <WizardStepBoundary stepName="Actions">
-            <Step3Actions
-              primaryCategory={primaryCategory}
-              secondaryCategories={secondaryCategories}
-              actions={actions}
-              onUpdateActions={(category, categoryActions) =>
-                setActions((prev) => ({ ...prev, [category]: categoryActions }))
-              }
-              onNext={() => setCurrentStep(4)}
-              onBack={() => setCurrentStep(2)}
-            />
-          </WizardStepBoundary>
-        )}
-
-        {currentStep === 4 && (
-          <WizardStepBoundary stepName="Habits">
-            <Step4Habits
-              primaryCategory={primaryCategory}
-              secondaryCategories={secondaryCategories}
-              habits={habits}
-              onUpdateHabit={(category, habit) =>
-                setHabits((prev) => ({ ...prev, [category]: habit }))
-              }
-              onNext={() => setCurrentStep(5)}
-              onBack={() => setCurrentStep(3)}
-            />
-          </WizardStepBoundary>
-        )}
-
-        {currentStep === 5 && (
-          <WizardStepBoundary stepName="Motivation">
-            <Step5Motivation
-              primaryCategory={primaryCategory}
-              secondaryCategories={secondaryCategories}
-              motivation={motivation}
-              onUpdateMotivation={(category, type, value) =>
-                setMotivation((prev) => ({
-                  ...prev,
-                  [category]: {
-                    ...(prev[category] || { why: "", consequence: "" }),
-                    [type]: value,
-                  },
-                }))
-              }
-              onNext={() => setCurrentStep(6)}
-              onBack={() => setCurrentStep(4)}
-            />
-          </WizardStepBoundary>
-        )}
-
-        {currentStep === 6 && (
-          <WizardStepBoundary stepName="Summary">
-            <Step6Summary
-              goals={compiledGoals}
-              primaryCategory={primaryCategory}
-              secondaryCategories={secondaryCategories}
-              userName={userName}
-              userEmail={userEmail}
-              isPdfGenerating={isPdfGenerating}
-              onUpdateUserInfo={(field, value) => {
-                if (field === "name") setUserName(value);
-                else setUserEmail(value);
-              }}
-              onDownloadPDF={handleDownloadPDF}
-              onBack={() => setCurrentStep(5)}
-              lifeWheelRatings={lifeWheelRatings}
-            />
-          </WizardStepBoundary>
-        )}
       </div>
-    </div>
     </>
   );
 };
