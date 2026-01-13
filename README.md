@@ -91,6 +91,7 @@ See `ENV-SETUP.md` for required environment variables.
 ## Production Readiness
 
 This project has been optimized for production with:
+
 - Security hardening (input validation, security headers)
 - Performance optimization (code splitting, lazy loading)
 - Error tracking setup
