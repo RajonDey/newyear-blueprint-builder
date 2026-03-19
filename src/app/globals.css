@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Spiritual Warm Palette ──
+     * Inspired by: Isha Foundation, Bhagavad Gita aesthetics
+     * Ivory backgrounds, deep indigo text, saffron accents
+     */
+
+    --background: 40 33% 98%;
+    --foreground: 222 35% 19%;
+    --card: 40 30% 99%;
+    --card-foreground: 222 35% 19%;
+    --popover: 40 30% 99%;
+    --popover-foreground: 222 35% 19%;
+
+    /* Primary — Deep Indigo (sacred, wise) */
+    --primary: 242 40% 30%;
+    --primary-foreground: 40 33% 98%;
+
+    /* Secondary — Warm Sand */
+    --secondary: 33 20% 93%;
+    --secondary-foreground: 222 35% 19%;
+
+    /* Muted — Light Parchment */
+    --muted: 35 18% 93%;
+    --muted-foreground: 222 12% 48%;
+
+    /* Accent — Saffron (spiritual warmth, action) */
+    --accent: 28 65% 48%;
+    --accent-foreground: 40 33% 98%;
+
+    /* Semantic */
+    --destructive: 0 65% 48%;
+    --destructive-foreground: 40 33% 98%;
+    --success: 152 50% 38%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 80% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Chrome */
+    --border: 33 15% 88%;
+    --input: 33 15% 88%;
+    --ring: 242 40% 30%;
+
+    /* Sidebar — Warm Ivory */
+    --sidebar-background: 38 25% 96%;
+    --sidebar-foreground: 222 35% 22%;
+    --sidebar-primary: 242 40% 30%;
+    --sidebar-primary-foreground: 40 33% 98%;
+    --sidebar-accent: 33 20% 92%;
+    --sidebar-accent-foreground: 222 35% 22%;
+    --sidebar-border: 33 15% 88%;
+    --sidebar-ring: 242 40% 30%;
+
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 225 20% 7%;
+    --foreground: 35 20% 90%;
+    --card: 225 18% 10%;
+    --card-foreground: 35 20% 90%;
+    --popover: 225 18% 10%;
+    --popover-foreground: 35 20% 90%;
+
+    --primary: 35 55% 55%;
+    --primary-foreground: 225 20% 7%;
+
+    --secondary: 225 14% 15%;
+    --secondary-foreground: 35 20% 90%;
+
+    --muted: 225 14% 15%;
+    --muted-foreground: 35 12% 55%;
+
+    --accent: 28 60% 52%;
+    --accent-foreground: 225 20% 7%;
+
+    --destructive: 0 55% 45%;
+    --destructive-foreground: 35 20% 90%;
+    --success: 152 50% 38%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 80% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 225 12% 18%;
+    --input: 225 12% 18%;
+    --ring: 35 55% 55%;
+
+    --sidebar-background: 225 20% 8%;
+    --sidebar-foreground: 35 16% 82%;
+    --sidebar-primary: 35 55% 55%;
+    --sidebar-primary-foreground: 225 20% 7%;
+    --sidebar-accent: 225 14% 14%;
+    --sidebar-accent-foreground: 35 16% 82%;
+    --sidebar-border: 225 12% 16%;
+    --sidebar-ring: 35 55% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
+  }
+
+  /* Elegant selection color */
+  ::selection {
+    @apply bg-accent/20 text-foreground;
+  }
+}
+
+/* ── Decorative Utilities ── */
+@layer utilities {
+  .text-gradient-brand {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(242 40% 30%), hsl(28 65% 48%));
+  }
+
+  .dark .text-gradient-brand {
+    background-image: linear-gradient(135deg, hsl(35 55% 55%), hsl(28 60% 52%));
+  }
+
+  /* Organic divider line */
+  .divider-ornament {
+    @apply relative flex items-center justify-center py-6;
+  }
+
+  .divider-ornament::before,
+  .divider-ornament::after {
+    content: "";
+    @apply flex-1 border-t border-border;
+  }
+
+  .divider-ornament::before {
+    @apply mr-4;
+  }
+
+  .divider-ornament::after {
+    @apply ml-4;
+  }
+
+  /* Watermark background pattern */
+  .bg-mandala-watermark {
+    background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='200' cy='200' r='180' stroke='%23D4B896' stroke-width='0.5' opacity='0.12'/%3E%3Ccircle cx='200' cy='200' r='140' stroke='%23D4B896' stroke-width='0.5' opacity='0.1'/%3E%3Ccircle cx='200' cy='200' r='100' stroke='%23D4B896' stroke-width='0.5' opacity='0.08'/%3E%3Ccircle cx='200' cy='200' r='60' stroke='%23D4B896' stroke-width='0.5' opacity='0.12'/%3E%3Ccircle cx='200' cy='200' r='20' fill='%23D4B896' opacity='0.06'/%3E%3Ccircle cx='200' cy='20' r='6' fill='%23D4B896' opacity='0.08'/%3E%3Ccircle cx='200' cy='380' r='6' fill='%23D4B896' opacity='0.08'/%3E%3Ccircle cx='20' cy='200' r='6' fill='%23D4B896' opacity='0.08'/%3E%3Ccircle cx='380' cy='200' r='6' fill='%23D4B896' opacity='0.08'/%3E%3Ccircle cx='72' cy='72' r='5' fill='%23D4B896' opacity='0.07'/%3E%3Ccircle cx='328' cy='72' r='5' fill='%23D4B896' opacity='0.07'/%3E%3Ccircle cx='72' cy='328' r='5' fill='%23D4B896' opacity='0.07'/%3E%3Ccircle cx='328' cy='328' r='5' fill='%23D4B896' opacity='0.07'/%3E%3Cline x1='200' y1='20' x2='200' y2='380' stroke='%23D4B896' stroke-width='0.3' opacity='0.06'/%3E%3Cline x1='20' y1='200' x2='380' y2='200' stroke='%23D4B896' stroke-width='0.3' opacity='0.06'/%3E%3Cline x1='72' y1='72' x2='328' y2='328' stroke='%23D4B896' stroke-width='0.3' opacity='0.04'/%3E%3Cline x1='328' y1='72' x2='72' y2='328' stroke='%23D4B896' stroke-width='0.3' opacity='0.04'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }
+
+  /* Lotus-leaf decorative corners */
+  .bg-lotus-corner {
+    background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 110 Q10 60 60 60 Q60 10 110 10' stroke='%23D4B896' stroke-width='0.8' fill='none' opacity='0.15'/%3E%3Cpath d='M15 110 Q15 65 65 65 Q65 15 115 15' stroke='%23D4B896' stroke-width='0.5' fill='none' opacity='0.1'/%3E%3Ccircle cx='60' cy='60' r='3' fill='%23D4B896' opacity='0.12'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: top right;
+    background-size: 120px;
+  }
+}

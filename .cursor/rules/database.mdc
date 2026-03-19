@@ -1,0 +1,30 @@
+---
+description: Database and Prisma patterns
+globs: ["src/**/*.ts", "prisma/**"]
+---
+
+# Database Standards
+
+## Prisma Client
+- Always use the singleton from `@/lib/db` (`import { db } from "@/lib/db"`).
+- Use `include` sparingly — only fetch relations you actually need.
+- For list queries, always paginate. Default: 20 items per page.
+- Use transactions (`db.$transaction`) for multi-table operations.
+
+## Plan Tier Limits (enforce in API routes)
+- FREE: max 1 yearly plan, 3 goals per plan, 3 daily systems per goal
+- PRO: unlimited plans, unlimited goals, unlimited systems
+- Check limits from `@/lib/config` (`planLimits`) before creating records.
+
+## Schema Conventions
+- Table names: snake_case plural (@@map)
+- Column names: camelCase (Prisma convention)
+- Always include createdAt/updatedAt on mutable models
+- Use `@default(cuid())` for IDs
+- Use enums for fixed-value columns
+
+## Query Patterns
+- Use `findUnique` when you have a unique identifier.
+- Use `findFirst` with a `where` clause for filtered queries.
+- Use `findMany` with `take` and `skip` for paginated lists.
+- Always order results explicitly.
