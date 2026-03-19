@@ -16,11 +16,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No signature" }, { status: 400 })
   }
 
-  const isValid = verifyWebhookSignature(
-    body,
-    signature,
-    process.env.LEMONSQUEEZY_WEBHOOK_SECRET!
-  )
+  const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET
+  if (!secret) {
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 })
+  }
+
+  const isValid = verifyWebhookSignature(body, signature, secret)
 
   if (!isValid) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
@@ -76,7 +77,7 @@ export async function POST(req: Request) {
         paused: "INACTIVE",
       }
 
-      await db.subscription.update({
+      await db.subscription.updateMany({
         where: { lsCustomerId: customerId },
         data: {
           status: statusMap[attrs.status] || "INACTIVE",
@@ -87,18 +88,17 @@ export async function POST(req: Request) {
       break
     }
 
-    case "subscription_cancelled":
     case "subscription_expired": {
       const data = event.data
       const attrs = data.attributes
       const customerId = String(attrs.customer_id)
 
-      await db.subscription.update({
+      await db.subscription.updateMany({
         where: { lsCustomerId: customerId },
         data: { status: "CANCELED" },
       })
 
-      const sub = await db.subscription.findUnique({
+      const sub = await db.subscription.findFirst({
         where: { lsCustomerId: customerId },
       })
       if (sub) {
@@ -107,6 +107,18 @@ export async function POST(req: Request) {
           data: { planTier: "FREE" },
         })
       }
+      break
+    }
+
+    case "subscription_cancelled": {
+      const data = event.data
+      const attrs = data.attributes
+      const customerId = String(attrs.customer_id)
+
+      await db.subscription.updateMany({
+        where: { lsCustomerId: customerId },
+        data: { status: "CANCELED", cancelAtPeriodEnd: true },
+      })
       break
     }
   }

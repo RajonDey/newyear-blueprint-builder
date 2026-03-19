@@ -103,7 +103,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       {!isPro && (
         <div className="border-t p-4">
           <Link
-            href="/settings"
+            href="/settings#billing"
             className="flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             <Sparkles className="h-4 w-4" />

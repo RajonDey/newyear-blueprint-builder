@@ -5,7 +5,7 @@ import { Sparkles, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface PremiumGateProps {
-  children: React.ReactNode
+  children?: React.ReactNode
   isPremium: boolean
   fallback?: React.ReactNode
   featureName?: string
@@ -32,7 +32,7 @@ export function PremiumGate({
           Upgrade to Pro to unlock this feature and supercharge your year planning.
         </p>
       </div>
-      <Link href="/settings">
+      <Link href="/settings#billing">
         <Button>
           <Sparkles className="mr-2 h-4 w-4" />
           Upgrade to Pro

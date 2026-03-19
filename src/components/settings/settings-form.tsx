@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MandalaWatermark } from "@/components/shared/mandala-watermark"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
-import { Loader2, User, LogOut } from "lucide-react"
+import { Loader2, User, LogOut, Sparkles, Check } from "lucide-react"
 import { toast } from "sonner"
 
 const COMMON_TIMEZONES = [
@@ -26,9 +26,15 @@ const COMMON_TIMEZONES = [
   "Australia/Sydney",
 ]
 
-export function SettingsForm() {
+interface SettingsFormProps {
+  planTier: string
+}
+
+export function SettingsForm({ planTier }: SettingsFormProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const isPro = planTier === "PRO"
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [timezone, setTimezone] = useState("UTC")
@@ -85,6 +91,67 @@ export function SettingsForm() {
       </div>
 
       <OrnamentDivider variant="lotus" />
+
+      <Card id="billing">
+        <CardHeader>
+          <CardTitle className="text-lg font-display flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-accent" /> Plan
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isPro ? (
+            <div className="flex items-center gap-3 rounded-lg border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/20 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
+                <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <p className="font-medium">You&apos;re on Pro</p>
+                <p className="text-sm text-muted-foreground">
+                  Full access to analytics, quarterly reviews, and more.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Upgrade to Pro for unlimited goals, quarterly reviews, advanced
+                analytics, and streak shields.
+              </p>
+              <Button
+                onClick={async () => {
+                  setCheckoutLoading(true)
+                  try {
+                    const res = await fetch("/api/checkout", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ plan: "yearly" }),
+                    })
+                    const json = await res.json()
+                    if (!res.ok) throw new Error(json.error || "Failed")
+                    if (json.data?.url) {
+                      window.location.href = json.data.url
+                    } else {
+                      throw new Error("No checkout URL")
+                    }
+                  } catch (err: unknown) {
+                    toast.error(err instanceof Error ? err.message : "Failed to start checkout")
+                  } finally {
+                    setCheckoutLoading(false)
+                  }
+                }}
+                disabled={checkoutLoading}
+              >
+                {checkoutLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-2 h-4 w-4" />
+                )}
+                Upgrade to Pro — $49/year
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <form onSubmit={handleSubmit}>
         <Card>

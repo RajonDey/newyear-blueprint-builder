@@ -5,7 +5,7 @@ import { SettingsForm } from "@/components/settings/settings-form"
 export const metadata: Metadata = { title: "Settings" }
 
 export default async function SettingsPage() {
-  await requireAuth()
+  const session = await requireAuth()
 
-  return <SettingsForm />
+  return <SettingsForm planTier={session.user.planTier} />
 }
