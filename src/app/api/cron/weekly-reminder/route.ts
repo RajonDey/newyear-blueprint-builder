@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { getWeekNumber } from "@/lib/utils"
+import { sendWeeklyReminder } from "@/lib/email"
 
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization")
@@ -7,17 +9,42 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  const now = new Date()
+  const weekNumber = getWeekNumber(now)
+  const year = now.getFullYear()
+
   const activePlans = await db.yearlyPlan.findMany({
     where: { status: "ACTIVE" },
     include: {
-      user: { select: { email: true, name: true } },
+      user: { select: { id: true, email: true, name: true } },
+      weeklyCheckIns: {
+        where: { weekNumber, year },
+        take: 1,
+      },
     },
   })
 
-  // TODO: Send weekly reminder emails via Resend
-  // For each user with an active plan, send a reminder to do their weekly check-in
+  const toNotify = activePlans.filter((p) => p.weeklyCheckIns.length === 0)
+  const sent: string[] = []
+  const errors: { email: string; error: string }[] = []
+
+  for (const plan of toNotify) {
+    try {
+      await sendWeeklyReminder(plan.user.email, plan.user.name ?? undefined)
+      sent.push(plan.user.email)
+    } catch (e) {
+      errors.push({
+        email: plan.user.email,
+        error: e instanceof Error ? e.message : "Unknown error",
+      })
+    }
+  }
 
   return NextResponse.json({
-    data: { usersNotified: activePlans.length },
+    data: {
+      usersNotified: sent.length,
+      sent,
+      errors: errors.length > 0 ? errors : undefined,
+    },
   })
 }
