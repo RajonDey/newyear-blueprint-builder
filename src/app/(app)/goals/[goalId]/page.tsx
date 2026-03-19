@@ -1,17 +1,28 @@
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { requireAuth } from "@/lib/auth-guard"
+import { getGoalById } from "@/lib/queries/goals"
+import { GoalDetailView } from "@/components/goals/goal-detail-view"
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ goalId: string }>
+}): Promise<Metadata> {
+  const { goalId } = await params
+  return { title: `Goal — ${goalId.slice(0, 6)}` }
+}
+
 export default async function GoalDetailPage({
   params,
 }: {
   params: Promise<{ goalId: string }>
 }) {
+  const session = await requireAuth()
   const { goalId } = await params
+  const goal = await getGoalById(goalId, session.user.id)
 
-  return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Goal Detail</h1>
-      <p className="text-muted-foreground">Goal ID: {goalId}</p>
-      <div className="rounded-lg border p-8 text-center text-muted-foreground">
-        Goal detail view will be built in Phase 1.
-      </div>
-    </div>
-  )
+  if (!goal) notFound()
+
+  return <GoalDetailView goal={goal as any} />
 }

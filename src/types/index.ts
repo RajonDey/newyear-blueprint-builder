@@ -18,4 +18,12 @@ declare module "next-auth" {
   }
 }
 
+declare module "@auth/core/jwt" {
+  interface JWT {
+    id: string
+    role: Role
+    planTier: PlanTier
+  }
+}
+
 export type { Role, PlanTier }

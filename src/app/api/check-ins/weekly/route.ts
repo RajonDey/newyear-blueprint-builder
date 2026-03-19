@@ -57,18 +57,72 @@ export async function POST(req: Request) {
   const weekNumber = getWeekNumber(now)
   const year = now.getFullYear()
 
-  const checkIn = await db.weeklyCheckIn.create({
-    data: {
-      planId: parsed.data.planId,
-      weekNumber,
-      year,
-      overallMood: parsed.data.overallMood,
-      notes: parsed.data.notes,
-      goalCheckIns: {
-        create: parsed.data.goalCheckIns,
+  const checkIn = await db.$transaction(async (tx) => {
+    const created = await tx.weeklyCheckIn.create({
+      data: {
+        planId: parsed.data.planId,
+        weekNumber,
+        year,
+        overallMood: parsed.data.overallMood,
+        notes: parsed.data.notes,
+        goalCheckIns: {
+          create: parsed.data.goalCheckIns,
+        },
       },
-    },
-    include: { goalCheckIns: true },
+      include: { goalCheckIns: true },
+    })
+
+    const prevWeek = weekNumber === 1 ? 52 : weekNumber - 1
+    const prevYear = weekNumber === 1 ? year - 1 : year
+
+    const hadPrevWeek = await tx.weeklyCheckIn.findFirst({
+      where: {
+        plan: { userId: session.user.id },
+        weekNumber: prevWeek,
+        year: prevYear,
+      },
+    })
+
+    const streak = await tx.streak.findUnique({
+      where: { userId_type: { userId: session.user.id, type: "WEEKLY_CHECK_IN" } },
+    })
+
+    const newCurrent = hadPrevWeek ? (streak?.currentStreak ?? 0) + 1 : 1
+    const newLongest = Math.max(streak?.longestStreak ?? 0, newCurrent)
+
+    await tx.streak.upsert({
+      where: { userId_type: { userId: session.user.id, type: "WEEKLY_CHECK_IN" } },
+      create: {
+        userId: session.user.id,
+        type: "WEEKLY_CHECK_IN",
+        currentStreak: newCurrent,
+        longestStreak: newLongest,
+        lastCompletedAt: now,
+      },
+      update: {
+        currentStreak: newCurrent,
+        longestStreak: newLongest,
+        lastCompletedAt: now,
+      },
+    })
+
+    const streakMilestones = [1, 4, 12, 26, 52]
+    for (const m of streakMilestones) {
+      if (newCurrent >= m) {
+        const type = m === 1 ? "first_check_in" : `streak_${m}`
+        await tx.achievement.upsert({
+          where: { userId_type: { userId: session.user.id, type } },
+          create: {
+            userId: session.user.id,
+            type,
+            title: m === 1 ? "First Step" : `${m}-week streak`,
+          },
+          update: {},
+        })
+      }
+    }
+
+    return created
   })
 
   return NextResponse.json({ data: checkIn }, { status: 201 })

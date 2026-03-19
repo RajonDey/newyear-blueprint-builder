@@ -93,12 +93,13 @@ model Subscription {
 // ─── YEARLY PLANS ────────────────────────────────────
 
 model YearlyPlan {
-  id        String     @id @default(cuid())
-  userId    String
-  year      Int
-  status    PlanStatus @default(DRAFT)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id          String     @id @default(cuid())
+  userId      String
+  year        Int
+  status      PlanStatus @default(DRAFT)
+  reflections Json?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   wheelEntries     WheelOfLifeEntry[]

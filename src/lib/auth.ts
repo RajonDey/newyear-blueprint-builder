@@ -7,6 +7,7 @@ import { db } from "@/lib/db"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db) as Adapter,
+  session: { strategy: "jwt" },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -22,13 +23,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/login",
   },
   callbacks: {
-    session({ session, user }) {
+    async jwt({ token, user, trigger }) {
+      if (user) {
+        token.id = user.id
+        token.role = (user as any).role
+        token.planTier = (user as any).planTier
+      }
+      if (trigger === "update") {
+        const dbUser = await db.user.findUnique({
+          where: { id: token.id as string },
+          select: { role: true, planTier: true },
+        })
+        if (dbUser) {
+          token.role = dbUser.role
+          token.planTier = dbUser.planTier
+        }
+      }
+      return token
+    },
+    session({ session, token }) {
       if (session.user) {
-        session.user.id = user.id
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        session.user.role = (user as any).role
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        session.user.planTier = (user as any).planTier
+        session.user.id = token.id as string
+        session.user.role = token.role as any
+        session.user.planTier = token.planTier as any
       }
       return session
     },

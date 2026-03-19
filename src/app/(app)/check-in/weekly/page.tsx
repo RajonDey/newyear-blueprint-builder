@@ -1,17 +1,32 @@
 import type { Metadata } from "next"
+import { requireAuth } from "@/lib/auth-guard"
+import { getCheckInFormData } from "@/lib/queries/check-in"
+import { WeeklyCheckInForm } from "@/components/check-in/weekly-check-in-form"
 
 export const metadata: Metadata = { title: "Weekly Check-in" }
 
-export default function WeeklyCheckInPage() {
-  return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <h1 className="text-3xl font-bold">Weekly Check-in</h1>
-      <p className="text-muted-foreground">
-        Take 60 seconds to reflect on your progress this week.
-      </p>
-      <div className="rounded-lg border p-8 text-center text-muted-foreground">
-        Weekly check-in form will be built in Phase 2.
+export default async function WeeklyCheckInPage() {
+  const session = await requireAuth()
+  const data = await getCheckInFormData(session.user.id)
+
+  if (!data) {
+    return (
+      <div className="max-w-2xl space-y-8">
+        <h1 className="font-display text-3xl font-semibold">
+          Weekly Check-in
+        </h1>
+        <p className="text-muted-foreground">
+          Create your yearly plan first to start tracking weekly progress.
+        </p>
+        <a
+          href="/plan/new"
+          className="inline-flex items-center gap-2 text-accent hover:underline font-medium"
+        >
+          Create your plan →
+        </a>
       </div>
-    </div>
-  )
+    )
+  }
+
+  return <WeeklyCheckInForm data={data} />
 }

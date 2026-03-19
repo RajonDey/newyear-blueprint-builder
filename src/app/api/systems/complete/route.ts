@@ -1,0 +1,86 @@
+import { NextResponse } from "next/server"
+import { auth } from "@/lib/auth"
+import { db } from "@/lib/db"
+import { z } from "zod"
+
+const completeSchema = z.object({
+  systemId: z.string().min(1),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  completed: z.boolean(),
+})
+
+export async function POST(req: Request) {
+  const session = await auth()
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const body = await req.json()
+  const parsed = completeSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 })
+  }
+
+  const { systemId, date, completed } = parsed.data
+  const dateObj = new Date(date + "T00:00:00.000Z")
+
+  const system = await db.dailySystem.findFirst({
+    where: {
+      id: systemId,
+      goal: { plan: { userId: session.user.id } },
+    },
+  })
+
+  if (!system) {
+    return NextResponse.json({ error: "System not found" }, { status: 404 })
+  }
+
+  if (completed) {
+    await db.systemCompletion.upsert({
+      where: {
+        systemId_date: { systemId, date: dateObj },
+      },
+      create: { systemId, date: dateObj },
+      update: {},
+    })
+  } else {
+    await db.systemCompletion.deleteMany({
+      where: { systemId, date: dateObj },
+    })
+  }
+
+  const activeSystemIds = await db.dailySystem.findMany({
+    where: {
+      goal: { plan: { userId: session.user.id, status: "ACTIVE" } },
+      isActive: true,
+    },
+    select: { id: true },
+  }).then((r) => r.map((s) => s.id))
+
+  const completionsToday = await db.systemCompletion.count({
+    where: {
+      systemId: { in: activeSystemIds },
+      date: dateObj,
+    },
+  })
+
+  const allDone = completionsToday === activeSystemIds.length && activeSystemIds.length > 0
+
+  if (allDone) {
+    await db.achievement.upsert({
+      where: {
+        userId_type: { userId: session.user.id, type: "all_systems_day" },
+      },
+      create: {
+        userId: session.user.id,
+        type: "all_systems_day",
+        title: "Perfect Day",
+      },
+      update: {},
+    })
+  }
+
+  return NextResponse.json({
+    data: { completed, allSystemsDone: allDone },
+  })
+}
