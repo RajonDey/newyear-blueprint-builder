@@ -12,22 +12,26 @@ import {
   Settings,
   Sparkles,
   ListChecks,
+  Shield,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { hasProProductAccess } from "@/lib/plan-access"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import type { PlanTier, Role } from "@prisma/client"
 
 interface AppSidebarProps {
   user: {
     name?: string | null
-    planTier: string
+    planTier: PlanTier
+    role: Role
   }
 }
 
-const navigation = [
+const navigationBase = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Goals", href: "/goals", icon: Target },
   { label: "Daily Systems", href: "/systems", icon: ListChecks },
-  { label: "Weekly Check-in", href: "/check-in/weekly", icon: CalendarCheck },
+  { label: "Weekly rhythm", href: "/check-in/weekly", icon: CalendarCheck },
   { label: "divider", href: "", icon: Activity },
   { label: "Analytics", href: "/analytics", icon: BarChart3, premium: true },
   {
@@ -43,7 +47,16 @@ const navigation = [
 
 export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname()
-  const isPro = user.planTier === "PRO"
+  const isPro = hasProProductAccess(user.planTier, user.role)
+
+  const navigation =
+    user.role === "ADMIN"
+      ? [
+          ...navigationBase.slice(0, -2),
+          { label: "Admin", href: "/admin", icon: Shield },
+          ...navigationBase.slice(-2),
+        ]
+      : navigationBase
 
   return (
     <aside className="hidden md:flex w-64 flex-col border-r bg-sidebar">

@@ -1,32 +1,71 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { requireAuth } from "@/lib/auth-guard"
-import { getCheckInFormData } from "@/lib/queries/check-in"
+import { AppContent } from "@/components/shared/app-content"
+import { MandalaWatermark } from "@/components/shared/mandala-watermark"
+import { OrnamentDivider } from "@/components/shared/ornament-divider"
+import { getWeeklyWorkspaceData } from "@/lib/queries/weekly-workspace"
 import { WeeklyCheckInForm } from "@/components/check-in/weekly-check-in-form"
+import { WeeklyPlanForm } from "@/components/check-in/weekly-plan-form"
+import { WeeklyWorkspaceTabs } from "@/components/check-in/weekly-workspace-tabs"
+import { Button } from "@/components/ui/button"
 
-export const metadata: Metadata = { title: "Weekly Check-in" }
+export const metadata: Metadata = { title: "Weekly rhythm" }
 
 export default async function WeeklyCheckInPage() {
   const session = await requireAuth()
-  const data = await getCheckInFormData(session.user.id)
+  const data = await getWeeklyWorkspaceData(session.user.id)
 
   if (!data) {
     return (
-      <div className="max-w-2xl space-y-8">
-        <h1 className="font-display text-3xl font-semibold">
-          Weekly Check-in
-        </h1>
-        <p className="text-muted-foreground">
-          Create your yearly plan first to start tracking weekly progress.
-        </p>
-        <a
-          href="/plan/new"
-          className="inline-flex items-center gap-2 text-accent hover:underline font-medium"
-        >
-          Create your plan →
-        </a>
-      </div>
+      <AppContent variant="narrow">
+        <div className="relative w-full space-y-8">
+          <MandalaWatermark position="top-right" size="sm" />
+          <div>
+            <h1 className="font-display text-3xl font-semibold">
+              Weekly rhythm
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Create your yearly plan first to plan and review each week.
+            </p>
+          </div>
+          <OrnamentDivider variant="lotus" />
+          <Button asChild>
+            <Link href="/plan/new">Create your plan</Link>
+          </Button>
+        </div>
+      </AppContent>
     )
   }
 
-  return <WeeklyCheckInForm data={data} />
+  return (
+    <AppContent variant="narrow">
+      <div className="relative w-full space-y-6">
+        <MandalaWatermark position="top-right" size="sm" />
+        <div>
+          <h1 className="font-display text-3xl font-semibold">Weekly rhythm</h1>
+          <p className="text-muted-foreground mt-1">
+            Week {data.weekNumber} of {data.year} — plan your week, then reflect.
+          </p>
+        </div>
+        <OrnamentDivider variant="lotus" />
+        <WeeklyWorkspaceTabs
+          planSlot={
+            <WeeklyPlanForm
+              planId={data.plan.id}
+              planYear={data.plan.year}
+              goals={data.goals}
+              weekNumber={data.weekNumber}
+              year={data.year}
+              initialPlan={data.weeklyPlan}
+              suggestionFromLastWeek={data.suggestionFromLastWeek}
+            />
+          }
+          reviewSlot={
+            <WeeklyCheckInForm data={data} embedded />
+          }
+        />
+      </div>
+    </AppContent>
+  )
 }

@@ -1,5 +1,6 @@
 import { db } from "@/lib/db"
 import { getWeekNumber } from "@/lib/utils"
+import { getActiveSystemsPeriodProgress } from "@/lib/queries/systems"
 
 export async function getDashboardData(userId: string) {
   const plan = await db.yearlyPlan.findFirst({
@@ -33,17 +34,7 @@ export async function getDashboardData(userId: string) {
   if (!plan) return null
 
   const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-
-  const activeSystemIds = plan.goals.flatMap((g) =>
-    g.dailySystems.filter((s) => s.isActive).map((s) => s.id)
-  )
-
-  const completionsToday = activeSystemIds.length > 0
-    ? await db.systemCompletion.count({
-        where: { systemId: { in: activeSystemIds }, date: today },
-      })
-    : 0
+  const systemsProgress = await getActiveSystemsPeriodProgress(userId)
 
   const streak = await db.streak.findFirst({
     where: { userId, type: "WEEKLY_CHECK_IN" },
@@ -75,8 +66,8 @@ export async function getDashboardData(userId: string) {
       ? { current: streak.currentStreak, longest: streak.longestStreak }
       : { current: 0, longest: 0 },
     systemsToday: {
-      completed: completionsToday,
-      total: activeSystemIds.length,
+      completed: systemsProgress.completed,
+      total: systemsProgress.total,
     },
     lastCheckIn: plan.weeklyCheckIns[0] ?? null,
     currentQuarter,

@@ -34,11 +34,17 @@ export async function GET(
 
 const updateGoalSchema = z.object({
   title: z.string().min(1).max(500).optional(),
-  description: z.string().max(2000).optional(),
+  description: z.string().max(2000).optional().nullable(),
   status: z
     .enum(["NOT_STARTED", "IN_PROGRESS", "ON_TRACK", "AT_RISK", "COMPLETED", "ABANDONED"])
     .optional(),
   type: z.enum(["PRIMARY", "SECONDARY"]).optional(),
+  motivation: z
+    .object({
+      whyText: z.string().max(5000).optional(),
+      consequenceText: z.string().max(5000).optional(),
+    })
+    .optional(),
 })
 
 export async function PUT(
@@ -64,9 +70,44 @@ export async function PUT(
     return NextResponse.json({ error: "Invalid input" }, { status: 400 })
   }
 
-  const goal = await db.goal.update({
-    where: { id: goalId },
-    data: parsed.data,
+  const { motivation, title, description, status, type } = parsed.data
+  const goalUpdate = Object.fromEntries(
+    [
+      ["title", title],
+      ["description", description],
+      ["status", status],
+      ["type", type],
+    ].filter(([, v]) => v !== undefined)
+  )
+
+  const goal = await db.$transaction(async (tx) => {
+    let updated = existing
+    if (Object.keys(goalUpdate).length > 0) {
+      updated = await tx.goal.update({
+        where: { id: goalId },
+        data: goalUpdate,
+      })
+    }
+
+    if (motivation && (motivation.whyText !== undefined || motivation.consequenceText !== undefined)) {
+      const prev = await tx.motivation.findUnique({ where: { goalId } })
+      await tx.motivation.upsert({
+        where: { goalId },
+        create: {
+          goalId,
+          whyText: motivation.whyText ?? prev?.whyText ?? "",
+          consequenceText: motivation.consequenceText ?? prev?.consequenceText ?? "",
+        },
+        update: {
+          ...(motivation.whyText !== undefined && { whyText: motivation.whyText }),
+          ...(motivation.consequenceText !== undefined && {
+            consequenceText: motivation.consequenceText,
+          }),
+        },
+      })
+    }
+
+    return updated
   })
 
   return NextResponse.json({ data: goal })

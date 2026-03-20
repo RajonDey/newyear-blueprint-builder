@@ -106,10 +106,29 @@ model YearlyPlan {
   goals            Goal[]
   antiGoals        AntiGoal[]
   weeklyCheckIns   WeeklyCheckIn[]
+  weeklyPlans      WeeklyPlan[]
   quarterlyReviews QuarterlyReview[]
 
   @@unique([userId, year])
   @@map("yearly_plans")
+}
+
+// Forward-looking weekly intent (Plan beat); pairs with WeeklyCheckIn (Review beat).
+model WeeklyPlan {
+  id              String         @id @default(cuid())
+  planId          String
+  weekNumber      Int
+  year            Int
+  priorityGoalIds String[]       @default([])
+  protectCategory LifeCategory?
+  commitments     Json?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  plan YearlyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, weekNumber, year])
+  @@map("weekly_plans")
 }
 
 // ─── WHEEL OF LIFE ───────────────────────────────────
@@ -242,13 +261,14 @@ model AntiGoal {
 // ─── CHECK-INS ───────────────────────────────────────
 
 model WeeklyCheckIn {
-  id          String   @id @default(cuid())
-  planId      String
-  weekNumber  Int
-  year        Int
-  overallMood Int?
-  notes       String?  @db.Text
-  completedAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  planId         String
+  weekNumber     Int
+  year           Int
+  overallMood    Int?
+  notes          String?  @db.Text
+  nextWeekFocus  String?  @db.Text
+  completedAt    DateTime @default(now())
 
   plan         YearlyPlan    @relation(fields: [planId], references: [id], onDelete: Cascade)
   goalCheckIns GoalCheckIn[]

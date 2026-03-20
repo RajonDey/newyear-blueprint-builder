@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import { requireAuth } from "@/lib/auth-guard"
+import { AppContent } from "@/components/shared/app-content"
+import { hasProProductAccess } from "@/lib/plan-access"
 import { AnalyticsDashboard } from "@/components/analytics/analytics-dashboard"
 import { PremiumGate } from "@/components/shared/premium-gate"
 
@@ -9,11 +11,16 @@ export default async function AnalyticsPage() {
   const session = await requireAuth()
 
   return (
-    <PremiumGate
-      isPremium={session.user.planTier === "PRO"}
-      featureName="Analytics"
-    >
-      <AnalyticsDashboard />
-    </PremiumGate>
+    <AppContent variant="wide">
+      <PremiumGate
+        isPremium={hasProProductAccess(
+          session.user.planTier,
+          session.user.role
+        )}
+        featureName="Analytics"
+      >
+        <AnalyticsDashboard />
+      </PremiumGate>
+    </AppContent>
   )
 }

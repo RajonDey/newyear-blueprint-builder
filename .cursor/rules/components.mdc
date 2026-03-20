@@ -14,6 +14,9 @@ globs: ["src/components/**/*.tsx"]
 - Props interface named `{ComponentName}Props`. Define above the component.
 - Destructure props in the function signature.
 
+## App shell layout
+- Authenticated pages: wrap main content in `<AppContent variant="narrow">` (forms, check-ins, settings, goal detail) or `variant="wide"` (dashboard, goals grid, analytics, systems, wrapped, plan year). Do not add separate `max-w-*` on the inner root unless needed for a sub-region.
+
 ## Styling
 - Use shadcn/ui primitives from `@/components/ui/*` — never build custom buttons, inputs, dialogs from scratch.
 - Use `cn()` from `@/lib/utils` for conditional classes.

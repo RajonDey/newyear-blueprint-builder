@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { auth } from "@/lib/auth"
 import { requireAuth } from "@/lib/auth-guard"
+import { AppContent } from "@/components/shared/app-content"
 import { getGoalById } from "@/lib/queries/goals"
 import { GoalDetailView } from "@/components/goals/goal-detail-view"
 
@@ -9,8 +11,12 @@ export async function generateMetadata({
 }: {
   params: Promise<{ goalId: string }>
 }): Promise<Metadata> {
+  const session = await auth()
+  if (!session?.user) return { title: "Goal" }
   const { goalId } = await params
-  return { title: `Goal — ${goalId.slice(0, 6)}` }
+  const goal = await getGoalById(goalId, session.user.id)
+  if (!goal) return { title: "Goal" }
+  return { title: goal.title }
 }
 
 export default async function GoalDetailPage({
@@ -24,5 +30,9 @@ export default async function GoalDetailPage({
 
   if (!goal) notFound()
 
-  return <GoalDetailView goal={goal as any} />
+  return (
+    <AppContent variant="narrow">
+      <GoalDetailView goal={goal as any} />
+    </AppContent>
+  )
 }

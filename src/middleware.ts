@@ -6,10 +6,12 @@ const publicRoutes = [
   "/login",
   "/signup",
   "/pricing",
+  "/features",
   "/blog",
   "/terms",
   "/privacy",
   "/refund",
+  "/cookies",
 ]
 
 export default auth((req) => {

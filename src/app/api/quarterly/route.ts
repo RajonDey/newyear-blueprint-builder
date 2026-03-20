@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { planLimits } from "@/lib/config"
+import { hasProProductAccess } from "@/lib/plan-access"
 import { z } from "zod"
 
 const createSchema = z.object({
@@ -46,8 +46,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 })
   }
 
-  const limits = planLimits[session.user.planTier]
-  if (!limits.quarterlyReview) {
+  if (!hasProProductAccess(session.user.planTier, session.user.role)) {
     return NextResponse.json(
       { error: "Quarterly reviews are a Pro feature. Upgrade to unlock." },
       { status: 403 }

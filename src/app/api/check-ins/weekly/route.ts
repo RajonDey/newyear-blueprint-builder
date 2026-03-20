@@ -8,6 +8,7 @@ const createCheckInSchema = z.object({
   planId: z.string().min(1),
   overallMood: z.number().int().min(1).max(5).optional(),
   notes: z.string().max(2000).optional(),
+  nextWeekFocus: z.string().max(2000).optional(),
   goalCheckIns: z.array(
     z.object({
       goalId: z.string().min(1),
@@ -65,6 +66,7 @@ export async function POST(req: Request) {
         year,
         overallMood: parsed.data.overallMood,
         notes: parsed.data.notes,
+        nextWeekFocus: parsed.data.nextWeekFocus?.trim() || null,
         goalCheckIns: {
           create: parsed.data.goalCheckIns,
         },

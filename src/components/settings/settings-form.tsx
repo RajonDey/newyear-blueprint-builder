@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { signOut } from "next-auth/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,6 +11,7 @@ import { MandalaWatermark } from "@/components/shared/mandala-watermark"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
 import { Loader2, User, LogOut, Sparkles, Check } from "lucide-react"
 import { toast } from "sonner"
+import { SITE_LEGAL_NAME } from "@/lib/legal"
 
 const COMMON_TIMEZONES = [
   "UTC",
@@ -80,7 +82,7 @@ export function SettingsForm({ planTier }: SettingsFormProps) {
   }
 
   return (
-    <div className="relative max-w-2xl space-y-8">
+    <div className="relative w-full space-y-8">
       <MandalaWatermark position="top-right" size="sm" />
 
       <div>
@@ -204,6 +206,42 @@ export function SettingsForm({ planTier }: SettingsFormProps) {
           </CardContent>
         </Card>
       </form>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-display">Legal</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground space-y-2">
+          <p>Policies for {SITE_LEGAL_NAME}:</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              <Link href="/terms" className="text-primary hover:underline">
+                Terms of Service
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy" className="text-primary hover:underline">
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link href="/cookies" className="text-primary hover:underline">
+                Cookie Policy
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy/california" className="text-primary hover:underline">
+                California privacy notice
+              </Link>
+            </li>
+            <li>
+              <Link href="/refund" className="text-primary hover:underline">
+                Refund Policy
+              </Link>
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

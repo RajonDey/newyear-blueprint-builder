@@ -3,6 +3,7 @@ import Link from "next/link"
 import { requireAuth } from "@/lib/auth-guard"
 import { getGoalsForUser } from "@/lib/queries/goals"
 import { GoalCard } from "@/components/goals/goal-card"
+import { AppContent } from "@/components/shared/app-content"
 import { PageHeader } from "@/components/shared/page-header"
 import { EmptyState } from "@/components/shared/empty-state"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,7 @@ export default async function GoalsPage() {
 
   if (goals.length === 0) {
     return (
+      <AppContent variant="wide">
       <div className="space-y-6">
         <PageHeader title="Your Goals" description="Track your yearly intentions" />
         <EmptyState
@@ -31,6 +33,7 @@ export default async function GoalsPage() {
           }
         />
       </div>
+      </AppContent>
     )
   }
 
@@ -38,6 +41,7 @@ export default async function GoalsPage() {
   const secondaryGoals = goals.filter((g) => g.type === "SECONDARY")
 
   return (
+    <AppContent variant="wide">
     <div className="space-y-8">
       <PageHeader
         title="Your Goals"
@@ -70,5 +74,6 @@ export default async function GoalsPage() {
         </section>
       )}
     </div>
+    </AppContent>
   )
 }

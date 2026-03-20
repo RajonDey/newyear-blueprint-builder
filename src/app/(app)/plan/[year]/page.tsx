@@ -6,6 +6,7 @@ import { db } from "@/lib/db"
 import { getPlanById } from "@/lib/queries/plans"
 import { GoalCard } from "@/components/goals/goal-card"
 import { WheelChart } from "@/components/dashboard/wheel-chart"
+import { AppContent } from "@/components/shared/app-content"
 import { PageHeader } from "@/components/shared/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -49,6 +50,7 @@ export default async function PlanYearPage({
   const reflections = fullPlan.reflections as Record<string, string> | null
 
   return (
+    <AppContent variant="wide">
     <div className="space-y-8">
       <PageHeader
         title={`${yearNum} Plan`}
@@ -116,5 +118,6 @@ export default async function PlanYearPage({
         </section>
       )}
     </div>
+    </AppContent>
   )
 }

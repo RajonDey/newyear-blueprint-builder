@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { getActiveSystemsPeriodProgress } from "@/lib/queries/systems"
 import { z } from "zod"
 
 const completeSchema = z.object({
@@ -49,22 +50,9 @@ export async function POST(req: Request) {
     })
   }
 
-  const activeSystemIds = await db.dailySystem.findMany({
-    where: {
-      goal: { plan: { userId: session.user.id, status: "ACTIVE" } },
-      isActive: true,
-    },
-    select: { id: true },
-  }).then((r) => r.map((s) => s.id))
-
-  const completionsToday = await db.systemCompletion.count({
-    where: {
-      systemId: { in: activeSystemIds },
-      date: dateObj,
-    },
-  })
-
-  const allDone = completionsToday === activeSystemIds.length && activeSystemIds.length > 0
+  const progress = await getActiveSystemsPeriodProgress(session.user.id)
+  const allDone =
+    progress.completed === progress.total && progress.total > 0
 
   if (allDone) {
     await db.achievement.upsert({

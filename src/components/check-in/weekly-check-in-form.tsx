@@ -29,11 +29,18 @@ interface FormData {
     id: string
     overallMood: number | null
     notes: string | null
+    nextWeekFocus?: string | null
     goalCheckIns: { goalId: string; progressRating: number; notes: string | null; blockers: string | null }[]
   } | null
 }
 
-export function WeeklyCheckInForm({ data }: { data: FormData }) {
+export function WeeklyCheckInForm({
+  data,
+  embedded = false,
+}: {
+  data: FormData
+  embedded?: boolean
+}) {
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
   const [overallMood, setOverallMood] = useState(
@@ -50,6 +57,8 @@ export function WeeklyCheckInForm({ data }: { data: FormData }) {
     }
     return init
   })
+  const [nextWeekFocus, setNextWeekFocus] = useState("")
+
   const [goalNotes, setGoalNotes] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {}
     for (const gc of data.existingCheckIn?.goalCheckIns ?? []) {
@@ -76,6 +85,7 @@ export function WeeklyCheckInForm({ data }: { data: FormData }) {
           planId: data.plan.id,
           overallMood,
           notes: notes.trim() || undefined,
+          nextWeekFocus: nextWeekFocus.trim() || undefined,
           goalCheckIns: data.goals.map((g) => ({
             goalId: g.id,
             progressRating: goalRatings[g.id] ?? 3,
@@ -120,13 +130,21 @@ export function WeeklyCheckInForm({ data }: { data: FormData }) {
   }
 
   return (
-    <div className="relative max-w-2xl space-y-8">
-      <MandalaWatermark position="top-right" size="sm" />
+    <div className="relative w-full space-y-8">
+      {!embedded && (
+        <MandalaWatermark position="top-right" size="sm" />
+      )}
 
       <div>
-        <h1 className="font-display text-3xl font-semibold">
-          Weekly Check-in
-        </h1>
+        {embedded ? (
+          <h2 className="font-display text-2xl font-semibold sm:text-3xl">
+            Weekly review
+          </h2>
+        ) : (
+          <h1 className="font-display text-3xl font-semibold">
+            Weekly Check-in
+          </h1>
+        )}
         <p className="text-muted-foreground mt-1">
           Week {data.weekNumber} of {data.year} — Take 60 seconds to reflect.
         </p>
@@ -135,19 +153,35 @@ export function WeeklyCheckInForm({ data }: { data: FormData }) {
       <OrnamentDivider variant="lotus" />
 
       {alreadyDone ? (
-        <Card className="border-emerald-200 dark:border-emerald-900/50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400">
-              <ClipboardCheck className="h-6 w-6" />
-              <div>
-                <p className="font-medium">You&apos;ve already completed this week&apos;s check-in.</p>
-                <p className="text-sm text-muted-foreground">
-                  Come back next week to keep your streak going.
-                </p>
+        <div className="space-y-4">
+          <Card className="border-emerald-200 dark:border-emerald-900/50">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400">
+                <ClipboardCheck className="h-6 w-6" />
+                <div>
+                  <p className="font-medium">You&apos;ve already completed this week&apos;s check-in.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Come back next week to keep your streak going.
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+          {data.existingCheckIn?.nextWeekFocus && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-display">
+                  Note for next week
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {data.existingCheckIn.nextWeekFocus}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card>
@@ -255,6 +289,27 @@ export function WeeklyCheckInForm({ data }: { data: FormData }) {
                   </div>
                 )
               })}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-display">
+                Looking ahead (optional)
+              </CardTitle>
+              <p className="text-sm text-muted-foreground font-normal">
+                One line you&apos;ll see when you plan next week — top priority,
+                a habit to protect, or something to carry over.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                value={nextWeekFocus}
+                onChange={(e) => setNextWeekFocus(e.target.value)}
+                placeholder="e.g. Protect sleep · Ship the draft · Book the dentist"
+                rows={2}
+                className="resize-none"
+              />
             </CardContent>
           </Card>
 

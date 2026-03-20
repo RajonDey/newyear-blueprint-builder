@@ -28,8 +28,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id
         token.role = (user as any).role
         token.planTier = (user as any).planTier
+        token.roleSyncedAt = Date.now()
+        return token
       }
-      if (trigger === "update") {
+
+      // JWT keeps role/planTier from sign-in; refresh from DB so admin / subscription edits apply
+      // without forcing sign-out (throttled to limit queries).
+      const SYNC_MS = 30_000
+      const stale =
+        trigger === "update" ||
+        token.roleSyncedAt == null ||
+        Date.now() - (token.roleSyncedAt as number) > SYNC_MS
+
+      if (token.id && stale) {
         const dbUser = await db.user.findUnique({
           where: { id: token.id as string },
           select: { role: true, planTier: true },
@@ -38,7 +49,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.role = dbUser.role
           token.planTier = dbUser.planTier
         }
+        token.roleSyncedAt = Date.now()
       }
+
       return token
     },
     session({ session, token }) {

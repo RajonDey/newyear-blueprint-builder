@@ -1,7 +1,7 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import { Moon, Sun, Menu, LogOut, User as UserIcon } from "lucide-react"
+import { Moon, Sun, LogOut, User as UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -14,12 +14,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from "next-auth/react"
 import Link from "next/link"
 import { MobileNav } from "@/components/shared/mobile-nav"
+import type { PlanTier, Role } from "@prisma/client"
 
 interface TopbarProps {
   user: {
     name?: string | null
     email?: string | null
     image?: string | null
+    planTier: PlanTier
+    role: Role
   }
 }
 
@@ -34,7 +37,7 @@ export function Topbar({ user }: TopbarProps) {
   return (
     <header className="flex h-16 items-center justify-between border-b px-6">
       <div className="md:hidden">
-        <MobileNav />
+        <MobileNav planTier={user.planTier} role={user.role} />
       </div>
       <div className="flex-1" />
       <div className="flex items-center gap-2">

@@ -10,7 +10,8 @@ import { OrnamentDivider } from "@/components/shared/ornament-divider"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/shared/empty-state"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
-import { Repeat, Loader2, CheckCircle2, Sparkles, Target } from "lucide-react"
+import Link from "next/link"
+import { Repeat, Loader2, CheckCircle2, Sparkles, Target, Compass } from "lucide-react"
 import { toast } from "sonner"
 
 interface System {
@@ -21,9 +22,15 @@ interface System {
   goal: { id: string; title: string; category: string }
 }
 
+interface WeeklyFocusPayload {
+  goals: { id: string; title: string }[]
+  protectCategory: string | null
+}
+
 export function SystemsTracker() {
   const router = useRouter()
   const [systems, setSystems] = useState<System[]>([])
+  const [weeklyFocus, setWeeklyFocus] = useState<WeeklyFocusPayload | null>(null)
   const [loading, setLoading] = useState(true)
   const [toggling, setToggling] = useState<string | null>(null)
 
@@ -45,6 +52,9 @@ export function SystemsTracker() {
       if (!res.ok) throw new Error("Failed to fetch")
       const json = await res.json()
       setSystems(json.data.systems ?? [])
+      setWeeklyFocus(
+        json.data.weeklyFocus ?? { goals: [], protectCategory: null }
+      )
     } catch {
       toast.error("Failed to load systems")
     } finally {
@@ -106,13 +116,18 @@ export function SystemsTracker() {
         <EmptyState
           icon={Repeat}
           title="No daily systems yet"
-          description="Create your yearly plan and add daily systems to your goals. They'll appear here for you to track."
+          description="Add systems from each goal’s page, or create a plan if you haven’t yet. Paused systems stay hidden here."
           action={
-            <Button asChild>
-              <a href="/plan/new">
-                <Sparkles className="mr-2 h-4 w-4" /> Create Your Plan
-              </a>
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <Button variant="outline" asChild>
+                <Link href="/goals">Manage goals</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/plan/new">
+                  <Sparkles className="mr-2 h-4 w-4" /> Create your plan
+                </Link>
+              </Button>
+            </div>
           }
         />
       </div>
@@ -138,6 +153,49 @@ export function SystemsTracker() {
       </div>
 
       <OrnamentDivider variant="lotus" />
+
+      {(weeklyFocus && (weeklyFocus.goals.length > 0 || weeklyFocus.protectCategory)) && (
+        <Card className="border-accent/30 bg-accent/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-display flex items-center gap-2">
+              <Compass className="h-4 w-4 text-accent" />
+              This week&apos;s focus
+            </CardTitle>
+            <p className="text-xs text-muted-foreground font-normal pt-1">
+              Set on{" "}
+              <Link href="/check-in/weekly" className="text-accent hover:underline">
+                Weekly rhythm
+              </Link>
+              .
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            {weeklyFocus.protectCategory && (
+              <p>
+                <span className="text-muted-foreground">Protecting: </span>
+                <span className="font-medium">
+                  {LIFE_CATEGORIES.find((c) => c.id === weeklyFocus.protectCategory)
+                    ?.label ?? weeklyFocus.protectCategory}
+                </span>
+              </p>
+            )}
+            {weeklyFocus.goals.length > 0 && (
+              <ul className="space-y-1.5">
+                {weeklyFocus.goals.map((g) => (
+                  <li key={g.id}>
+                    <Link
+                      href={`/goals/${g.id}`}
+                      className="text-accent font-medium hover:underline"
+                    >
+                      {g.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader className="pb-2">
@@ -172,7 +230,12 @@ export function SystemsTracker() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
                   {catInfo && <catInfo.icon className="h-4 w-4" style={{ color: catInfo.color }} />}
-                  {goal.title}
+                  <Link
+                    href={`/goals/${goal.id}`}
+                    className="hover:text-accent transition-colors"
+                  >
+                    {goal.title}
+                  </Link>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">

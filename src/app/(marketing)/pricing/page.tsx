@@ -13,7 +13,8 @@ export const metadata: Metadata = {
 const freeFeatures = [
   "Full planning wizard",
   "Up to 3 intentional goals",
-  "Weekly check-ins",
+  "Weekly rhythm (plan + review)",
+  "Daily systems tied to goals",
   "Basic streak tracking",
   "Wheel of Life assessment",
   "PDF export",
@@ -73,8 +74,8 @@ export default function PricingPage() {
               ))}
             </ul>
             <Link href="/signup" className="block">
-              <Button variant="outline" className="w-full">
-                Begin Free
+              <Button variant="outline" className="w-full h-11 font-medium border-border/90">
+                Begin free
               </Button>
             </Link>
           </div>
@@ -106,7 +107,9 @@ export default function PricingPage() {
               ))}
             </ul>
             <Link href="/signup" className="block">
-              <Button className="w-full">Begin Your Journey</Button>
+              <Button className="w-full h-11 font-display font-semibold tracking-wide shadow-sm">
+                Begin your journey
+              </Button>
             </Link>
           </div>
         </div>

@@ -23,6 +23,8 @@ declare module "@auth/core/jwt" {
     id: string
     role: Role
     planTier: PlanTier
+    /** Unix ms — throttle DB refresh of role/planTier */
+    roleSyncedAt?: number
   }
 }
 

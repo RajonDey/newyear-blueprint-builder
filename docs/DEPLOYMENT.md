@@ -24,7 +24,47 @@
 1. Create a Neon project at https://neon.tech
 2. Copy the connection string to `DATABASE_URL`
 3. Push schema: `npm run db:push`
-4. (Optional) Seed: `npm run db:seed`
+4. (Optional) Promote admin(s): see **Admin users** below, then `npm run db:seed`
+
+## Admin users
+
+`/admin` is gated by `User.role === ADMIN` in middleware. Normal sign-ups get `USER`.
+
+### Option A — Seed (recommended for local / known emails)
+
+1. Sign in once with Google or email magic link so the row exists in `users`.
+2. In `.env.local`, set:
+   ```bash
+   SEED_ADMIN_EMAILS="you@example.com,other@example.com"
+   ```
+3. Run:
+   ```bash
+   npm run db:seed
+   ```
+4. **Reload the app** (or wait up to ~30s and navigate). The JWT callback refreshes `role` / `planTier` from the database on a short interval, so a full sign-out is no longer strictly required—but signing out and back in still works if you prefer.
+
+The seed script lives at `prisma/seed.ts`. If `SEED_ADMIN_EMAILS` is empty, it logs a message and exits without error.
+
+### Option B — SQL (Neon SQL editor or `psql`)
+
+```sql
+UPDATE users SET role = 'ADMIN' WHERE email ILIKE 'you@example.com';
+```
+
+Then sign out and sign back in.
+
+### Option C — Prisma Studio
+
+```bash
+npm run db:studio
+```
+
+Open `users`, edit `role` to `ADMIN` for the right row. Sign out and sign back in.
+
+### Production
+
+- Prefer **one-off SQL** or Studio on production DB for the first admin, or set `SEED_ADMIN_EMAILS` **only on the machine running seed** (e.g. CI or local), not long-term in Vercel env, unless you intend to re-run seed on deploys.
+- Remove or leave `SEED_ADMIN_EMAILS` empty in production after promotion to avoid accidental re-runs changing roles.
 
 ## Vercel Deployment
 

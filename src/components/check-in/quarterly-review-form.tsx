@@ -108,7 +108,7 @@ export function QuarterlyReviewForm({ data }: { data: FormData }) {
   }
 
   return (
-    <div className="relative max-w-2xl space-y-8">
+    <div className="relative w-full space-y-8">
       <MandalaWatermark position="top-right" size="sm" />
 
       <div>

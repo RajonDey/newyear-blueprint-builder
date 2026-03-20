@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { planLimits } from "@/lib/config"
+import { hasProProductAccess } from "@/lib/plan-access"
 import { getAnalyticsData } from "@/lib/queries/analytics"
 
 export async function GET() {
@@ -9,8 +9,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const limits = planLimits[session.user.planTier]
-  if (!limits.advancedAnalytics) {
+  if (!hasProProductAccess(session.user.planTier, session.user.role)) {
     return NextResponse.json(
       { error: "Analytics is a Pro feature. Upgrade to unlock." },
       { status: 403 }

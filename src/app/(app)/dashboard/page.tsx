@@ -7,6 +7,7 @@ import { WheelChart } from "@/components/dashboard/wheel-chart"
 import { GoalsOverview } from "@/components/dashboard/goals-overview"
 import { QuickActions } from "@/components/dashboard/quick-actions"
 import { AchievementsBadge } from "@/components/dashboard/achievements-badge"
+import { AppContent } from "@/components/shared/app-content"
 import { MandalaWatermark } from "@/components/shared/mandala-watermark"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
 import { Button } from "@/components/ui/button"
@@ -19,12 +20,17 @@ export default async function DashboardPage() {
   const data = await getDashboardData(session.user.id)
 
   if (!data) {
-    return <EmptyDashboard name={session.user.name} />
+    return (
+      <AppContent variant="wide">
+        <EmptyDashboard name={session.user.name} />
+      </AppContent>
+    )
   }
 
   const firstName = session.user.name?.split(" ")[0] || "there"
 
   return (
+    <AppContent variant="wide">
     <div className="relative space-y-8">
       <MandalaWatermark position="top-right" size="sm" />
 
@@ -55,6 +61,7 @@ export default async function DashboardPage() {
         <AchievementsBadge userId={session.user.id} />
       </div>
     </div>
+    </AppContent>
   )
 }
 
