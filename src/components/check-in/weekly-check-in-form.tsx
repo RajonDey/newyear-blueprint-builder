@@ -73,7 +73,7 @@ export function WeeklyCheckInForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (alreadyDone) {
-      toast.info("You've already completed this week's check-in.")
+      toast.info("You've already completed this week's review.")
       return
     }
     setSubmitting(true)
@@ -98,7 +98,7 @@ export function WeeklyCheckInForm({
         const err = await res.json()
         throw new Error(err.error || "Failed to save")
       }
-      toast.success("Check-in saved!", {
+      toast.success("Weekly review saved!", {
         description: "Your streak is building. Keep it up!",
       })
       router.refresh()
@@ -115,8 +115,8 @@ export function WeeklyCheckInForm({
         <MandalaWatermark position="top-right" size="sm" />
         <EmptyState
           icon={ClipboardCheck}
-          title="No goals to check in on"
-          description="Create your yearly plan and add goals first. Then you can track your weekly progress here."
+          title="No goals for your weekly review yet"
+          description="Create your yearly plan and add goals first. Then you can plan and reflect each week here."
           action={
             <Button asChild>
               <a href="/plan/new">
@@ -142,7 +142,7 @@ export function WeeklyCheckInForm({
           </h2>
         ) : (
           <h1 className="font-display text-3xl font-semibold">
-            Weekly Check-in
+            Weekly review
           </h1>
         )}
         <p className="text-muted-foreground mt-1">

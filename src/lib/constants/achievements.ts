@@ -2,7 +2,7 @@ export const ACHIEVEMENTS = {
   first_check_in: {
     type: "first_check_in",
     title: "First Step",
-    description: "Completed your first weekly check-in",
+    description: "Completed your first weekly review",
     icon: "🎯",
   },
   streak_4: {

@@ -1,16 +1,24 @@
 "use client"
 
+import { Suspense, useCallback } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export function WeeklyWorkspaceTabs({
-  planSlot,
-  reviewSlot,
-}: {
-  planSlot: React.ReactNode
+export type WeeklyWorkspaceTab = "plan" | "review"
+
+export function parseWeeklyWorkspaceTab(
+  tab: string | string[] | undefined
+): WeeklyWorkspaceTab {
+  const v = Array.isArray(tab) ? tab[0] : tab
+  return v === "review" ? "review" : "plan"
+}
+
+function tabsListAndContent(
+  planSlot: React.ReactNode,
   reviewSlot: React.ReactNode
-}) {
+) {
   return (
-    <Tabs defaultValue="plan" className="w-full">
+    <>
       <TabsList className="grid w-full max-w-md grid-cols-2">
         <TabsTrigger value="plan">This week&apos;s plan</TabsTrigger>
         <TabsTrigger value="review">Weekly review</TabsTrigger>
@@ -21,6 +29,82 @@ export function WeeklyWorkspaceTabs({
       <TabsContent value="review" className="mt-6">
         {reviewSlot}
       </TabsContent>
+    </>
+  )
+}
+
+function WeeklyWorkspaceTabsInner({
+  planSlot,
+  reviewSlot,
+}: {
+  planSlot: React.ReactNode
+  reviewSlot: React.ReactNode
+}) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  const tab = parseWeeklyWorkspaceTab(searchParams.get("tab") ?? undefined)
+
+  const onValueChange = useCallback(
+    (value: string) => {
+      const next = parseWeeklyWorkspaceTab(value)
+      const params = new URLSearchParams(searchParams.toString())
+      if (next === "plan") {
+        params.delete("tab")
+      } else {
+        params.set("tab", "review")
+      }
+      const qs = params.toString()
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+    },
+    [pathname, router, searchParams]
+  )
+
+  return (
+    <Tabs value={tab} onValueChange={onValueChange} className="w-full">
+      {tabsListAndContent(planSlot, reviewSlot)}
     </Tabs>
+  )
+}
+
+function WeeklyWorkspaceTabsFallback({
+  defaultTab,
+  planSlot,
+  reviewSlot,
+}: {
+  defaultTab: WeeklyWorkspaceTab
+  planSlot: React.ReactNode
+  reviewSlot: React.ReactNode
+}) {
+  return (
+    <Tabs defaultValue={defaultTab} className="w-full">
+      {tabsListAndContent(planSlot, reviewSlot)}
+    </Tabs>
+  )
+}
+
+export function WeeklyWorkspaceTabs({
+  planSlot,
+  reviewSlot,
+  defaultTab = "plan",
+}: {
+  planSlot: React.ReactNode
+  reviewSlot: React.ReactNode
+  /** Initial tab from server (`?tab=review`); client keeps URL in sync when switching tabs */
+  defaultTab?: WeeklyWorkspaceTab
+}) {
+  return (
+    <Suspense
+      fallback={
+        <WeeklyWorkspaceTabsFallback
+          defaultTab={defaultTab}
+          planSlot={planSlot}
+          reviewSlot={reviewSlot}
+        />
+      }
+    >
+      <WeeklyWorkspaceTabsInner planSlot={planSlot} reviewSlot={reviewSlot} />
+    </Suspense>
   )
 }

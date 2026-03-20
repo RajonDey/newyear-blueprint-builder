@@ -9,14 +9,30 @@ import { Label } from "@/components/ui/label"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
 import { Loader2, Mail } from "lucide-react"
 
-interface LoginFormProps {
-  mode?: "login" | "signup"
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  SessionInvalid:
+    "Your session expired or this account is no longer available. Please sign in again.",
+  AccessDenied:
+    "Sign-in was denied. If you had an account, it may have been deactivated—contact support if you think this is wrong.",
+  Configuration:
+    "Authentication is misconfigured. Please try again later or contact support.",
+  Verification: "The sign-in link expired or was already used. Request a new magic link.",
+  Default: "Something went wrong while signing in. Please try again.",
 }
 
-export function LoginForm({ mode = "login" }: LoginFormProps) {
+interface LoginFormProps {
+  mode?: "login" | "signup"
+  authError?: string
+}
+
+export function LoginForm({ mode = "login", authError }: LoginFormProps) {
   const isSignup = mode === "signup"
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState<"google" | "email" | null>(null)
+
+  const errorMessage = authError
+    ? AUTH_ERROR_MESSAGES[authError] ?? AUTH_ERROR_MESSAGES.Default
+    : null
 
   async function handleGoogle() {
     setLoading("google")
@@ -33,6 +49,14 @@ export function LoginForm({ mode = "login" }: LoginFormProps) {
   return (
     <div className="rounded-xl border border-border/80 bg-card shadow-sm overflow-hidden bg-lotus-corner">
       <div className="px-8 py-9 sm:px-10 sm:py-10 space-y-7">
+        {errorMessage && (
+          <div
+            role="alert"
+            className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          >
+            {errorMessage}
+          </div>
+        )}
         <div className="text-center space-y-2">
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-accent">
             {isSignup ? "Start here" : "Welcome back"}

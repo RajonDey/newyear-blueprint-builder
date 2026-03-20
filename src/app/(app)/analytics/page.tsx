@@ -17,7 +17,7 @@ export default async function AnalyticsPage() {
           session.user.planTier,
           session.user.role
         )}
-        featureName="Analytics"
+        featureName="Progress analytics"
       >
         <AnalyticsDashboard />
       </PremiumGate>

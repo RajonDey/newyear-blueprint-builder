@@ -7,11 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { MandalaWatermark } from "@/components/shared/mandala-watermark"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
-import { Loader2, User, LogOut, Sparkles, Check } from "lucide-react"
+import { Loader2, User, LogOut, Sparkles, Check, Trash2 } from "lucide-react"
 import { toast } from "sonner"
-import { SITE_LEGAL_NAME } from "@/lib/legal"
+import { SITE_LEGAL_NAME, getSupportEmail } from "@/lib/legal"
 
 const COMMON_TIMEZONES = [
   "UTC",
@@ -40,6 +48,12 @@ export function SettingsForm({ planTier }: SettingsFormProps) {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [timezone, setTimezone] = useState("UTC")
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState("")
+  const [deleting, setDeleting] = useState(false)
+
+  const supportEmail = getSupportEmail()
+  const deletePhrase = "DELETE MY ACCOUNT"
 
   useEffect(() => {
     fetch("/api/user/me")
@@ -247,16 +261,95 @@ export function SettingsForm({ planTier }: SettingsFormProps) {
         <CardHeader>
           <CardTitle className="text-lg font-display">Account</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Button
-            variant="outline"
-            onClick={() => signOut({ callbackUrl: "/" })}
-            className="gap-2"
-          >
-            <LogOut className="h-4 w-4" /> Sign Out
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Sign out on this device. For Google sign-in, you can also revoke the app in your Google
+              account if you want to remove access everywhere.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="gap-2"
+            >
+              <LogOut className="h-4 w-4" /> Sign out
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-destructive/30">
+        <CardHeader>
+          <CardTitle className="text-lg font-display text-destructive">Danger zone</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Permanently delete your account and all plans, goals, and data. This cannot be undone. If
+            you have an active Pro subscription, cancel billing in your Lemon Squeezy customer
+            portal first (or email{" "}
+            <a href={`mailto:${supportEmail}`} className="text-primary font-medium hover:underline">
+              {supportEmail}
+            </a>
+            ).
+          </p>
+          <Button variant="destructive" className="gap-2" onClick={() => setDeleteOpen(true)}>
+            <Trash2 className="h-4 w-4" /> Delete my account
           </Button>
         </CardContent>
       </Card>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle>Delete account permanently?</DialogTitle>
+            <DialogDescription className="text-left space-y-3 pt-2">
+              <span className="block">
+                All of your data will be removed from our systems. You will lose access immediately.
+              </span>
+              <span className="block font-medium text-foreground">
+                Type <span className="font-mono text-sm">{deletePhrase}</span> to confirm.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={deleteConfirm}
+            onChange={(e) => setDeleteConfirm(e.target.value)}
+            placeholder={deletePhrase}
+            className="font-mono text-sm"
+            autoComplete="off"
+          />
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteConfirm !== deletePhrase || deleting}
+              onClick={async () => {
+                if (deleteConfirm !== deletePhrase) return
+                setDeleting(true)
+                try {
+                  const res = await fetch("/api/user/account", { method: "DELETE" })
+                  if (!res.ok) {
+                    const j = await res.json().catch(() => ({}))
+                    throw new Error(j.error || "Failed to delete account")
+                  }
+                  toast.success("Account deleted")
+                  setDeleteOpen(false)
+                  await signOut({ callbackUrl: "/" })
+                } catch (e: unknown) {
+                  toast.error(e instanceof Error ? e.message : "Failed to delete account")
+                } finally {
+                  setDeleting(false)
+                }
+              }}
+            >
+              {deleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Delete forever
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

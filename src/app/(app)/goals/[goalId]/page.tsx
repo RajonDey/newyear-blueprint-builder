@@ -12,7 +12,7 @@ export async function generateMetadata({
   params: Promise<{ goalId: string }>
 }): Promise<Metadata> {
   const session = await auth()
-  if (!session?.user) return { title: "Goal" }
+  if (!session?.user?.id) return { title: "Goal" }
   const { goalId } = await params
   const goal = await getGoalById(goalId, session.user.id)
   if (!goal) return { title: "Goal" }

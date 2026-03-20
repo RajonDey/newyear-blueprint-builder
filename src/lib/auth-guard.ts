@@ -3,8 +3,8 @@ import { redirect } from "next/navigation"
 
 export async function requireAuth() {
   const session = await auth()
-  if (!session?.user) {
-    redirect("/login")
+  if (!session?.user?.id) {
+    redirect("/login?error=SessionInvalid")
   }
   return session
 }

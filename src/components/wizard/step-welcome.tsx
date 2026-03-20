@@ -25,6 +25,10 @@ export function StepWelcome() {
           minutes, you&apos;ll reflect on your past, discover where you stand, and
           set intentions for a life worth living.
         </p>
+        <p className="text-muted-foreground/90 text-sm max-w-md mx-auto leading-relaxed border border-border/60 rounded-lg bg-muted/30 px-4 py-3">
+          Your answers save automatically in this browser—you can close anytime
+          and resume where you left off.
+        </p>
       </div>
 
       <OrnamentDivider variant="lotus" />

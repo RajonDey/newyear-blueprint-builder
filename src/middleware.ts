@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
+import { rateLimitAuthIfConfigured } from "@/lib/rate-limit-auth"
 
 const publicRoutes = [
   "/",
@@ -14,13 +15,15 @@ const publicRoutes = [
   "/cookies",
 ]
 
-export default auth((req) => {
-  const { pathname } = req.nextUrl
-  const isLoggedIn = !!req.auth
+export default auth(async (req) => {
+  const pathname = req.nextUrl.pathname
 
-  const isPublicRoute = publicRoutes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  )
+  if (pathname.startsWith("/api/auth")) {
+    const rateLimited = await rateLimitAuthIfConfigured(req)
+    if (rateLimited) return rateLimited
+  }
+
+  const isLoggedIn = Boolean(req.auth?.user?.id)
   const isApiRoute = pathname.startsWith("/api")
   const isStaticAsset =
     pathname.startsWith("/_next") || pathname.includes(".")
@@ -28,6 +31,10 @@ export default auth((req) => {
   if (isApiRoute || isStaticAsset) {
     return NextResponse.next()
   }
+
+  const isPublicRoute = publicRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  )
 
   if (!isLoggedIn && !isPublicRoute) {
     const loginUrl = new URL("/login", req.nextUrl.origin)

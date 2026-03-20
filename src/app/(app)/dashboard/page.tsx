@@ -53,7 +53,7 @@ export default async function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <WheelChart scores={data.wheelScores} />
-        <GoalsOverview goals={data.goals as any} />
+        <GoalsOverview goals={data.goals as any} planYear={data.plan.year} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

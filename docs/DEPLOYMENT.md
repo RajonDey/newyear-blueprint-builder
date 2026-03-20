@@ -19,12 +19,30 @@
    openssl rand -base64 32  # for CRON_SECRET
    ```
 
+## Production checklist — auth & abuse (P0)
+
+Before pointing a real domain at production, verify:
+
+| Item | Why |
+|------|-----|
+| **`NEXTAUTH_URL`** | Must be the **exact** public origin (`https://yourdomain.com`), no trailing slash. Wrong value breaks OAuth and magic links. |
+| **`NEXTAUTH_SECRET`** | Unique per environment; never commit; rotate if leaked. |
+| **`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`** | Enables **rate limiting** on `/api/auth/*` (60 req/min/IP). Without Upstash, auth is still functional but easier to abuse. [Upstash](https://upstash.com) has a free tier. |
+| **`NEXT_PUBLIC_SUPPORT_EMAIL`** | Used in Settings (delete account copy) and legal pages. |
+| **Google OAuth redirect URIs** | In Google Cloud Console, authorized redirect URIs must include `https://yourdomain.com/api/auth/callback/google`. |
+| **HTTPS only** | Vercel provides TLS; do not serve production auth over plain HTTP. |
+
+**Suspended accounts:** set column `"disabledAt"` on `users` to a timestamp; sign-in is rejected and existing JWTs become invalid on the next refresh (≤30s).
+
 ## Database Setup
 
 1. Create a Neon project at https://neon.tech
 2. Copy the connection string to `DATABASE_URL`
-3. Push schema: `npm run db:push`
-4. (Optional) Promote admin(s): see **Admin users** below, then `npm run db:seed`
+3. **Apply schema** (pick one workflow):
+   - **Migrations (recommended for production):** with `DATABASE_URL` set, run `npm run db:deploy` (e.g. CI or a one-off before/after deploy). Migrations live in `prisma/migrations/`.
+   - **Prototype / solo dev:** `npm run db:push` syncs the schema without writing migration history.
+4. **Existing database that used only `db push`:** the first `migrate deploy` can fail with **P3005** (non-empty DB, no `_prisma_migrations`). Align the DB with `prisma/schema.prisma` using `npm run db:push`, then mark the already-shipped migrations as applied, e.g. `npx prisma migrate resolve --applied 20250320190000_add_user_disabled_at` (use the folder name under `prisma/migrations/`). After that, `npm run db:deploy` is safe for new migrations.
+5. (Optional) Promote admin(s): see **Admin users** below, then `npm run db:seed`
 
 ## Admin users
 

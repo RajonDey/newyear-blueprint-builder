@@ -2,8 +2,9 @@ import Link from "next/link"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { ArrowRight, Flame } from "lucide-react"
+import { ArrowRight, Flame, Target } from "lucide-react"
 
 interface GoalSummary {
   id: string
@@ -27,8 +28,42 @@ function getStatusLabel(status: string) {
   return status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-export function GoalsOverview({ goals }: { goals: GoalSummary[] }) {
-  if (goals.length === 0) return null
+export function GoalsOverview({
+  goals,
+  planYear,
+}: {
+  goals: GoalSummary[]
+  /** Active plan year (dashboard only passes this when a plan exists) */
+  planYear: number
+}) {
+  if (goals.length === 0) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-display">Your Goals</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-3 rounded-lg border border-dashed bg-muted/20 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/10">
+              <Target className="h-5 w-5 text-accent" />
+            </div>
+            <div className="space-y-1 min-w-0">
+              <p className="text-sm font-medium">No goals on this plan yet</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Add intentions to your {planYear} plan so checkpoints, weekly
+                rhythm, and daily systems have something to anchor to.
+              </p>
+            </div>
+          </div>
+          <Button asChild variant="secondary" className="w-full sm:w-auto">
+            <Link href={`/plan/${planYear}`}>
+              View your {planYear} plan
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card>

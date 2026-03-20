@@ -20,7 +20,7 @@ export default async function QuarterlyReviewPage() {
       <AppContent variant="narrow">
         <PremiumGate
           isPremium={false}
-          featureName="Quarterly Review"
+          featureName="Quarterly review"
         />
       </AppContent>
     )

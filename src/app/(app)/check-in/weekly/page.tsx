@@ -7,13 +7,22 @@ import { OrnamentDivider } from "@/components/shared/ornament-divider"
 import { getWeeklyWorkspaceData } from "@/lib/queries/weekly-workspace"
 import { WeeklyCheckInForm } from "@/components/check-in/weekly-check-in-form"
 import { WeeklyPlanForm } from "@/components/check-in/weekly-plan-form"
-import { WeeklyWorkspaceTabs } from "@/components/check-in/weekly-workspace-tabs"
+import {
+  parseWeeklyWorkspaceTab,
+  WeeklyWorkspaceTabs,
+} from "@/components/check-in/weekly-workspace-tabs"
 import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = { title: "Weekly rhythm" }
 
-export default async function WeeklyCheckInPage() {
+export default async function WeeklyCheckInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>
+}) {
   const session = await requireAuth()
+  const { tab } = await searchParams
+  const workspaceTab = parseWeeklyWorkspaceTab(tab)
   const data = await getWeeklyWorkspaceData(session.user.id)
 
   if (!data) {
@@ -50,6 +59,7 @@ export default async function WeeklyCheckInPage() {
         </div>
         <OrnamentDivider variant="lotus" />
         <WeeklyWorkspaceTabs
+          defaultTab={workspaceTab}
           planSlot={
             <WeeklyPlanForm
               planId={data.plan.id}

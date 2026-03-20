@@ -23,17 +23,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/login",
   },
   callbacks: {
+    async signIn({ user }) {
+      if (!user?.id) return true
+      const row = await db.user.findUnique({
+        where: { id: user.id },
+        select: { disabledAt: true },
+      })
+      if (row?.disabledAt) return false
+      return true
+    },
     async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
         token.role = (user as any).role
         token.planTier = (user as any).planTier
+        token.accountActive = !(user as any).disabledAt
         token.roleSyncedAt = Date.now()
         return token
       }
 
-      // JWT keeps role/planTier from sign-in; refresh from DB so admin / subscription edits apply
-      // without forcing sign-out (throttled to limit queries).
       const SYNC_MS = 30_000
       const stale =
         trigger === "update" ||
@@ -43,11 +51,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.id && stale) {
         const dbUser = await db.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, planTier: true },
+          select: { role: true, planTier: true, disabledAt: true },
         })
         if (dbUser) {
           token.role = dbUser.role
           token.planTier = dbUser.planTier
+          token.accountActive = !dbUser.disabledAt
+        } else {
+          token.accountActive = false
         }
         token.roleSyncedAt = Date.now()
       }
@@ -55,6 +66,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token
     },
     session({ session, token }) {
+      if (token.accountActive === false || !token.id) {
+        return {
+          ...session,
+          user: {
+            id: "",
+            name: null,
+            email: null,
+            image: null,
+            role: "USER",
+            planTier: "FREE",
+          },
+        }
+      }
       if (session.user) {
         session.user.id = token.id as string
         session.user.role = token.role as any

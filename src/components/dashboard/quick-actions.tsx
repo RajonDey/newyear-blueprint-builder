@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  ClipboardCheck,
+  CalendarCheck,
   Target,
   BarChart3,
   CalendarRange,
@@ -9,10 +9,10 @@ import {
 
 const actions = [
   {
-    label: "Weekly Check-in",
+    label: "Weekly rhythm",
     href: "/check-in/weekly",
-    icon: ClipboardCheck,
-    description: "Reflect on this week's progress",
+    icon: CalendarCheck,
+    description: "Plan the week and reflect",
   },
   {
     label: "View Goals",

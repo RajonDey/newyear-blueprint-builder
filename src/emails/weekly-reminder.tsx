@@ -21,10 +21,10 @@ export function WeeklyReminderEmail({ userName, appUrl }: WeeklyReminderEmailPro
   return (
     <Html>
       <Head />
-      <Preview>Your weekly check-in awaits — reflect on your progress.</Preview>
+      <Preview>Your weekly review awaits — reflect on your progress.</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={heading}>Weekly Check-in Reminder</Heading>
+          <Heading style={heading}>Weekly rhythm reminder</Heading>
           <Text style={paragraph}>
             {userName ? `Hi ${userName},` : "Hi,"}
           </Text>

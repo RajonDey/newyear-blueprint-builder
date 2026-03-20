@@ -15,7 +15,7 @@ export async function sendWeeklyReminder(to: string, name?: string) {
   const { data, error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
-    subject: "Your weekly check-in awaits",
+    subject: "Your weekly review awaits",
     react: WeeklyReminderEmail({ userName: name, appUrl }),
   })
   if (error) throw error

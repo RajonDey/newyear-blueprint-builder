@@ -94,6 +94,8 @@ This document satisfies the product checklist (sections 1–10) with **evidence*
 
 - Dev-only auto-admin allowlist in auth callbacks if you want zero manual step before first login.
 
+**P0 auth hardening (implemented)** — See `docs/AUTH_PRODUCTION.md`: Upstash rate limit on `/api/auth`, production env checklist in `DEPLOYMENT.md`, Settings account deletion, `User.disabledAt` + session neutering, login error messages.
+
 ---
 
 ## 4. UX & usability
@@ -106,15 +108,16 @@ This document satisfies the product checklist (sections 1–10) with **evidence*
 
 **Gaps / drop-off risks**
 
-- **Label drift:** Sidebar/mobile still say **“Weekly Check-in”** while the weekly page title and metadata use **“Weekly rhythm”** (`check-in/weekly/page.tsx`)—users may perceive two different features.
-- **Wizard** is long (7 steps) with **localStorage persistence** (`yir-wizard`)—good for return visits, but no visible **“Save & continue later”** reassurance on early steps (perceived commitment).
-- **Quarterly** and **Analytics** are Pro-gated; free users see gates—ensure pricing page promises match in-app labels.
+- **Label drift (mostly addressed):** Sidebar/mobile and weekly page use **“Weekly rhythm”**; dashboard quick actions, standalone review heading, emails, and achievements now use **“weekly review”** / **“Weekly rhythm”** consistently. Admin metrics may still say “check-in” internally.
+- **Wizard reassurance (addressed):** Begin + Reflect steps show **auto-save / resume** copy (`step-welcome.tsx`, `step-reflection.tsx`).
+- **Pro gates vs pricing (addressed):** Premium gate titles aligned with pricing copy (**Quarterly review**, **Progress analytics**).
 
 **Recommendations**
 
-- Align nav label with page title (pick one vocabulary).
-- Add explicit copy on step 1–2 of the wizard about autosave / resume.
-- Optional: `?tab=` deep link on weekly workspace for support links.
+- ~~Align nav label with page title~~ — Done.
+- ~~Autosave copy on early wizard steps~~ — Done (steps 1–2: Begin, Reflect).
+- ~~`?tab=` deep link~~ — Done: `/check-in/weekly?tab=plan` | `tab=review`.
+- ~~URL ↔ tab sync~~ — Done: switching tabs updates the query string (`router.replace`, `scroll: false`); browser back/forward keeps tabs aligned (`weekly-workspace-tabs.tsx`, `Suspense` + `useSearchParams`).
 
 ---
 
@@ -129,7 +132,7 @@ This document satisfies the product checklist (sections 1–10) with **evidence*
 
 **Gaps**
 
-- None critical from static review; ongoing polish is **empty states** when plan exists but goal count is zero on secondary surfaces.
+- None critical from static review; **dashboard** now shows a **GoalsOverview** empty card (plan exists, zero goals) with CTA to `/plan/[year]` (`goals-overview.tsx`).
 
 **Recommendations**
 

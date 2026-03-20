@@ -18,6 +18,8 @@ model User {
   role          Role      @default(USER)
   planTier      PlanTier  @default(FREE)
   timezone      String    @default("UTC")
+  /// When set, the account cannot sign in or call APIs (soft suspend). Use with JWT `accountActive`.
+  disabledAt    DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

@@ -37,7 +37,7 @@ YearInReview is an annual planning platform built with Next.js 15 (App Router), 
 
 ## Subscription Model
 
-- **Free tier**: Planning wizard, 3 goals, weekly check-ins, basic streaks
+- **Free tier**: Planning wizard, 3 goals, weekly rhythm (plan + review), basic streaks
 - **Pro tier ($49/year)**: Unlimited goals, quarterly reviews, analytics, AI coach, streak shields
 
 ## Key Directories

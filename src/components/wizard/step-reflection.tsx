@@ -57,6 +57,9 @@ export function StepReflection() {
           Before you look ahead, take a moment to look back with kindness.
           There is no right or wrong here — just honesty.
         </p>
+        <p className="text-muted-foreground/90 text-sm max-w-md mx-auto leading-relaxed border border-border/60 rounded-lg bg-muted/30 px-4 py-3">
+          Still auto-saving in this browser—take breaks whenever you need.
+        </p>
       </div>
 
       <OrnamentDivider variant="leaf" />
