@@ -28,6 +28,11 @@ interface Goal {
   category: string
 }
 
+const PROTECT_SELECT_VALUES = new Set<string>([
+  "NONE",
+  ...LIFE_CATEGORIES.map((c) => c.id),
+])
+
 interface WeeklyPlanFormProps {
   planId: string
   planYear: number
@@ -56,9 +61,11 @@ export function WeeklyPlanForm({
   const [priorityIds, setPriorityIds] = useState<string[]>(
     initialPlan?.priorityGoalIds ?? []
   )
-  const [protect, setProtect] = useState<string>(
-    initialPlan?.protectCategory ?? "NONE"
-  )
+  const [protect, setProtect] = useState<string>(() => {
+    const c = initialPlan?.protectCategory
+    if (c && PROTECT_SELECT_VALUES.has(c)) return c
+    return "NONE"
+  })
   const [commitments, setCommitments] = useState<WeeklyCommitment[]>(() =>
     initialPlan?.commitments && initialPlan.commitments.length > 0
       ? initialPlan.commitments

@@ -132,7 +132,7 @@ This document satisfies the product checklist (sections 1–10) with **evidence*
 
 **Gaps**
 
-- None critical from static review; **dashboard** now shows a **GoalsOverview** empty card (plan exists, zero goals) with CTA to `/plan/[year]` (`goals-overview.tsx`).
+- None critical from static review; **dashboard** `GoalsOverview` empty state links to **`/plan/[year]#plan-goals`**. **`/plan/[year]`** includes **Add goal** (dialog → `POST /api/goals`) with Free/Pro limits; **`/goals`** empty copy distinguishes “no plan” vs “plan, no goals”.
 
 **Recommendations**
 

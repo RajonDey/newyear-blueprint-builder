@@ -40,10 +40,13 @@ export async function getGoalById(goalId: string, userId: string) {
 export async function getGoalsForUser(userId: string) {
   const activePlan = await db.yearlyPlan.findFirst({
     where: { userId, status: "ACTIVE" },
-    select: { id: true },
+    select: { id: true, year: true },
   })
 
-  if (!activePlan) return []
+  if (!activePlan) {
+    return { goals: [], activePlanYear: null as number | null }
+  }
 
-  return getGoalsByPlan(activePlan.id, userId)
+  const goals = await getGoalsByPlan(activePlan.id, userId)
+  return { goals, activePlanYear: activePlan.year }
 }

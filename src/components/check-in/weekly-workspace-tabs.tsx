@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useCallback } from "react"
+import { useCallback } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -33,7 +33,11 @@ function tabsListAndContent(
   )
 }
 
-function WeeklyWorkspaceTabsInner({
+/**
+ * Must be rendered under a parent `<Suspense>` (e.g. from the weekly page RSC)
+ * because of `useSearchParams`.
+ */
+export function WeeklyWorkspaceTabs({
   planSlot,
   reviewSlot,
 }: {
@@ -65,46 +69,5 @@ function WeeklyWorkspaceTabsInner({
     <Tabs value={tab} onValueChange={onValueChange} className="w-full">
       {tabsListAndContent(planSlot, reviewSlot)}
     </Tabs>
-  )
-}
-
-function WeeklyWorkspaceTabsFallback({
-  defaultTab,
-  planSlot,
-  reviewSlot,
-}: {
-  defaultTab: WeeklyWorkspaceTab
-  planSlot: React.ReactNode
-  reviewSlot: React.ReactNode
-}) {
-  return (
-    <Tabs defaultValue={defaultTab} className="w-full">
-      {tabsListAndContent(planSlot, reviewSlot)}
-    </Tabs>
-  )
-}
-
-export function WeeklyWorkspaceTabs({
-  planSlot,
-  reviewSlot,
-  defaultTab = "plan",
-}: {
-  planSlot: React.ReactNode
-  reviewSlot: React.ReactNode
-  /** Initial tab from server (`?tab=review`); client keeps URL in sync when switching tabs */
-  defaultTab?: WeeklyWorkspaceTab
-}) {
-  return (
-    <Suspense
-      fallback={
-        <WeeklyWorkspaceTabsFallback
-          defaultTab={defaultTab}
-          planSlot={planSlot}
-          reviewSlot={reviewSlot}
-        />
-      }
-    >
-      <WeeklyWorkspaceTabsInner planSlot={planSlot} reviewSlot={reviewSlot} />
-    </Suspense>
   )
 }

@@ -27,6 +27,9 @@ export async function rateLimitAuthIfConfigured(req: NextRequest): Promise<NextR
   const limiter = getAuthLimiter()
   if (!limiter) return null
 
+  // Session/CSRF/provider metadata are GETs — limiting them breaks normal browsing (dev + prefetch).
+  if (req.method === "GET" || req.method === "HEAD") return null
+
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("x-real-ip") ||

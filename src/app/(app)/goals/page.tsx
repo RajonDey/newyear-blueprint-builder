@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: "Goals" }
 
 export default async function GoalsPage() {
   const session = await requireAuth()
-  const goals = await getGoalsForUser(session.user.id)
+  const { goals, activePlanYear } = await getGoalsForUser(session.user.id)
 
   if (goals.length === 0) {
     return (
@@ -23,13 +23,25 @@ export default async function GoalsPage() {
         <EmptyState
           icon={Target}
           title="No goals yet"
-          description="Create your yearly plan to set meaningful goals for each area of your life."
+          description={
+            activePlanYear != null
+              ? `Your ${activePlanYear} plan doesn’t have goals yet. Add them from your plan page.`
+              : "Create your yearly plan to set meaningful goals for each area of your life."
+          }
           action={
-            <Button asChild>
-              <Link href="/plan/new">
-                <Sparkles className="mr-2 h-4 w-4" /> Create Your Plan
-              </Link>
-            </Button>
+            activePlanYear != null ? (
+              <Button asChild>
+                <Link href={`/plan/${activePlanYear}#plan-goals`}>
+                  <Sparkles className="mr-2 h-4 w-4" /> Add goals to your plan
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild>
+                <Link href="/plan/new">
+                  <Sparkles className="mr-2 h-4 w-4" /> Create Your Plan
+                </Link>
+              </Button>
+            )
           }
         />
       </div>

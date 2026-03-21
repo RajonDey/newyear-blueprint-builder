@@ -4,7 +4,9 @@ import Link from "next/link"
 import { requireAuth } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { getPlanById } from "@/lib/queries/plans"
+import { planLimits } from "@/lib/config"
 import { GoalCard } from "@/components/goals/goal-card"
+import { PlanAddGoalDialog } from "@/components/plan/plan-add-goal-dialog"
 import { WheelChart } from "@/components/dashboard/wheel-chart"
 import { AppContent } from "@/components/shared/app-content"
 import { PageHeader } from "@/components/shared/page-header"
@@ -48,6 +50,9 @@ export default async function PlanYearPage({
   }))
 
   const reflections = fullPlan.reflections as Record<string, string> | null
+
+  const tier = session.user.planTier === "PRO" ? "PRO" : "FREE"
+  const maxGoals = planLimits[tier].maxGoalsPerPlan
 
   return (
     <AppContent variant="wide">
@@ -93,16 +98,32 @@ export default async function PlanYearPage({
         )}
       </div>
 
-      {fullPlan.goals.length > 0 && (
-        <section className="space-y-3">
+      <section id="plan-goals" className="scroll-mt-24 space-y-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="font-display text-xl font-semibold">Goals</h2>
+          <PlanAddGoalDialog
+            planId={fullPlan.id}
+            goalCount={fullPlan.goals.length}
+            maxGoals={maxGoals}
+            planTier={tier}
+          />
+        </div>
+
+        {fullPlan.goals.length === 0 ? (
+          <p className="text-sm text-muted-foreground rounded-lg border border-dashed bg-muted/20 px-4 py-6">
+            No goals on this plan yet. Use{" "}
+            <span className="font-medium text-foreground">Add goal</span> to
+            create one—you can add checkpoints and daily systems from each goal&apos;s
+            page.
+          </p>
+        ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {fullPlan.goals.map((goal) => (
               <GoalCard key={goal.id} goal={goal as any} />
             ))}
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {fullPlan.antiGoals.length > 0 && (
         <section className="space-y-3">

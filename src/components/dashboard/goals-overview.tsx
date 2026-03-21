@@ -55,11 +55,14 @@ export function GoalsOverview({
               </p>
             </div>
           </div>
-          <Button asChild variant="secondary" className="w-full sm:w-auto">
-            <Link href={`/plan/${planYear}`}>
-              View your {planYear} plan
-            </Link>
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Button asChild variant="default" className="w-full sm:w-auto">
+              <Link href={`/plan/${planYear}#plan-goals`}>Add goal</Link>
+            </Button>
+            <Button asChild variant="secondary" className="w-full sm:w-auto">
+              <Link href={`/plan/${planYear}`}>View full plan</Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     )
