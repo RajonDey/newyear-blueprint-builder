@@ -30,13 +30,13 @@ interface AppSidebarProps {
 const navigationBase = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Goals", href: "/goals", icon: Target },
-  { label: "Daily Systems", href: "/systems", icon: ListChecks },
-  { label: "Weekly rhythm", href: "/check-in/weekly", icon: CalendarCheck },
+  { label: "Daily Systems", href: "/rhythm/daily", icon: ListChecks },
+  { label: "Weekly rhythm", href: "/rhythm/weekly", icon: CalendarCheck },
   { label: "divider", href: "", icon: Activity },
   { label: "Analytics", href: "/analytics", icon: BarChart3, premium: true },
   {
     label: "Quarterly Review",
-    href: "/check-in/quarterly",
+    href: "/rhythm/quarterly",
     icon: Activity,
     premium: true,
   },

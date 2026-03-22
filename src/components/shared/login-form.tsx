@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { signIn } from "next-auth/react"
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { OrnamentDivider } from "@/components/shared/ornament-divider"
-import { Loader2, Mail } from "lucide-react"
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { OrnamentDivider } from "@/components/shared/ornament-divider";
+import { Loader2, Mail } from "lucide-react";
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   SessionInvalid:
@@ -16,34 +16,35 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
     "Sign-in was denied. If you had an account, it may have been deactivated—contact support if you think this is wrong.",
   Configuration:
     "Authentication is misconfigured. Please try again later or contact support.",
-  Verification: "The sign-in link expired or was already used. Request a new magic link.",
+  Verification:
+    "The sign-in link expired or was already used. Request a new magic link.",
   Default: "Something went wrong while signing in. Please try again.",
-}
+};
 
 interface LoginFormProps {
-  mode?: "login" | "signup"
-  authError?: string
+  mode?: "login" | "signup";
+  authError?: string;
 }
 
 export function LoginForm({ mode = "login", authError }: LoginFormProps) {
-  const isSignup = mode === "signup"
-  const [email, setEmail] = useState("")
-  const [loading, setLoading] = useState<"google" | "email" | null>(null)
+  const isSignup = mode === "signup";
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState<"google" | "email" | null>(null);
 
   const errorMessage = authError
-    ? AUTH_ERROR_MESSAGES[authError] ?? AUTH_ERROR_MESSAGES.Default
-    : null
+    ? (AUTH_ERROR_MESSAGES[authError] ?? AUTH_ERROR_MESSAGES.Default)
+    : null;
 
   async function handleGoogle() {
-    setLoading("google")
-    await signIn("google", { callbackUrl: "/dashboard" })
+    setLoading("google");
+    await signIn("google", { callbackUrl: "/dashboard" });
   }
 
   async function handleEmail(e: React.FormEvent) {
-    e.preventDefault()
-    if (!email.trim()) return
-    setLoading("email")
-    await signIn("resend", { email, callbackUrl: "/dashboard" })
+    e.preventDefault();
+    if (!email.trim()) return;
+    setLoading("email");
+    await signIn("resend", { email, callbackUrl: "/dashboard" });
   }
 
   return (
@@ -152,14 +153,20 @@ export function LoginForm({ mode = "login", authError }: LoginFormProps) {
           {isSignup ? (
             <>
               Already have an account?{" "}
-              <Link href="/login" className="text-primary font-semibold hover:underline underline-offset-4">
+              <Link
+                href="/login"
+                className="text-primary font-semibold hover:underline underline-offset-4"
+              >
                 Log in
               </Link>
             </>
           ) : (
             <>
               New here?{" "}
-              <Link href="/signup" className="text-primary font-semibold hover:underline underline-offset-4">
+              <Link
+                href="/signup"
+                className="text-primary font-semibold hover:underline underline-offset-4"
+              >
                 Create an account
               </Link>
             </>
@@ -167,5 +174,5 @@ export function LoginForm({ mode = "login", authError }: LoginFormProps) {
         </p>
       </div>
     </div>
-  )
+  );
 }

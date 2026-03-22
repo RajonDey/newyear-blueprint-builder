@@ -23,18 +23,6 @@ export const wizardSubmitSchema = z.object({
     lessons: z.string().max(5000),
   }),
 
-  wheelEntries: z
-    .array(
-      z.object({
-        category: lifeCategoryEnum,
-        rating: z.number().int().min(1).max(10),
-      })
-    )
-    .min(6)
-    .max(6),
-
-  wheelContext: z.string().max(2000).optional(),
-
   goals: z
     .array(
       z.object({

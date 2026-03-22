@@ -3,7 +3,7 @@
 ## P0 (implemented)
 
 - **Rate limiting** — `/api/auth/*` limited by IP when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are set (`src/lib/rate-limit-auth.ts`, `middleware.ts`).
-- **Production env checklist** — `docs/DEPLOYMENT.md` → *Production checklist — auth & abuse (P0)*.
+- **Production env checklist** — `docs/DEPLOYMENT.md` → _Production checklist — auth & abuse (P0)_.
 - **Account exit** — Settings → **Danger zone** → delete account (`DELETE /api/user/account`), with typed confirmation `DELETE MY ACCOUNT`, Pro/billing notice, and `signOut` after success.
 - **Disabled / deleted users** — `User.disabledAt` in Prisma; `signIn` callback blocks disabled users; JWT refresh sets `accountActive` when a **matching user row** exists; neutered session clears `user.id` so middleware and APIs treat the user as signed out (`src/lib/auth.ts`, `auth-guard.ts`, `middleware.ts` uses `req.auth?.user?.id`).
 - **JWT `sub` + missing row** — Session `user.id` resolves from `token.id` **or** standard `token.sub`. If a DB refresh finds **no** user row, we **do not** revoke the session (avoids false logouts after ~30s from flaky reads or id drift); we log a warning and backoff. Rows with `disabledAt` still revoke. Truly deleted accounts may keep a JWT until it expires—tighten with shorter `maxAge` or explicit sign-out if needed.

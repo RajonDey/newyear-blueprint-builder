@@ -10,7 +10,7 @@ import {
 const actions = [
   {
     label: "Weekly rhythm",
-    href: "/check-in/weekly",
+    href: "/rhythm/weekly",
     icon: CalendarCheck,
     description: "Plan the week and reflect",
   },
@@ -28,7 +28,7 @@ const actions = [
   },
   {
     label: "Daily Systems",
-    href: "/systems",
+    href: "/rhythm/daily",
     icon: CalendarRange,
     description: "Track today's habits",
   },

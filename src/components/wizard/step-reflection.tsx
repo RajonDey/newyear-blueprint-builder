@@ -2,7 +2,7 @@
 
 import { useWizardStore } from "@/stores/wizard-store"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
 import { BookOpen, ArrowLeft, ArrowRight } from "lucide-react"
 
@@ -69,14 +69,14 @@ export function StepReflection() {
           <div key={item.key} className="space-y-2">
             <h3 className="font-display text-xl font-medium">{item.title}</h3>
             <p className="text-sm text-muted-foreground">{item.prompt}</p>
-            <Textarea
-              value={reflections[item.key]}
-              onChange={(e) =>
-                setReflections({ [item.key]: e.target.value })
+            <RichTextEditor
+              value={reflections[item.key] || ""}
+              onChange={(val) =>
+                setReflections({ [item.key]: val })
               }
               placeholder={item.placeholder}
               rows={4}
-              className="resize-none bg-card"
+              className="bg-card"
             />
           </div>
         ))}

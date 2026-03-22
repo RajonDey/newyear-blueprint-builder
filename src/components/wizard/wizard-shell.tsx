@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Check } from "lucide-react"
 import { StepWelcome } from "./step-welcome"
 import { StepReflection } from "./step-reflection"
-import { StepWheel } from "./step-wheel"
 import { StepGoals } from "./step-goals"
 import { StepPlan } from "./step-plan"
 import { StepAntiGoals } from "./step-anti-goals"
@@ -16,7 +15,6 @@ import { MandalaWatermark } from "@/components/shared/mandala-watermark"
 const STEP_COMPONENTS = [
   StepWelcome,
   StepReflection,
-  StepWheel,
   StepGoals,
   StepPlan,
   StepAntiGoals,
@@ -25,7 +23,8 @@ const STEP_COMPONENTS = [
 
 export function WizardShell() {
   const { currentStep } = useWizardStore()
-  const StepComponent = STEP_COMPONENTS[currentStep]
+  const safeStep = Math.min(Math.max(0, currentStep), STEP_COMPONENTS.length - 1)
+  const StepComponent = STEP_COMPONENTS[safeStep]
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -36,8 +35,8 @@ export function WizardShell() {
         <div className="mx-auto max-w-4xl px-4 py-4">
           <nav className="flex items-center justify-between gap-1 overflow-x-auto">
             {WIZARD_STEPS.map((step, index) => {
-              const isCompleted = index < currentStep
-              const isCurrent = index === currentStep
+              const isCompleted = index < safeStep
+              const isCurrent = index === safeStep
               return (
                 <div key={step.id} className="flex items-center gap-1.5 shrink-0">
                   <div
@@ -77,7 +76,7 @@ export function WizardShell() {
       <div className="mx-auto max-w-4xl px-4 py-8">
         <AnimatePresence mode="wait">
           <motion.div
-            key={currentStep}
+            key={safeStep}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}

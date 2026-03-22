@@ -65,9 +65,10 @@ export function GoalCard({ goal }: GoalCardProps) {
               </h3>
 
               {goal.description && (
-                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                  {goal.description}
-                </p>
+                <div 
+                  className="text-sm text-muted-foreground mt-1 line-clamp-2 prose prose-sm dark:prose-invert"
+                  dangerouslySetInnerHTML={{ __html: goal.description }}
+                />
               )}
 
               {totalCPs > 0 && (

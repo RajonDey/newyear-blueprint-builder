@@ -109,6 +109,7 @@ model YearlyPlan {
   antiGoals        AntiGoal[]
   weeklyCheckIns   WeeklyCheckIn[]
   weeklyPlans      WeeklyPlan[]
+  monthlyReviews   MonthlyReview[]
   quarterlyReviews QuarterlyReview[]
 
   @@unique([userId, year])
@@ -311,6 +312,25 @@ model QuarterlyReview {
 
   @@unique([planId, quarter])
   @@map("quarterly_reviews")
+}
+
+// ─── MONTHLY REVIEWS ─────────────────────────────────
+
+model MonthlyReview {
+  id              String   @id @default(cuid())
+  planId          String
+  month           Int      // 1-12
+  year            Int
+  summary         String?  @db.Text
+  winsText        String?  @db.Text
+  challengesText  String?  @db.Text
+  adjustments     String?  @db.Text
+  completedAt     DateTime @default(now())
+
+  plan YearlyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, month, year])
+  @@map("monthly_reviews")
 }
 
 // ─── GAMIFICATION ────────────────────────────────────

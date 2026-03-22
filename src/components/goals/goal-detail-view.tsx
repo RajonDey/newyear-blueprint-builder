@@ -433,7 +433,10 @@ export function GoalDetailView({ goal }: GoalDetailProps) {
               {goal.title}
             </h1>
             {goal.description && (
-              <p className="text-muted-foreground mt-1">{goal.description}</p>
+              <div 
+                className="text-muted-foreground mt-1 prose prose-sm dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: goal.description }}
+              />
             )}
           </>
         )}
@@ -689,7 +692,7 @@ export function GoalDetailView({ goal }: GoalDetailProps) {
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   Why this matters
                 </p>
-                <p className="text-sm">{goal.motivation.whyText}</p>
+                <div className="text-sm prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: goal.motivation.whyText }} />
               </div>
             )}
             <OrnamentDivider variant="dot" />
@@ -698,7 +701,7 @@ export function GoalDetailView({ goal }: GoalDetailProps) {
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   What&apos;s at stake
                 </p>
-                <p className="text-sm">{goal.motivation.consequenceText}</p>
+                <div className="text-sm prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: goal.motivation.consequenceText }} />
               </div>
             )}
           </CardContent>

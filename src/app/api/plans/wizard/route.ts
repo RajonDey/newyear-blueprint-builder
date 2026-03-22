@@ -19,23 +19,27 @@ export async function POST(req: Request) {
     )
   }
 
-  const { year, reflections, wheelEntries, wheelContext, goals, antiGoals } =
+  const { year, reflections, goals, antiGoals } =
     parsed.data
   const userId = session.user.id
   const limits = planLimits[session.user.planTier]
 
   const existingPlan = await db.yearlyPlan.findUnique({
     where: { userId_year: { userId, year } },
+    include: { goals: { select: { id: true } } },
   })
+  
   if (existingPlan) {
-    return NextResponse.json(
-      { error: `You already have a plan for ${year}.` },
-      { status: 409 }
-    )
+    if (existingPlan.goals.length > 0) {
+      return NextResponse.json(
+        { error: `You already have a full plan for ${year}.` },
+        { status: 409 }
+      )
+    }
   }
 
   const planCount = await db.yearlyPlan.count({ where: { userId } })
-  if (planCount >= limits.maxPlans) {
+  if (!existingPlan && planCount >= limits.maxPlans) {
     return NextResponse.json(
       { error: "Plan limit reached. Upgrade to Pro for more plans." },
       { status: 403 }
@@ -50,28 +54,26 @@ export async function POST(req: Request) {
   }
 
   const plan = await db.$transaction(async (tx) => {
-    await tx.yearlyPlan.updateMany({
-      where: { userId, status: "ACTIVE" },
-      data: { status: "ARCHIVED" },
-    })
+    let newPlan
 
-    const newPlan = await tx.yearlyPlan.create({
-      data: {
-        userId,
-        year,
-        status: "ACTIVE",
-        reflections,
-      },
-    })
+    if (existingPlan) {
+      newPlan = await tx.yearlyPlan.update({
+        where: { id: existingPlan.id },
+        data: { status: "ACTIVE", reflections },
+      })
+    } else {
+      await tx.yearlyPlan.updateMany({
+        where: { userId, status: "ACTIVE" },
+        data: { status: "ARCHIVED" },
+      })
 
-    if (wheelEntries.length > 0) {
-      await tx.wheelOfLifeEntry.createMany({
-        data: wheelEntries.map((entry) => ({
-          planId: newPlan.id,
-          category: entry.category,
-          rating: entry.rating,
-          context: wheelContext || null,
-        })),
+      newPlan = await tx.yearlyPlan.create({
+        data: {
+          userId,
+          year,
+          status: "ACTIVE",
+          reflections,
+        },
       })
     }
 

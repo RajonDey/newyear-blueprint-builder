@@ -78,19 +78,19 @@ export default async function PlanYearPage({
               {reflections.wins && (
                 <div>
                   <p className="font-medium text-xs uppercase tracking-wider text-muted-foreground">Wins</p>
-                  <p className="mt-0.5">{reflections.wins}</p>
+                  <div className="mt-0.5 prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: reflections.wins }} />
                 </div>
               )}
               {reflections.gratitude && (
                 <div>
                   <p className="font-medium text-xs uppercase tracking-wider text-muted-foreground">Gratitude</p>
-                  <p className="mt-0.5">{reflections.gratitude}</p>
+                  <div className="mt-0.5 prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: reflections.gratitude }} />
                 </div>
               )}
               {reflections.lessons && (
                 <div>
                   <p className="font-medium text-xs uppercase tracking-wider text-muted-foreground">Lessons</p>
-                  <p className="mt-0.5">{reflections.lessons}</p>
+                  <div className="mt-0.5 prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: reflections.lessons }} />
                 </div>
               )}
             </CardContent>

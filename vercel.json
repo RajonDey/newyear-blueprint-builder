@@ -5,6 +5,10 @@
       "schedule": "0 18 * * 0"
     },
     {
+      "path": "/api/cron/daily-nudge",
+      "schedule": "0 14 * * *"
+    },
+    {
       "path": "/api/cron/streak-calculator",
       "schedule": "0 1 * * *"
     },

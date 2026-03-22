@@ -16,14 +16,6 @@ import {
   ShieldOff,
   Loader2,
 } from "lucide-react"
-import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  ResponsiveContainer,
-} from "recharts"
 import { toast } from "sonner"
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -41,8 +33,6 @@ export function StepReview() {
   const {
     year,
     reflections,
-    wheelEntries,
-    wheelContext,
     goals,
     antiGoals,
     isSubmitting,
@@ -51,23 +41,12 @@ export function StepReview() {
     reset,
   } = store
 
-  const chartData = wheelEntries.map((e) => ({
-    category: CATEGORY_LABELS[e.category] || e.category,
-    score: e.rating,
-    fullMark: 10,
-  }))
-
   async function handleActivate() {
     setSubmitting(true)
     try {
       const payload = {
         year,
         reflections,
-        wheelEntries: wheelEntries.map((e) => ({
-          category: e.category,
-          rating: e.rating,
-        })),
-        wheelContext,
         goals: goals.map((g) => ({
           category: g.category,
           type: g.type,
@@ -142,36 +121,8 @@ export function StepReview() {
         <SummaryCard icon={ShieldOff} label="Anti-Goals" value={antiGoals.length} />
       </div>
 
-      {/* Wheel of Life */}
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-display">Wheel of Life</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[260px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={chartData}>
-                <PolarGrid stroke="hsl(var(--border))" />
-                <PolarAngleAxis
-                  dataKey="category"
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                />
-                <PolarRadiusAxis angle={90} domain={[0, 10]} tick={false} />
-                <Radar
-                  dataKey="score"
-                  stroke="hsl(var(--accent))"
-                  fill="hsl(var(--accent))"
-                  fillOpacity={0.2}
-                  strokeWidth={2}
-                />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Goals */}
-      <div className="max-w-2xl mx-auto space-y-3">
+      <div className="max-w-2xl mx-auto space-y-3 mt-8">
         <h3 className="font-display text-xl font-medium">Your Goals</h3>
         {goals.map((goal) => {
           const catInfo = LIFE_CATEGORIES.find((c) => c.id === goal.category)
@@ -196,9 +147,10 @@ export function StepReview() {
                 </div>
                 <p className="font-medium">{goal.title}</p>
                 {goal.description && (
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    {goal.description}
-                  </p>
+                  <div 
+                    className="text-sm text-muted-foreground mt-0.5 prose prose-sm dark:prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ __html: goal.description }}
+                  />
                 )}
                 <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
                   <span>{goal.checkpoints.length} checkpoints</span>

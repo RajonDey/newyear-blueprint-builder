@@ -11,11 +11,6 @@ export interface WizardReflections {
   lessons: string
 }
 
-export interface WizardWheelEntry {
-  category: LifeCategory
-  rating: number
-}
-
 export interface WizardCheckpoint {
   quarter: Quarter
   title: string
@@ -49,8 +44,6 @@ interface WizardState {
   currentStep: number
   year: number
   reflections: WizardReflections
-  wheelEntries: WizardWheelEntry[]
-  wheelContext: string
   goals: WizardGoal[]
   antiGoals: WizardAntiGoal[]
   isSubmitting: boolean
@@ -60,8 +53,6 @@ interface WizardState {
   prevStep: () => void
   setYear: (year: number) => void
   setReflections: (reflections: Partial<WizardReflections>) => void
-  setWheelEntry: (category: LifeCategory, rating: number) => void
-  setWheelContext: (context: string) => void
   addGoal: (goal: WizardGoal) => void
   updateGoal: (id: string, data: Partial<WizardGoal>) => void
   removeGoal: (id: string) => void
@@ -71,16 +62,6 @@ interface WizardState {
   setSubmitting: (v: boolean) => void
   reset: () => void
 }
-
-const LIFE_CATEGORIES: LifeCategory[] = [
-  "HEALTH",
-  "CAREER",
-  "FINANCE",
-  "RELATIONSHIPS",
-  "SPIRITUALITY",
-  "PASSION",
-]
-
 const currentMonth = new Date().getMonth()
 const defaultYear = currentMonth >= 10 ? new Date().getFullYear() + 1 : new Date().getFullYear()
 
@@ -88,8 +69,6 @@ const initialState = {
   currentStep: 0,
   year: defaultYear,
   reflections: { wins: "", challenges: "", gratitude: "", lessons: "" },
-  wheelEntries: LIFE_CATEGORIES.map((c) => ({ category: c, rating: 5 })),
-  wheelContext: "",
   goals: [] as WizardGoal[],
   antiGoals: [] as WizardAntiGoal[],
   isSubmitting: false,
@@ -101,21 +80,12 @@ export const useWizardStore = create<WizardState>()(
       ...initialState,
 
       setStep: (step) => set({ currentStep: step }),
-      nextStep: () => set((s) => ({ currentStep: Math.min(s.currentStep + 1, 6) })),
+      nextStep: () => set((s) => ({ currentStep: Math.min(s.currentStep + 1, 5) })),
       prevStep: () => set((s) => ({ currentStep: Math.max(s.currentStep - 1, 0) })),
       setYear: (year) => set({ year }),
 
       setReflections: (reflections) =>
         set((s) => ({ reflections: { ...s.reflections, ...reflections } })),
-
-      setWheelEntry: (category, rating) =>
-        set((s) => ({
-          wheelEntries: s.wheelEntries.map((e) =>
-            e.category === category ? { ...e, rating } : e
-          ),
-        })),
-
-      setWheelContext: (wheelContext) => set({ wheelContext }),
 
       addGoal: (goal) => set((s) => ({ goals: [...s.goals, goal] })),
       updateGoal: (id, data) =>
@@ -143,7 +113,6 @@ export const useWizardStore = create<WizardState>()(
 export const WIZARD_STEPS = [
   { id: "begin", label: "Begin", title: "Welcome to Your Journey" },
   { id: "reflect", label: "Reflect", title: "Honor Your Past Year" },
-  { id: "discover", label: "Discover", title: "Your Wheel of Life" },
   { id: "envision", label: "Envision", title: "Set Your Intentions" },
   { id: "map", label: "Map", title: "Chart the Path" },
   { id: "release", label: "Release", title: "Set Boundaries" },

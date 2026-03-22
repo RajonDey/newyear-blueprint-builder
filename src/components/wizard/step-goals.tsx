@@ -5,7 +5,7 @@ import { useWizardStore, type WizardGoal } from "@/stores/wizard-store"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
@@ -35,19 +35,12 @@ const EMPTY_GOAL: Omit<WizardGoal, "id"> = {
 }
 
 export function StepGoals() {
-  const { goals, wheelEntries, addGoal, updateGoal, removeGoal, nextStep, prevStep } =
+  const { goals, addGoal, updateGoal, removeGoal, nextStep, prevStep } =
     useWizardStore()
   const [error, setError] = useState("")
 
-  const sorted = [...wheelEntries].sort((a, b) => a.rating - b.rating)
-  const suggestedCategories = sorted.slice(0, 3).map((e) => e.category)
-
   function handleAddGoal() {
-    const defaultCategory =
-      suggestedCategories.find(
-        (c) => !goals.some((g) => g.category === c)
-      ) || "HEALTH"
-    addGoal({ ...EMPTY_GOAL, id: generateId(), category: defaultCategory as LifeCategory })
+    addGoal({ ...EMPTY_GOAL, id: generateId(), category: "HEALTH" })
   }
 
   function handleNext() {
@@ -80,29 +73,6 @@ export function StepGoals() {
         </p>
       </div>
 
-      {suggestedCategories.length > 0 && (
-        <div className="text-center space-y-1">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            Suggested focus areas
-          </p>
-          <div className="flex gap-2 justify-center flex-wrap">
-            {suggestedCategories.map((cat) => {
-              const info = LIFE_CATEGORIES.find((c) => c.id === cat)
-              return (
-                <Badge
-                  key={cat}
-                  variant="outline"
-                  className="gap-1"
-                  style={{ borderColor: info?.color, color: info?.color }}
-                >
-                  {info && <info.icon className="h-3 w-3" />}
-                  {info?.label}
-                </Badge>
-              )
-            })}
-          </div>
-        </div>
-      )}
 
       <OrnamentDivider variant="leaf" />
 
@@ -241,34 +211,34 @@ function GoalEditor({
           <label className="text-sm font-medium">
             Describe your vision <span className="text-muted-foreground">(optional)</span>
           </label>
-          <Textarea
-            value={goal.description}
-            onChange={(e) => onUpdate({ description: e.target.value })}
+          <RichTextEditor
+            value={goal.description || ""}
+            onChange={(val) => onUpdate({ description: val })}
             placeholder="What does success look like? Be specific..."
             rows={2}
-            className="resize-none bg-card"
+            className="bg-card"
           />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Why does this matter?</label>
-            <Textarea
-              value={goal.whyText}
-              onChange={(e) => onUpdate({ whyText: e.target.value })}
+            <RichTextEditor
+              value={goal.whyText || ""}
+              onChange={(val) => onUpdate({ whyText: val })}
               placeholder="The deep reason this goal is important to you..."
               rows={2}
-              className="resize-none bg-card"
+              className="bg-card"
             />
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium">What if you don&apos;t?</label>
-            <Textarea
-              value={goal.consequenceText}
-              onChange={(e) => onUpdate({ consequenceText: e.target.value })}
+            <RichTextEditor
+              value={goal.consequenceText || ""}
+              onChange={(val) => onUpdate({ consequenceText: val })}
               placeholder="What happens if you don't pursue this..."
               rows={2}
-              className="resize-none bg-card"
+              className="bg-card"
             />
           </div>
         </div>

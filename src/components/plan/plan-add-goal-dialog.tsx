@@ -7,7 +7,7 @@ import { LIFE_CATEGORIES, type LifeCategoryId } from "@/lib/constants/categories
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import {
   Dialog,
   DialogContent,
@@ -181,14 +181,11 @@ export function PlanAddGoalDialog({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="goal-description">Details (optional)</Label>
-              <Textarea
-                id="goal-description"
+              <RichTextEditor
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(val) => setDescription(val)}
                 placeholder="Context, success criteria, or notes"
                 rows={3}
-                className="resize-none"
-                maxLength={2000}
               />
             </div>
           </div>

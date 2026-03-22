@@ -5,6 +5,8 @@ import { getDashboardData } from "@/lib/queries/dashboard"
 import { StatsCards } from "@/components/dashboard/stats-cards"
 import { WheelChart } from "@/components/dashboard/wheel-chart"
 import { GoalsOverview } from "@/components/dashboard/goals-overview"
+import { WheelIcebreaker } from "@/components/dashboard/wheel-icebreaker"
+import { IcebreakerUpsell } from "@/components/dashboard/icebreaker-upsell"
 import { QuickActions } from "@/components/dashboard/quick-actions"
 import { AchievementsBadge } from "@/components/dashboard/achievements-badge"
 import { AppContent } from "@/components/shared/app-content"
@@ -22,7 +24,7 @@ export default async function DashboardPage() {
   if (!data) {
     return (
       <AppContent variant="wide">
-        <EmptyDashboard name={session.user.name} />
+        <WheelIcebreaker userName={session.user.name} />
       </AppContent>
     )
   }
@@ -53,7 +55,11 @@ export default async function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <WheelChart scores={data.wheelScores} />
-        <GoalsOverview goals={data.goals as any} planYear={data.plan.year} />
+        {data.goalStats.total === 0 ? (
+          <IcebreakerUpsell />
+        ) : (
+          <GoalsOverview goals={data.goals as any} planYear={data.plan.year} />
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -65,41 +71,3 @@ export default async function DashboardPage() {
   )
 }
 
-function EmptyDashboard({ name }: { name?: string | null }) {
-  const firstName = name?.split(" ")[0] || "there"
-
-  return (
-    <div className="relative flex flex-col items-center justify-center text-center py-20 space-y-6">
-      <MandalaWatermark position="center" size="lg" />
-
-      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent/10">
-        <Compass className="h-10 w-10 text-accent" />
-      </div>
-
-      <div className="space-y-2 max-w-md">
-        <h1 className="font-display text-3xl font-semibold">
-          Welcome, {firstName}
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          Your journey begins here. Create your first yearly plan to start
-          living with intention and clarity.
-        </p>
-      </div>
-
-      <OrnamentDivider variant="lotus" />
-
-      <blockquote className="max-w-sm italic text-muted-foreground text-sm">
-        &ldquo;A year from now, you will wish you had started today.&rdquo;
-        <footer className="mt-1 font-medium not-italic text-foreground/70">
-          — Karen Lamb
-        </footer>
-      </blockquote>
-
-      <Button size="lg" asChild className="px-10 mt-2">
-        <Link href="/plan/new">
-          <Sparkles className="mr-2 h-4 w-4" /> Create Your Plan
-        </Link>
-      </Button>
-    </div>
-  )
-}

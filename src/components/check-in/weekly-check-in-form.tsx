@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Slider } from "@/components/ui/slider"
 import { MandalaWatermark } from "@/components/shared/mandala-watermark"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
@@ -175,9 +175,10 @@ export function WeeklyCheckInForm({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {data.existingCheckIn.nextWeekFocus}
-                </p>
+                <div 
+                  className="text-sm text-muted-foreground prose prose-sm dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: data.existingCheckIn.nextWeekFocus }}
+                />
               </CardContent>
             </Card>
           )}
@@ -209,12 +210,12 @@ export function WeeklyCheckInForm({
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Notes (optional)</label>
-                <Textarea
+                <RichTextEditor
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={(val) => setNotes(val)}
                   placeholder="What stood out this week? Wins, challenges, gratitude..."
                   rows={3}
-                  className="resize-none"
+                  className="bg-card"
                 />
               </div>
             </CardContent>
@@ -303,12 +304,12 @@ export function WeeklyCheckInForm({
               </p>
             </CardHeader>
             <CardContent>
-              <Textarea
+              <RichTextEditor
                 value={nextWeekFocus}
-                onChange={(e) => setNextWeekFocus(e.target.value)}
+                onChange={(val) => setNextWeekFocus(val)}
                 placeholder="e.g. Protect sleep · Ship the draft · Book the dentist"
                 rows={2}
-                className="resize-none"
+                className="bg-card"
               />
             </CardContent>
           </Card>

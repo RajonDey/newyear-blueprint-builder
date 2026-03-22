@@ -163,7 +163,7 @@ export function SystemsTracker() {
             </CardTitle>
             <p className="text-xs text-muted-foreground font-normal pt-1">
               Set on{" "}
-              <Link href="/check-in/weekly" className="text-accent hover:underline">
+              <Link href="/rhythm/weekly" className="text-accent hover:underline">
                 Weekly rhythm
               </Link>
               .
