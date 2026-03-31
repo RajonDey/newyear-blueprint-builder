@@ -1,0 +1,38 @@
+---
+description: React component patterns for YearInReview
+globs: ["src/components/**/*.tsx"]
+---
+
+# Component Patterns
+
+## Server vs Client
+- Default to Server Components. Only add "use client" when the component needs:
+  useState, useEffect, event handlers, browser APIs, or client-side hooks.
+- Data fetching happens in Server Components or page.tsx files.
+
+## Props
+- Props interface named `{ComponentName}Props`. Define above the component.
+- Destructure props in the function signature.
+
+## App shell layout
+- Authenticated pages: wrap main content in `<AppContent variant="narrow">` (forms, check-ins, settings, goal detail) or `variant="wide"` (dashboard, goals grid, analytics, systems, wrapped, plan year). Do not add separate `max-w-*` on the inner root unless needed for a sub-region.
+
+## Styling
+- Use shadcn/ui primitives from `@/components/ui/*` — never build custom buttons, inputs, dialogs from scratch.
+- Use `cn()` from `@/lib/utils` for conditional classes.
+- Never inline styles. Always use Tailwind classes.
+- Framer Motion for animations. Keep animations subtle (200-300ms, ease-out).
+
+## UI States
+- Loading states: Use Skeleton components.
+- Empty states: Use the shared EmptyState component with icon, title, and action.
+- Error states: Catch and display user-friendly messages.
+
+## Premium Features
+- Wrap premium-only UI in `<PremiumGate>`.
+- Never hide premium features entirely — show them locked with an upgrade prompt.
+- Check premium status via the user's `planTier` from session.
+
+## Data Display
+- Use `formatDate()` from `@/lib/utils` for dates.
+- Numbers: use Intl.NumberFormat for locale-aware formatting.

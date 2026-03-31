@@ -1,0 +1,42 @@
+---
+description: Global coding standards for YearInReview v2
+globs: ["**/*.ts", "**/*.tsx"]
+---
+
+# General Coding Standards
+
+## TypeScript
+- Use strict mode. No `any` types unless absolutely necessary (add comment explaining why).
+- Prefer `const` over `let`. Never use `var`.
+- Use named exports (except Next.js pages which require default export).
+- Use early returns to reduce nesting.
+
+## Error Handling
+- Error messages should be user-friendly, not technical jargon.
+- All dates stored in UTC. Convert to user timezone only in the UI layer.
+- Use Zod for ALL external input validation (API requests, form data, URL params).
+
+## File Naming
+- Components: `kebab-case.tsx` (e.g., `goal-card.tsx`)
+- Hooks: `use-kebab-case.ts` (e.g., `use-current-user.ts`)
+- Utils/lib: `kebab-case.ts` (e.g., `auth-guard.ts`)
+- API routes: `route.ts` inside folder structure
+
+## Import Order
+1. React / Next.js
+2. Third-party libraries
+3. `@/lib/*`
+4. `@/components/*`
+5. `@/hooks/*`
+6. `@/types/*`
+7. Relative imports
+(Blank line between each group)
+
+## Architecture
+- Next.js 15 App Router with route groups: (marketing), (auth), (app), admin
+- PostgreSQL via Neon + Prisma ORM
+- NextAuth v5 for authentication
+- Lemon Squeezy for subscriptions
+- Resend for transactional email
+- shadcn/ui + Tailwind CSS for UI
+- Zustand for wizard state, React Query for server state

@@ -1,0 +1,56 @@
+---
+description: API route patterns
+globs: ["src/app/api/**/*.ts"]
+---
+
+# API Route Standards
+
+## Authentication
+- Always check authentication with `auth()` from `@/lib/auth`.
+- Return 401 if not authenticated.
+- For admin routes, verify `session.user.role === "ADMIN"`. Return 403 if not admin.
+
+## Validation
+- Always validate request body with Zod before processing.
+- Return consistent JSON: `{ data: T }` for success, `{ error: string }` for errors.
+
+## HTTP Status Codes
+- 200: OK
+- 201: Created
+- 400: Bad Request (validation error)
+- 401: Unauthorized
+- 403: Forbidden
+- 404: Not Found
+- 500: Server Error
+
+## Pagination
+- List endpoints support: `?page=1&limit=20`
+- Return: `{ data: T[], pagination: { page, limit, total, totalPages } }`
+
+## Cron Routes
+- Verify `CRON_SECRET` header for all cron endpoints.
+- Pattern: `if (req.headers.get("authorization") !== \`Bearer ${process.env.CRON_SECRET}\`) return 401`
+
+## Pattern Example
+```ts
+import { auth } from "@/lib/auth"
+import { db } from "@/lib/db"
+import { NextResponse } from "next/server"
+import { z } from "zod"
+
+const schema = z.object({ title: z.string().min(1) })
+
+export async function POST(req: Request) {
+  const session = await auth()
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+  const body = await req.json()
+  const parsed = schema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 })
+  }
+  const result = await db.goal.create({ data: { ...parsed.data, userId: session.user.id } })
+  return NextResponse.json({ data: result }, { status: 201 })
+}
+```

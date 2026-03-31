@@ -1,0 +1,23 @@
+---
+description: Naming conventions across the project
+globs: ["**/*"]
+---
+
+# Naming Conventions
+
+| Entity | Convention | Example |
+|--------|-----------|---------|
+| Files (components) | kebab-case | goal-card.tsx |
+| Files (hooks) | use-kebab-case | use-current-user.ts |
+| Components | PascalCase | GoalCard |
+| Props types | PascalCase + Props | GoalCardProps |
+| Hooks | camelCase with use | useCurrentUser |
+| Utility functions | camelCase | formatDate |
+| Constants | UPPER_SNAKE_CASE | MAX_FREE_GOALS |
+| Env vars | UPPER_SNAKE_CASE | DATABASE_URL |
+| DB tables | snake_case plural | yearly_plans |
+| API routes | kebab-case paths | /api/check-ins/weekly |
+| Zod schemas | camelCase + Schema | createGoalSchema |
+| TypeScript types | PascalCase | GoalWithActions |
+| CSS variables | kebab-case | --color-primary |
+| Route groups | (lowercase) | (marketing), (auth), (app) |
