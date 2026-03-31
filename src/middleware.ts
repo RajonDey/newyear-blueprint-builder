@@ -1,7 +1,12 @@
-import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
-import { rateLimitAuthIfConfigured } from "@/lib/rate-limit-auth"
+import type { NextRequest } from "next/server"
+import { getToken } from "next-auth/jwt"
 
+/**
+ * Edge middleware must stay small (< 1 MB on Vercel Hobby). Do not import `@/lib/auth`
+ * here — it pulls Prisma, adapters, and providers into the Edge bundle.
+ * Session is validated via JWT only (`getToken`). API routes still use `auth()` in Node.
+ */
 const publicRoutes = [
   "/",
   "/login",
@@ -15,15 +20,8 @@ const publicRoutes = [
   "/cookies",
 ]
 
-export default auth(async (req) => {
+export default async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname
-
-  if (pathname.startsWith("/api/auth")) {
-    const rateLimited = await rateLimitAuthIfConfigured(req)
-    if (rateLimited) return rateLimited
-  }
-
-  const isLoggedIn = Boolean(req.auth?.user?.id)
   const isApiRoute = pathname.startsWith("/api")
   const isStaticAsset =
     pathname.startsWith("/_next") || pathname.includes(".")
@@ -31,6 +29,24 @@ export default auth(async (req) => {
   if (isApiRoute || isStaticAsset) {
     return NextResponse.next()
   }
+
+  const secret = process.env.NEXTAUTH_SECRET
+  if (!secret) {
+    console.error("[middleware] NEXTAUTH_SECRET is not set")
+    return NextResponse.next()
+  }
+
+  const token = await getToken({
+    req,
+    secret,
+    secureCookie: process.env.NODE_ENV === "production",
+  })
+
+  const uid =
+    (typeof token?.id === "string" && token.id.length > 0 ? token.id : null) ||
+    (typeof token?.sub === "string" && token.sub.length > 0 ? token.sub : null)
+  const accountActive = token?.accountActive !== false
+  const isLoggedIn = Boolean(uid && accountActive)
 
   const isPublicRoute = publicRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
@@ -43,13 +59,13 @@ export default auth(async (req) => {
   }
 
   if (pathname.startsWith("/admin")) {
-    if (req.auth?.user?.role !== "ADMIN") {
+    if (token?.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin))
     }
   }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|images|fonts|assets).*)"],
