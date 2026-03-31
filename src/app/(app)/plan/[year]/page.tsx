@@ -12,6 +12,7 @@ import { AppContent } from "@/components/shared/app-content"
 import { PageHeader } from "@/components/shared/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { sanitizeRichTextHtml } from "@/lib/sanitize"
 import { ShieldOff } from "lucide-react"
 
 export async function generateMetadata({
@@ -66,37 +67,41 @@ export default async function PlanYearPage({
         </Badge>
       </PageHeader>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <WheelChart scores={wheelScores} />
-
-        {reflections && Object.values(reflections).some((v) => v) && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-display text-lg">Reflections</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              {reflections.wins && (
-                <div>
-                  <p className="font-medium text-xs uppercase tracking-wider text-muted-foreground">Wins</p>
-                  <div className="mt-0.5 prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: reflections.wins }} />
-                </div>
-              )}
-              {reflections.gratitude && (
-                <div>
-                  <p className="font-medium text-xs uppercase tracking-wider text-muted-foreground">Gratitude</p>
-                  <div className="mt-0.5 prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: reflections.gratitude }} />
-                </div>
-              )}
-              {reflections.lessons && (
-                <div>
-                  <p className="font-medium text-xs uppercase tracking-wider text-muted-foreground">Lessons</p>
-                  <div className="mt-0.5 prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: reflections.lessons }} />
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      {(() => {
+        const hasReflections = reflections && Object.values(reflections).some((v) => v)
+        return (
+          <div className={`grid gap-6 ${hasReflections ? "lg:grid-cols-2" : ""}`}>
+            <WheelChart scores={wheelScores} />
+            {hasReflections && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-display text-lg">Reflections</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  {reflections.wins && (
+                    <div>
+                      <p className="font-medium text-xs uppercase tracking-wider text-muted-foreground">Wins</p>
+                      <div className="mt-0.5 prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(reflections.wins) }} />
+                    </div>
+                  )}
+                  {reflections.gratitude && (
+                    <div>
+                      <p className="font-medium text-xs uppercase tracking-wider text-muted-foreground">Gratitude</p>
+                      <div className="mt-0.5 prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(reflections.gratitude) }} />
+                    </div>
+                  )}
+                  {reflections.lessons && (
+                    <div>
+                      <p className="font-medium text-xs uppercase tracking-wider text-muted-foreground">Lessons</p>
+                      <div className="mt-0.5 prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(reflections.lessons) }} />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )
+      })()}
 
       <section id="plan-goals" className="scroll-mt-24 space-y-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

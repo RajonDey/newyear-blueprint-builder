@@ -66,6 +66,42 @@ export async function POST(req: Request) {
       },
       update: {},
     })
+
+    const existing = await db.streak.findUnique({
+      where: {
+        userId_type: { userId: session.user.id, type: "DAILY_SYSTEM" },
+      },
+    })
+
+    const today = date
+    const yesterday = new Date(dateObj.getTime() - 86_400_000)
+      .toISOString()
+      .slice(0, 10)
+
+    const lastDate = existing?.lastCompletedAt
+      ?.toISOString()
+      .slice(0, 10)
+
+    const isContinuation = lastDate === yesterday || lastDate === today
+    const newCurrent = isContinuation ? (existing?.currentStreak ?? 0) + 1 : 1
+
+    await db.streak.upsert({
+      where: {
+        userId_type: { userId: session.user.id, type: "DAILY_SYSTEM" },
+      },
+      create: {
+        userId: session.user.id,
+        type: "DAILY_SYSTEM",
+        currentStreak: 1,
+        longestStreak: 1,
+        lastCompletedAt: dateObj,
+      },
+      update: {
+        currentStreak: newCurrent,
+        longestStreak: Math.max(newCurrent, existing?.longestStreak ?? 0),
+        lastCompletedAt: dateObj,
+      },
+    })
   }
 
   return NextResponse.json({

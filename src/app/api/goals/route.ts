@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { z } from "zod"
 import { planLimits } from "@/lib/config"
+import { sanitizeRichTextHtml } from "@/lib/sanitize"
 
 const createGoalSchema = z.object({
   planId: z.string().min(1),
@@ -69,6 +70,7 @@ export async function POST(req: Request) {
   const goal = await db.goal.create({
     data: {
       ...parsed.data,
+      description: sanitizeRichTextHtml(parsed.data.description) || null,
       sortOrder: goalCount,
     },
   })

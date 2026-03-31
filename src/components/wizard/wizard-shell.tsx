@@ -1,9 +1,10 @@
 "use client"
 
+import Link from "next/link"
 import { useWizardStore, WIZARD_STEPS } from "@/stores/wizard-store"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
-import { Check } from "lucide-react"
+import { Check, ArrowLeft } from "lucide-react"
 import { StepWelcome } from "./step-welcome"
 import { StepReflection } from "./step-reflection"
 import { StepGoals } from "./step-goals"
@@ -27,13 +28,20 @@ export function WizardShell() {
   const StepComponent = STEP_COMPONENTS[safeStep]
 
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
       <MandalaWatermark position="top-right" size="lg" />
 
       {/* Stepper */}
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="mx-auto max-w-4xl px-4 py-4">
-          <nav className="flex items-center justify-between gap-1 overflow-x-auto">
+          <nav className="flex items-center gap-1 overflow-x-auto">
+            <Link
+              href="/dashboard"
+              className="mr-3 shrink-0 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Exit</span>
+            </Link>
             {WIZARD_STEPS.map((step, index) => {
               const isCompleted = index < safeStep
               const isCurrent = index === safeStep
@@ -51,7 +59,7 @@ export function WizardShell() {
                   </div>
                   <span
                     className={cn(
-                      "hidden text-xs font-medium sm:inline",
+                      "text-[10px] sm:text-xs font-medium",
                       isCurrent ? "text-foreground" : "text-muted-foreground"
                     )}
                   >

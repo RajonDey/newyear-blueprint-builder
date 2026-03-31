@@ -20,8 +20,8 @@ function tabsListAndContent(
   return (
     <>
       <TabsList className="grid w-full max-w-md grid-cols-2">
-        <TabsTrigger value="plan">This week&apos;s plan</TabsTrigger>
-        <TabsTrigger value="review">Weekly review</TabsTrigger>
+        <TabsTrigger value="plan">Plan week</TabsTrigger>
+        <TabsTrigger value="review">Review week</TabsTrigger>
       </TabsList>
       <TabsContent value="plan" className="mt-6">
         {planSlot}

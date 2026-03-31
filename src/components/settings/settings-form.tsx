@@ -15,6 +15,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { MandalaWatermark } from "@/components/shared/mandala-watermark"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
 import { Loader2, User, LogOut, Sparkles, Check, Trash2 } from "lucide-react"
@@ -130,8 +137,8 @@ export function SettingsForm({ planTier }: SettingsFormProps) {
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Upgrade to Pro for unlimited goals, quarterly reviews, advanced
-                analytics, and streak shields.
+                Upgrade to Pro for unlimited goals, monthly &amp; quarterly reviews,
+                and advanced analytics.
               </p>
               <Button
                 onClick={async () => {
@@ -200,18 +207,18 @@ export function SettingsForm({ planTier }: SettingsFormProps) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="timezone">Timezone</Label>
-              <select
-                id="timezone"
-                value={timezone}
-                onChange={(e) => setTimezone(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              >
-                {COMMON_TIMEZONES.map((tz) => (
-                  <option key={tz} value={tz}>
-                    {tz}
-                  </option>
-                ))}
-              </select>
+              <Select value={timezone} onValueChange={setTimezone}>
+                <SelectTrigger id="timezone">
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COMMON_TIMEZONES.map((tz) => (
+                    <SelectItem key={tz} value={tz}>
+                      {tz.replace(/_/g, " ")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button type="submit" disabled={saving}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

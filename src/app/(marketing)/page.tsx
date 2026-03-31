@@ -63,17 +63,7 @@ export default function HomePage() {
             <Button size="lg" variant="outline" className="px-8 h-12 text-base" asChild>
               <Link href="/pricing">See pricing</Link>
             </Button>
-            <Button size="lg" variant="ghost" className="px-6 h-12 text-base hidden sm:inline-flex" asChild>
-              <Link href="/features" className="gap-1">
-                All features <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
           </div>
-          <p className="sm:hidden">
-            <Link href="/features" className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1">
-              View all features <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </p>
 
           <ul className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground pt-2">
             <li className="flex items-center justify-center gap-2">
@@ -121,12 +111,12 @@ export default function HomePage() {
               {
                 icon: Repeat,
                 title: "Stay in motion",
-                body: "Weekly rhythm: set priorities for the week, protect what matters, then reflect and carry a note into the next week.",
+                body: "Weekly planner: set priorities for the week, protect what matters, then reflect and carry a note into the next week.",
               },
               {
                 icon: TrendingUp,
                 title: "Compound in small reps",
-                body: "Daily systems tied to goals turn your plan into repeatable actions—where real change actually happens.",
+                body: "Daily habits tied to goals turn your plan into repeatable actions — where real change actually happens.",
               },
             ].map((item) => (
               <div
@@ -248,12 +238,12 @@ export default function HomePage() {
               },
               {
                 icon: ListChecks,
-                title: "Daily systems",
+                title: "Daily habits",
                 desc: "Small recurring actions per goal so progress shows up in your week, not only on January 1.",
               },
               {
                 icon: CalendarCheck,
-                title: "Weekly rhythm",
+                title: "Weekly planner",
                 desc: "Plan the week (priorities + commitments), reflect, and leave a note for your future self.",
               },
               {
@@ -300,8 +290,8 @@ export default function HomePage() {
             <div className="rounded-lg border bg-background p-8 space-y-4">
               <h3 className="font-display text-lg font-semibold">Free</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Full wizard, Wheel of Life, up to three goals, weekly rhythm, daily systems, streaks, and PDF
-                export—enough to run a serious year without paying.
+                Full wizard, Wheel of Life, up to three goals, weekly rhythm, daily systems, and streaks—enough
+                to run a serious year without paying.
               </p>
               <Button variant="outline" className="w-full sm:w-auto" asChild>
                 <Link href="/signup">Create free account</Link>
@@ -312,8 +302,8 @@ export default function HomePage() {
                 Pro <Sparkles className="h-4 w-4 text-accent" />
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Unlimited goals, quarterly review, advanced analytics, AI planning coach, accountability
-                sharing, streak shields, and premium Year Wrapped—when you want the full studio.
+                Unlimited goals, monthly and quarterly reviews, advanced analytics, and
+                Year Wrapped—when you want the full studio.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button asChild>

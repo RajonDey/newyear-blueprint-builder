@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Target,
   CalendarCheck,
+  CalendarDays,
   Activity,
   BarChart3,
   Gift,
@@ -27,36 +28,43 @@ interface AppSidebarProps {
   }
 }
 
-const navigationBase = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Goals", href: "/goals", icon: Target },
-  { label: "Daily Systems", href: "/rhythm/daily", icon: ListChecks },
-  { label: "Weekly rhythm", href: "/rhythm/weekly", icon: CalendarCheck },
-  { label: "divider", href: "", icon: Activity },
-  { label: "Analytics", href: "/analytics", icon: BarChart3, premium: true },
-  {
-    label: "Quarterly Review",
-    href: "/rhythm/quarterly",
-    icon: Activity,
-    premium: true,
-  },
-  { label: "Year Wrapped", href: "/wrapped", icon: Gift },
-  { label: "divider2", href: "", icon: Settings },
-  { label: "Settings", href: "/settings", icon: Settings },
+type NavItem =
+  | { kind: "link"; label: string; href: string; icon: typeof LayoutDashboard; premium?: boolean }
+  | { kind: "divider" }
+
+const navigationBase: NavItem[] = [
+  { kind: "link", label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { kind: "divider" },
+  { kind: "link", label: "Goals", href: "/goals", icon: Target },
+  { kind: "divider" },
+  { kind: "link", label: "Daily Habits", href: "/rhythm/daily", icon: ListChecks },
+  { kind: "link", label: "Weekly Planner", href: "/rhythm/weekly", icon: CalendarCheck },
+  { kind: "divider" },
+  { kind: "link", label: "Monthly Review", href: "/rhythm/monthly", icon: CalendarDays, premium: true },
+  { kind: "link", label: "Quarterly Review", href: "/rhythm/quarterly", icon: Activity, premium: true },
+  { kind: "link", label: "Analytics", href: "/analytics", icon: BarChart3, premium: true },
+  { kind: "link", label: "Year Wrapped", href: "/wrapped", icon: Gift },
+  { kind: "divider" },
+  { kind: "link", label: "Settings", href: "/settings", icon: Settings },
 ]
+
+function buildNavigation(role: string): NavItem[] {
+  if (role !== "ADMIN") return navigationBase
+
+  const settingsIdx = navigationBase.findIndex(
+    (item) => item.kind === "link" && item.href === "/settings"
+  )
+  return [
+    ...navigationBase.slice(0, settingsIdx),
+    { kind: "link", label: "Admin", href: "/admin", icon: Shield },
+    ...navigationBase.slice(settingsIdx),
+  ]
+}
 
 export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname()
   const isPro = hasProProductAccess(user.planTier, user.role)
-
-  const navigation =
-    user.role === "ADMIN"
-      ? [
-          ...navigationBase.slice(0, -2),
-          { label: "Admin", href: "/admin", icon: Shield },
-          ...navigationBase.slice(-2),
-        ]
-      : navigationBase
+  const navigation = buildNavigation(user.role)
 
   return (
     <aside className="hidden md:flex w-64 flex-col border-r bg-sidebar">
@@ -79,11 +87,11 @@ export function AppSidebar({ user }: AppSidebarProps) {
       </div>
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-1">
-          {navigation.map((item) => {
-            if (item.label.startsWith("divider")) {
+          {navigation.map((item, i) => {
+            if (item.kind === "divider") {
               return (
                 <div
-                  key={item.label}
+                  key={`divider-${i}`}
                   className="my-3 h-px bg-sidebar-border"
                 />
               )

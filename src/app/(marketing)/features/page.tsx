@@ -12,11 +12,8 @@ import {
   CalendarCheck,
   BarChart3,
   Sparkles,
-  Share2,
-  Shield,
   FileDown,
   Flame,
-  Bot,
 } from "lucide-react"
 
 export const metadata: Metadata = {
@@ -98,9 +95,9 @@ export default function FeaturesPage() {
               },
               {
                 icon: FileDown,
-                title: "PDF export",
+                title: "Plan overview",
                 tier: "free",
-                text: "Take your plan offline for journaling, printing, or sharing with a coach.",
+                text: "See your full plan at a glance — goals, checkpoints, systems, and anti-goals in one view.",
               },
             ]}
           />
@@ -111,13 +108,13 @@ export default function FeaturesPage() {
             items={[
               {
                 icon: CalendarCheck,
-                title: "Weekly rhythm",
+                title: "Weekly planner",
                 tier: "free",
                 text: "Set weekly priorities, note what to protect, log core and follow-up commitments, then reflect. Carry a “looking ahead” note into the next week.",
               },
               {
                 icon: ListChecks,
-                title: "Daily systems tracker",
+                title: "Daily habits tracker",
                 tier: "free",
                 text: "See today’s systems, complete them with one tap, and surface this week’s focus next to your goals.",
               },
@@ -147,28 +144,10 @@ export default function FeaturesPage() {
                 text: "Deeper progress views to see how your year is trending—not just how today felt.",
               },
               {
-                icon: Bot,
-                title: "AI planning coach",
-                tier: "pro",
-                text: "Guidance inside the product when you want prompts and suggestions (where enabled).",
-              },
-              {
-                icon: Share2,
-                title: "Accountability sharing",
-                tier: "pro",
-                text: "Share progress with someone you trust when you want external support.",
-              },
-              {
-                icon: Shield,
-                title: "Streak shields",
-                tier: "pro",
-                text: "Protect momentum during unavoidable breaks—limited per quarter so the stakes stay real.",
-              },
-              {
                 icon: Sparkles,
-                title: "Premium Year Wrapped",
+                title: "Year Wrapped",
                 tier: "pro",
-                text: "A richer end-of-year story of how you lived your plan.",
+                text: "A rich end-of-year summary of how you lived your plan — shareable and motivating.",
               },
             ]}
           />
@@ -222,7 +201,7 @@ function FeatureBlock({
             className="flex gap-4 rounded-lg border border-border/80 bg-background/80 p-5 text-left"
           >
             <div className="shrink-0 flex flex-col items-start gap-2">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/8 text-primary">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <item.icon className="h-5 w-5" />
               </span>
               <TierBadge tier={item.tier} />

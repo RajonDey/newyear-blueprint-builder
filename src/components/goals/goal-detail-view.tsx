@@ -43,6 +43,11 @@ import {
   Plus,
 } from "lucide-react"
 import { toast } from "sonner"
+import { sanitizeRichTextHtml } from "@/lib/sanitize-client"
+import { GoalProgressTimeline } from "./goal-progress-timeline"
+import { GoalKeyResults } from "./goal-key-results"
+import { GoalNotes } from "./goal-notes"
+import { GoalCompletionDialog } from "./goal-completion-dialog"
 
 interface GoalDetailProps {
   goal: {
@@ -69,15 +74,34 @@ interface GoalDetailProps {
     habits: { id: string; description: string; routineFormula?: string | null; frequency: string }[]
     motivation: { whyText: string; consequenceText: string } | null
     actions: { id: string; type: string; description: string; status: string }[]
+    goalCheckIns?: {
+      id: string
+      progressRating: number
+      notes?: string | null
+      blockers?: string | null
+      weeklyCheckIn: { weekNumber: number; year: number; completedAt: string }
+    }[]
+    keyResults?: {
+      id: string
+      title: string
+      currentValue: number
+      targetValue: number
+      unit: string
+    }[]
+    goalNotes?: {
+      id: string
+      content: string
+      createdAt: string
+    }[]
   }
 }
 
 const STATUS_OPTIONS = [
-  { value: "NOT_STARTED", label: "Not Started", icon: Clock },
-  { value: "IN_PROGRESS", label: "In Progress", icon: Loader2 },
-  { value: "ON_TRACK", label: "On Track", icon: Check },
-  { value: "AT_RISK", label: "At Risk", icon: AlertTriangle },
-  { value: "COMPLETED", label: "Completed", icon: Check },
+  { value: "NOT_STARTED", label: "Not Started", icon: Clock, color: "text-muted-foreground" },
+  { value: "IN_PROGRESS", label: "In Progress", icon: Clock, color: "text-blue-600 dark:text-blue-400" },
+  { value: "ON_TRACK", label: "On Track", icon: Check, color: "text-green-600 dark:text-green-400" },
+  { value: "AT_RISK", label: "At Risk", icon: AlertTriangle, color: "text-orange-600 dark:text-orange-400" },
+  { value: "COMPLETED", label: "Completed", icon: Check, color: "text-emerald-600 dark:text-emerald-400" },
 ]
 
 const QUARTER_LABELS: Record<string, string> = {
@@ -107,6 +131,8 @@ export function GoalDetailView({ goal }: GoalDetailProps) {
   const [draftConsequence, setDraftConsequence] = useState(
     goal.motivation?.consequenceText ?? ""
   )
+
+  const [completionOpen, setCompletionOpen] = useState(false)
 
   const [newSystemDesc, setNewSystemDesc] = useState("")
   const [newSystemFreq, setNewSystemFreq] = useState<"DAILY" | "WEEKLY" | "MONTHLY">("DAILY")
@@ -144,7 +170,15 @@ export function GoalDetailView({ goal }: GoalDetailProps) {
         body: JSON.stringify({ status }),
       })
       if (!res.ok) throw new Error("Failed to update")
-      toast.success(`Status updated to ${status.replace(/_/g, " ")}`)
+
+      const json = await res.json()
+
+      if (status === "COMPLETED" && json.achievementUnlocked) {
+        setCompletionOpen(true)
+      } else {
+        toast.success(`Status updated to ${status.replace(/_/g, " ")}`)
+      }
+
       router.refresh()
     } catch {
       toast.error("Failed to update status")
@@ -435,33 +469,54 @@ export function GoalDetailView({ goal }: GoalDetailProps) {
             {goal.description && (
               <div 
                 className="text-muted-foreground mt-1 prose prose-sm dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: goal.description }}
+                dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(goal.description) }}
               />
             )}
           </>
         )}
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <p className="text-sm font-medium mb-3">Status</p>
-          <div className="flex flex-wrap gap-2">
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-medium text-muted-foreground">Status</span>
+        <Select
+          value={goal.status}
+          onValueChange={(v) => updateStatus(v)}
+          disabled={updating}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue>
+              {(() => {
+                const current = STATUS_OPTIONS.find((o) => o.value === goal.status)
+                if (!current) return goal.status
+                return (
+                  <span className={`flex items-center gap-2 ${current.color}`}>
+                    <current.icon className="h-3.5 w-3.5" />
+                    {current.label}
+                  </span>
+                )
+              })()}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
             {STATUS_OPTIONS.map((opt) => (
-              <Button
-                key={opt.value}
-                variant={goal.status === opt.value ? "default" : "outline"}
-                size="sm"
-                onClick={() => updateStatus(opt.value)}
-                disabled={updating || goal.status === opt.value}
-                className="gap-1.5"
-              >
-                <opt.icon className="h-3.5 w-3.5" />
-                {opt.label}
-              </Button>
+              <SelectItem key={opt.value} value={opt.value}>
+                <span className={`flex items-center gap-2 ${opt.color}`}>
+                  <opt.icon className="h-3.5 w-3.5" />
+                  {opt.label}
+                </span>
+              </SelectItem>
             ))}
-          </div>
-        </CardContent>
-      </Card>
+          </SelectContent>
+        </Select>
+        {updating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+      </div>
+
+      <GoalKeyResults
+        goalId={goal.id}
+        keyResults={goal.keyResults ?? []}
+      />
+
+      <GoalProgressTimeline checkIns={goal.goalCheckIns ?? []} />
 
       {totalCPs > 0 && (
         <Card>
@@ -528,7 +583,7 @@ export function GoalDetailView({ goal }: GoalDetailProps) {
             <Repeat className="h-4 w-4 text-accent" /> Daily &amp; weekly systems
           </CardTitle>
           <p className="text-sm text-muted-foreground font-normal">
-            These power your Daily Systems page. Weekly/monthly items stay done
+            These power your Daily Habits page. Weekly/monthly items stay done
             for the whole week or month once checked.
           </p>
         </CardHeader>
@@ -577,7 +632,7 @@ export function GoalDetailView({ goal }: GoalDetailProps) {
                     onCheckedChange={(c) => setSysDraftActive(c === true)}
                     disabled={updating}
                   />
-                  Active (show on Daily Systems)
+                  Active (show on Daily Habits)
                 </label>
                 <div className="flex flex-wrap gap-2">
                   <Button
@@ -692,7 +747,7 @@ export function GoalDetailView({ goal }: GoalDetailProps) {
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   Why this matters
                 </p>
-                <div className="text-sm prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: goal.motivation.whyText }} />
+                <div className="text-sm prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(goal.motivation.whyText) }} />
               </div>
             )}
             <OrnamentDivider variant="dot" />
@@ -701,12 +756,21 @@ export function GoalDetailView({ goal }: GoalDetailProps) {
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   What&apos;s at stake
                 </p>
-                <div className="text-sm prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: goal.motivation.consequenceText }} />
+                <div className="text-sm prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(goal.motivation.consequenceText) }} />
               </div>
             )}
           </CardContent>
         </Card>
       )}
+
+      <GoalNotes goalId={goal.id} notes={goal.goalNotes ?? []} />
+
+      <GoalCompletionDialog
+        open={completionOpen}
+        onOpenChange={setCompletionOpen}
+        goalId={goal.id}
+        goalTitle={goal.title}
+      />
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent>

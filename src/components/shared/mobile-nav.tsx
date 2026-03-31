@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Target,
   CalendarCheck,
+  CalendarDays,
   ListChecks,
   Activity,
   BarChart3,
@@ -22,25 +23,22 @@ import { cn } from "@/lib/utils"
 import { hasProProductAccess } from "@/lib/plan-access"
 import type { PlanTier, Role } from "@prisma/client"
 
-const mobileNavBeforeSettings: {
-  label: string
-  href: string
-  icon: typeof LayoutDashboard
-  premium?: boolean
-  dividerBefore?: boolean
-}[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Goals", href: "/goals", icon: Target },
-  { label: "Daily Systems", href: "/rhythm/daily", icon: ListChecks },
-  { label: "Weekly rhythm", href: "/rhythm/weekly", icon: CalendarCheck },
-  { label: "Analytics", href: "/analytics", icon: BarChart3, premium: true, dividerBefore: true },
-  {
-    label: "Quarterly Review",
-    href: "/rhythm/quarterly",
-    icon: Activity,
-    premium: true,
-  },
-  { label: "Year Wrapped", href: "/wrapped", icon: Gift, dividerBefore: true },
+type MobileNavItem =
+  | { kind: "link"; label: string; href: string; icon: typeof LayoutDashboard; premium?: boolean }
+  | { kind: "divider" }
+
+const mobileNavBase: MobileNavItem[] = [
+  { kind: "link", label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { kind: "divider" },
+  { kind: "link", label: "Goals", href: "/goals", icon: Target },
+  { kind: "divider" },
+  { kind: "link", label: "Daily Habits", href: "/rhythm/daily", icon: ListChecks },
+  { kind: "link", label: "Weekly Planner", href: "/rhythm/weekly", icon: CalendarCheck },
+  { kind: "divider" },
+  { kind: "link", label: "Monthly Review", href: "/rhythm/monthly", icon: CalendarDays, premium: true },
+  { kind: "link", label: "Quarterly Review", href: "/rhythm/quarterly", icon: Activity, premium: true },
+  { kind: "link", label: "Analytics", href: "/analytics", icon: BarChart3, premium: true },
+  { kind: "link", label: "Year Wrapped", href: "/wrapped", icon: Gift },
 ]
 
 interface MobileNavProps {
@@ -48,24 +46,22 @@ interface MobileNavProps {
   role: Role
 }
 
+function buildMobileNav(role: string): MobileNavItem[] {
+  const trailing: MobileNavItem[] = [
+    { kind: "divider" },
+    ...(role === "ADMIN"
+      ? [{ kind: "link" as const, label: "Admin", href: "/admin", icon: Shield }]
+      : []),
+    { kind: "link", label: "Settings", href: "/settings", icon: Settings },
+  ]
+  return [...mobileNavBase, ...trailing]
+}
+
 export function MobileNav({ planTier, role }: MobileNavProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
   const isPro = hasProProductAccess(planTier, role)
-
-  const items: {
-    label: string
-    href: string
-    icon: typeof LayoutDashboard
-    premium?: boolean
-    dividerBefore?: boolean
-  }[] = [
-    ...mobileNavBeforeSettings,
-    ...(role === "ADMIN"
-      ? [{ label: "Admin", href: "/admin", icon: Shield, dividerBefore: true }]
-      : []),
-    { label: "Settings", href: "/settings", icon: Settings, dividerBefore: true },
-  ]
+  const items = buildMobileNav(role)
 
   function linkActive(href: string) {
     return pathname === href || pathname.startsWith(`${href}/`)
@@ -94,19 +90,27 @@ export function MobileNav({ planTier, role }: MobileNavProps) {
               </Button>
             </div>
             <nav className="space-y-1">
-              {items.map((item) => (
-                <div key={item.href}>
-                  {item.dividerBefore && (
-                    <div className="my-3 h-px bg-border" aria-hidden />
-                  )}
+              {items.map((item, i) => {
+                if (item.kind === "divider") {
+                  return (
+                    <div
+                      key={`divider-${i}`}
+                      className="my-3 h-px bg-border"
+                      aria-hidden
+                    />
+                  )
+                }
+
+                return (
                   <Link
+                    key={item.href}
                     href={item.href}
                     onClick={() => setOpen(false)}
                     className={cn(
                       "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
                       linkActive(item.href)
-                        ? "bg-accent/10 text-foreground font-medium"
-                        : "text-muted-foreground hover:text-foreground"
+                        ? "bg-accent/15 text-foreground font-medium"
+                        : "text-muted-foreground hover:bg-accent/5 hover:text-foreground"
                     )}
                   >
                     <item.icon className="h-4 w-4 shrink-0" />
@@ -115,8 +119,8 @@ export function MobileNav({ planTier, role }: MobileNavProps) {
                       <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
                     )}
                   </Link>
-                </div>
-              ))}
+                )
+              })}
             </nav>
             {!isPro && (
               <div className="mt-6 border-t pt-4">

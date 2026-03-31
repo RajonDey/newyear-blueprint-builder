@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { hasProProductAccess } from "@/lib/plan-access"
+import { sanitizeRichTextHtml } from "@/lib/sanitize"
 import { z } from "zod"
 
 const createSchema = z.object({
@@ -60,6 +61,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Plan not found" }, { status: 404 })
   }
 
+  const safeSummary = sanitizeRichTextHtml(parsed.data.summary) || null
+  const safeWins = sanitizeRichTextHtml(parsed.data.winsText) || null
+  const safeChallenges = sanitizeRichTextHtml(parsed.data.challengesText) || null
+  const safeAdjustments = sanitizeRichTextHtml(parsed.data.adjustments) || null
+
   const review = await db.quarterlyReview.upsert({
     where: {
       planId_quarter: {
@@ -70,17 +76,17 @@ export async function POST(req: Request) {
     create: {
       planId: parsed.data.planId,
       quarter: parsed.data.quarter as "Q1" | "Q2" | "Q3" | "Q4",
-      summary: parsed.data.summary,
-      winsText: parsed.data.winsText,
-      challengesText: parsed.data.challengesText,
-      adjustments: parsed.data.adjustments,
+      summary: safeSummary,
+      winsText: safeWins,
+      challengesText: safeChallenges,
+      adjustments: safeAdjustments,
       wheelOfLifeSnapshot: parsed.data.wheelOfLifeSnapshot ?? undefined,
     },
     update: {
-      summary: parsed.data.summary,
-      winsText: parsed.data.winsText,
-      challengesText: parsed.data.challengesText,
-      adjustments: parsed.data.adjustments,
+      summary: safeSummary,
+      winsText: safeWins,
+      challengesText: safeChallenges,
+      adjustments: safeAdjustments,
       wheelOfLifeSnapshot: parsed.data.wheelOfLifeSnapshot ?? undefined,
     },
   })

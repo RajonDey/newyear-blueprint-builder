@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { getWeekNumber } from "@/lib/utils"
+import { getIsoWeekContextInTimeZone } from "@/lib/utils"
+import { sanitizeRichTextHtml } from "@/lib/sanitize"
 import { z } from "zod"
 
 const lifeCategory = z.enum([
@@ -34,9 +35,16 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { timezone: true },
+  })
+
   const now = new Date()
-  const weekNumber = getWeekNumber(now)
-  const year = now.getFullYear()
+  const { weekNumber, year } = getIsoWeekContextInTimeZone(
+    now,
+    user?.timezone || "UTC"
+  )
 
   const plan = await db.yearlyPlan.findFirst({
     where: { userId: session.user.id, status: "ACTIVE" },
@@ -77,6 +85,7 @@ export async function PUT(req: Request) {
     where: { id: planId, userId: session.user.id, status: "ACTIVE" },
     include: {
       goals: { where: { status: { not: "COMPLETED" } }, select: { id: true } },
+      user: { select: { timezone: true } },
     },
   })
   if (!plan) {
@@ -92,8 +101,18 @@ export async function PUT(req: Request) {
   }
 
   const now = new Date()
-  const weekNumber = getWeekNumber(now)
-  const year = now.getFullYear()
+  const { weekNumber, year } = getIsoWeekContextInTimeZone(
+    now,
+    plan.user.timezone || "UTC"
+  )
+
+  const safeCommitments =
+    commitments
+      ?.map((row) => ({
+        ...row,
+        text: sanitizeRichTextHtml(row.text),
+      }))
+      .filter((row) => row.text.length > 0) ?? undefined
 
   const row = await db.weeklyPlan.upsert({
     where: {
@@ -109,12 +128,12 @@ export async function PUT(req: Request) {
       year,
       priorityGoalIds,
       protectCategory: protectCategory ?? null,
-      commitments: commitments ?? [],
+      commitments: safeCommitments ?? [],
     },
     update: {
       priorityGoalIds,
       ...(protectCategory !== undefined && { protectCategory }),
-      ...(commitments !== undefined && { commitments }),
+      ...(safeCommitments !== undefined && { commitments: safeCommitments }),
     },
   })
 

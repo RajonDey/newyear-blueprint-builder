@@ -34,73 +34,27 @@ const MenuBar = ({ editor }: { editor: any }) => {
 
   return (
     <div className="flex flex-wrap items-center gap-1 border-b border-border/60 bg-muted/20 p-1">
-      <Button
-        type="button"
-        variant="ghost"
-        className={toggleBtnClass}
-        data-active={editor.isActive("bold")}
-        onClick={() => editor.chain().focus().toggleBold().run()}
-      >
+      <Button type="button" variant="ghost" className={toggleBtnClass} data-active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()} aria-label="Bold">
         <Bold className="h-4 w-4" />
       </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        className={toggleBtnClass}
-        data-active={editor.isActive("italic")}
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-      >
+      <Button type="button" variant="ghost" className={toggleBtnClass} data-active={editor.isActive("italic")} onClick={() => editor.chain().focus().toggleItalic().run()} aria-label="Italic">
         <Italic className="h-4 w-4" />
       </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        className={toggleBtnClass}
-        data-active={editor.isActive("strike")}
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-      >
+      <Button type="button" variant="ghost" className={toggleBtnClass} data-active={editor.isActive("strike")} onClick={() => editor.chain().focus().toggleStrike().run()} aria-label="Strikethrough">
         <Strikethrough className="h-4 w-4" />
       </Button>
-      
       <div className="h-4 w-px bg-border/60 mx-1" />
-      
-      <Button
-        type="button"
-        variant="ghost"
-        className={toggleBtnClass}
-        data-active={editor.isActive("heading", { level: 1 })}
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-      >
+      <Button type="button" variant="ghost" className={toggleBtnClass} data-active={editor.isActive("heading", { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} aria-label="Heading 1">
         <Heading1 className="h-4 w-4" />
       </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        className={toggleBtnClass}
-        data-active={editor.isActive("heading", { level: 2 })}
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-      >
+      <Button type="button" variant="ghost" className={toggleBtnClass} data-active={editor.isActive("heading", { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} aria-label="Heading 2">
         <Heading2 className="h-4 w-4" />
       </Button>
-      
       <div className="h-4 w-px bg-border/60 mx-1" />
-      
-      <Button
-        type="button"
-        variant="ghost"
-        className={toggleBtnClass}
-        data-active={editor.isActive("bulletList")}
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-      >
+      <Button type="button" variant="ghost" className={toggleBtnClass} data-active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()} aria-label="Bullet list">
         <List className="h-4 w-4" />
       </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        className={toggleBtnClass}
-        data-active={editor.isActive("orderedList")}
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-      >
+      <Button type="button" variant="ghost" className={toggleBtnClass} data-active={editor.isActive("orderedList")} onClick={() => editor.chain().focus().toggleOrderedList().run()} aria-label="Numbered list">
         <ListOrdered className="h-4 w-4" />
       </Button>
     </div>
@@ -127,10 +81,8 @@ export function RichTextEditor({
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: cn(
-          "prose prose-sm dark:prose-invert max-w-none focus:outline-none p-3",
-          `min-h-[${rows * 1.5}rem]`
-        ),
+        class: "prose prose-sm dark:prose-invert max-w-none focus:outline-none p-3",
+        style: `min-height: ${rows * 1.5}rem`,
       },
     },
     onUpdate: ({ editor }) => {

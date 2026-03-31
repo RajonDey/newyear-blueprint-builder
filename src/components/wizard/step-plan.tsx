@@ -132,7 +132,7 @@ export function StepPlan() {
                   </div>
                 </div>
 
-                {/* Daily Systems */}
+                {/* Daily Habits */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Repeat className="h-4 w-4 text-accent" />

@@ -1,39 +1,48 @@
+import { subWeeks } from "date-fns"
 import { db } from "@/lib/db"
-import { getWeekNumber } from "@/lib/utils"
+import { getIsoWeekContextInTimeZone, getPreviousIsoWeekContext } from "@/lib/utils"
 import { getActiveSystemsPeriodProgress } from "@/lib/queries/systems"
 
 export async function getDashboardData(userId: string) {
-  const plan = await db.yearlyPlan.findFirst({
-    where: { userId, status: "ACTIVE" },
-    include: {
-      goals: {
-        select: {
-          id: true,
-          title: true,
-          category: true,
-          type: true,
-          status: true,
-          dailySystems: { select: { id: true, isActive: true } },
-          checkpointGoals: { select: { id: true, status: true, quarter: true } },
+  const [user, plan] = await Promise.all([
+    db.user.findUnique({
+      where: { id: userId },
+      select: { timezone: true },
+    }),
+    db.yearlyPlan.findFirst({
+      where: { userId, status: "ACTIVE" },
+      include: {
+        goals: {
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            type: true,
+            status: true,
+            dailySystems: { select: { id: true, isActive: true } },
+            checkpointGoals: { select: { id: true, status: true, quarter: true } },
+          },
+          orderBy: [{ type: "asc" }, { sortOrder: "asc" }],
         },
-        orderBy: [{ type: "asc" }, { sortOrder: "asc" }],
+        wheelEntries: {
+          orderBy: { recordedAt: "desc" },
+          take: 6,
+          distinct: ["category"],
+        },
+        weeklyCheckIns: {
+          orderBy: { completedAt: "desc" },
+          take: 5,
+          select: { weekNumber: true, year: true, overallMood: true, completedAt: true },
+        },
       },
-      wheelEntries: {
-        orderBy: { recordedAt: "desc" },
-        take: 6,
-        distinct: ["category"],
-      },
-      weeklyCheckIns: {
-        orderBy: { completedAt: "desc" },
-        take: 1,
-        select: { weekNumber: true, overallMood: true, completedAt: true },
-      },
-    },
-  })
+    }),
+  ])
 
   if (!plan) return null
 
   const now = new Date()
+  const timeZone = user?.timezone || "UTC"
+  const { weekNumber, year: weekYear } = getIsoWeekContextInTimeZone(now, timeZone)
   const systemsProgress = await getActiveSystemsPeriodProgress(userId)
 
   const streak = await db.streak.findFirst({
@@ -49,6 +58,17 @@ export async function getDashboardData(userId: string) {
     inProgress: plan.goals.filter((g) => g.status === "IN_PROGRESS" || g.status === "ON_TRACK").length,
     atRisk: plan.goals.filter((g) => g.status === "AT_RISK").length,
   }
+
+  const prevWeek = getPreviousIsoWeekContext(weekNumber, weekYear)
+  const prevCheckIn = plan.weeklyCheckIns.find(
+    (ci) => ci.weekNumber === prevWeek.weekNumber && ci.year === prevWeek.year
+  )
+  const lastMood = plan.weeklyCheckIns[0]?.overallMood ?? null
+  const prevMood = plan.weeklyCheckIns[1]?.overallMood ?? null
+
+  const totalCheckIns = await db.weeklyCheckIn.count({
+    where: { planId: plan.id },
+  })
 
   return {
     plan: {
@@ -71,6 +91,12 @@ export async function getDashboardData(userId: string) {
     },
     lastCheckIn: plan.weeklyCheckIns[0] ?? null,
     currentQuarter,
-    currentWeek: getWeekNumber(now),
+    currentWeek: weekNumber,
+    trends: {
+      totalCheckIns,
+      lastMood,
+      prevMood,
+      moodDelta: lastMood && prevMood ? lastMood - prevMood : null,
+    },
   }
 }

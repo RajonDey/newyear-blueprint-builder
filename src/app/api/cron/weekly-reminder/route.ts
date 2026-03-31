@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { getWeekNumber } from "@/lib/utils"
+import { getIsoWeekContext } from "@/lib/utils"
 import { sendWeeklyReminder } from "@/lib/email"
 
 export async function GET(req: Request) {
@@ -10,8 +10,7 @@ export async function GET(req: Request) {
   }
 
   const now = new Date()
-  const weekNumber = getWeekNumber(now)
-  const year = now.getFullYear()
+  const { weekNumber, year } = getIsoWeekContext(now)
 
   const activePlans = await db.yearlyPlan.findMany({
     where: { status: "ACTIVE" },

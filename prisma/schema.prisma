@@ -171,6 +171,8 @@ model Goal {
   habits          Habit[]
   motivation      Motivation?
   goalCheckIns    GoalCheckIn[]
+  keyResults      KeyResult[]
+  goalNotes       GoalNote[]
 
   @@map("goals")
 }
@@ -259,6 +261,38 @@ model AntiGoal {
   plan YearlyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@map("anti_goals")
+}
+
+// ─── KEY RESULTS ────────────────────────────────────
+
+model KeyResult {
+  id           String   @id @default(cuid())
+  goalId       String
+  title        String
+  currentValue Float    @default(0)
+  targetValue  Float
+  unit         String   @default("")
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@map("key_results")
+}
+
+// ─── GOAL NOTES ─────────────────────────────────────
+
+model GoalNote {
+  id        String   @id @default(cuid())
+  goalId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId, createdAt])
+  @@map("goal_notes")
 }
 
 // ─── CHECK-INS ───────────────────────────────────────

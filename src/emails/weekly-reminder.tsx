@@ -16,7 +16,7 @@ interface WeeklyReminderEmailProps {
 }
 
 export function WeeklyReminderEmail({ userName, appUrl }: WeeklyReminderEmailProps) {
-  const checkInUrl = `${appUrl}/check-in/weekly`
+  const checkInUrl = `${appUrl}/rhythm/weekly?tab=review`
 
   return (
     <Html>
@@ -24,7 +24,7 @@ export function WeeklyReminderEmail({ userName, appUrl }: WeeklyReminderEmailPro
       <Preview>Your weekly review awaits — reflect on your progress.</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={heading}>Weekly rhythm reminder</Heading>
+          <Heading style={heading}>Weekly Planner reminder</Heading>
           <Text style={paragraph}>
             {userName ? `Hi ${userName},` : "Hi,"}
           </Text>

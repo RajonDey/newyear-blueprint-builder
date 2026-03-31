@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { OrnamentDivider } from "@/components/shared/ornament-divider"
+import { EmptyState } from "@/components/shared/empty-state"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
+import { sanitizeRichTextHtml } from "@/lib/sanitize-client"
 import {
   Select,
   SelectContent,
@@ -16,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Compass, Loader2, Plus, Target, Trash2 } from "lucide-react"
+import { Compass, Loader2, Plus, Target, Trash2, Sparkles, CalendarCheck } from "lucide-react"
 import { toast } from "sonner"
 import type { WeeklyCommitment } from "@/types/weekly"
 import Link from "next/link"
@@ -121,56 +122,47 @@ export function WeeklyPlanForm({
 
   if (goals.length === 0) {
     return (
-      <div className="relative text-center py-12 text-muted-foreground text-sm">
-        Add goals in your yearly plan before setting a weekly focus.
-        <Button asChild variant="link" className="block mx-auto mt-2">
-          <Link href="/plan/new">Create or update your plan</Link>
-        </Button>
-      </div>
+      <EmptyState
+        icon={CalendarCheck}
+        title="Add goals to plan your week"
+        description="Your weekly plan is based on your yearly goals. Create goals first, then come back to set weekly priorities."
+        action={
+          <Button asChild>
+            <Link href="/goals">
+              <Sparkles className="mr-2 h-4 w-4" /> Go to goals
+            </Link>
+          </Button>
+        }
+      />
     )
   }
 
   return (
-    <div className="relative w-full space-y-8">
-      <div>
-        <h2 className="font-display text-2xl font-semibold sm:text-3xl">
-          This week&apos;s plan
-        </h2>
-        <p className="text-muted-foreground mt-1">
-          Week {weekNumber} of {year} · {planYear} plan — set focus before you
-          grind.
-        </p>
-      </div>
-
-      <OrnamentDivider variant="leaf" />
-
+    <div className="space-y-6">
       {suggestionFromLastWeek && (
-        <Card className="border-accent/30 bg-accent/5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-display flex items-center gap-2">
-              <Compass className="h-4 w-4 text-accent" />
-              From last week&apos;s review
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {suggestionFromLastWeek}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="flex items-start gap-3 rounded-lg border border-accent/20 bg-accent/5 p-3 text-sm">
+          <Compass className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+          <div className="min-w-0">
+            <p className="font-medium text-xs uppercase tracking-wide text-muted-foreground mb-1">From last week&apos;s review</p>
+            <div
+              className="prose prose-sm dark:prose-invert max-w-none text-sm"
+              dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(suggestionFromLastWeek) }}
+            />
+          </div>
+        </div>
       )}
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-display flex items-center gap-2">
+          <CardTitle className="text-base font-display flex items-center gap-2">
             <Target className="h-4 w-4 text-accent" />
             Priority goals (up to 3)
           </CardTitle>
           <p className="text-sm text-muted-foreground font-normal">
-            These stay top-of-mind on your Daily Systems page.
+            These stay top-of-mind on your Daily Habits page.
           </p>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2">
           {goals.map((g) => {
             const cat = LIFE_CATEGORIES.find((c) => c.id === g.category)
             const checked = priorityIds.includes(g.id)
@@ -178,7 +170,7 @@ export function WeeklyPlanForm({
               <label
                 key={g.id}
                 className={cn(
-                  "flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors",
+                  "flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors",
                   checked && "border-accent/50 bg-accent/5"
                 )}
               >
@@ -198,12 +190,11 @@ export function WeeklyPlanForm({
                       setPriorityIds((prev) => prev.filter((x) => x !== g.id))
                     }
                   }}
-                  className="mt-0.5"
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     {cat && (
-                      <cat.icon className="h-4 w-4 shrink-0" style={{ color: cat.color }} />
+                      <cat.icon className="h-3.5 w-3.5 shrink-0" style={{ color: cat.color }} />
                     )}
                     <span className="text-sm font-medium">{g.title}</span>
                   </div>
@@ -216,7 +207,7 @@ export function WeeklyPlanForm({
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-display">
+          <CardTitle className="text-base font-display">
             Life area to protect
           </CardTitle>
           <p className="text-sm text-muted-foreground font-normal">
@@ -242,12 +233,12 @@ export function WeeklyPlanForm({
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-display">Commitments</CardTitle>
+          <CardTitle className="text-base font-display">Commitments</CardTitle>
           <p className="text-sm text-muted-foreground font-normal">
             Core = tied to yearly goals. Follow-up = admin, errands, small wins.
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {commitments.map((row, i) => (
             <div key={i} className="flex flex-col gap-2 sm:flex-row sm:items-end">
               <div className="flex-1 space-y-1.5">
@@ -265,7 +256,7 @@ export function WeeklyPlanForm({
                     updateCommitment(i, { kind: v as WeeklyCommitment["kind"] })
                   }
                 >
-                  <SelectTrigger className="w-[140px]">
+                  <SelectTrigger className="w-[130px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -307,9 +298,7 @@ export function WeeklyPlanForm({
       </Card>
 
       <Button size="lg" className="w-full" onClick={save} disabled={saving}>
-        {saving ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : null}
+        {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Save weekly plan
       </Button>
     </div>

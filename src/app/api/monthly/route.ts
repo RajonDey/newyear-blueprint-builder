@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { hasProProductAccess } from "@/lib/plan-access"
+import { sanitizeRichTextHtml } from "@/lib/sanitize"
 import { z } from "zod"
 
 const createSchema = z.object({
@@ -52,6 +53,11 @@ export async function POST(req: Request) {
   })
   if (!plan) return NextResponse.json({ error: "Plan not found" }, { status: 404 })
 
+  const safeSummary = sanitizeRichTextHtml(parsed.data.summary) || null
+  const safeWins = sanitizeRichTextHtml(parsed.data.winsText) || null
+  const safeChallenges = sanitizeRichTextHtml(parsed.data.challengesText) || null
+  const safeAdjustments = sanitizeRichTextHtml(parsed.data.adjustments) || null
+
   const review = await db.monthlyReview.upsert({
     where: {
       planId_month_year: {
@@ -64,16 +70,16 @@ export async function POST(req: Request) {
       planId: parsed.data.planId,
       month: parsed.data.month,
       year: parsed.data.year,
-      summary: parsed.data.summary,
-      winsText: parsed.data.winsText,
-      challengesText: parsed.data.challengesText,
-      adjustments: parsed.data.adjustments,
+      summary: safeSummary,
+      winsText: safeWins,
+      challengesText: safeChallenges,
+      adjustments: safeAdjustments,
     },
     update: {
-      summary: parsed.data.summary,
-      winsText: parsed.data.winsText,
-      challengesText: parsed.data.challengesText,
-      adjustments: parsed.data.adjustments,
+      summary: safeSummary,
+      winsText: safeWins,
+      challengesText: safeChallenges,
+      adjustments: safeAdjustments,
     },
   })
 

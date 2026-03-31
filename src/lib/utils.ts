@@ -1,5 +1,13 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import {
+  getISOWeek,
+  getISOWeekYear,
+  setISOWeek,
+  startOfISOWeek,
+  subWeeks,
+  addWeeks,
+} from "date-fns"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -25,9 +33,58 @@ export function getCurrentYear(): number {
   return month >= 9 ? now.getFullYear() + 1 : now.getFullYear()
 }
 
+function ymdToUtcNoon(ymd: string): Date {
+  const [y, m, d] = ymd.split("-").map(Number)
+  return new Date(Date.UTC(y, m - 1, d, 12, 0, 0))
+}
+
+export function getYmdInTimeZone(date: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date)
+}
+
+export function getIsoWeekContext(date: Date): { weekNumber: number; year: number } {
+  return {
+    weekNumber: getISOWeek(date),
+    year: getISOWeekYear(date),
+  }
+}
+
+export function getIsoWeekContextInTimeZone(
+  date: Date,
+  timeZone: string
+): { weekNumber: number; year: number } {
+  const ymd = getYmdInTimeZone(date, timeZone)
+  const zonedDate = ymdToUtcNoon(ymd)
+  return getIsoWeekContext(zonedDate)
+}
+
+export function getPreviousIsoWeekContext(
+  weekNumber: number,
+  year: number
+): { weekNumber: number; year: number } {
+  const weekAnchor = startOfISOWeek(
+    setISOWeek(new Date(Date.UTC(year, 0, 4, 12, 0, 0)), weekNumber)
+  )
+  const prev = subWeeks(weekAnchor, 1)
+  return getIsoWeekContext(prev)
+}
+
+export function getNextIsoWeekContext(
+  weekNumber: number,
+  year: number
+): { weekNumber: number; year: number } {
+  const weekAnchor = startOfISOWeek(
+    setISOWeek(new Date(Date.UTC(year, 0, 4, 12, 0, 0)), weekNumber)
+  )
+  const next = addWeeks(weekAnchor, 1)
+  return getIsoWeekContext(next)
+}
+
 export function getWeekNumber(date: Date): number {
-  const start = new Date(date.getFullYear(), 0, 1)
-  const diff = date.getTime() - start.getTime()
-  const oneWeek = 7 * 24 * 60 * 60 * 1000
-  return Math.ceil((diff / oneWeek) + 1)
+  return getIsoWeekContext(date).weekNumber
 }

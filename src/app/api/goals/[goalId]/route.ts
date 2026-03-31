@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { z } from "zod"
+import { sanitizeRichTextHtml } from "@/lib/sanitize"
 
 export async function GET(
   _req: Request,
@@ -71,10 +72,12 @@ export async function PUT(
   }
 
   const { motivation, title, description, status, type } = parsed.data
+  const safeDescription =
+    description === undefined ? undefined : sanitizeRichTextHtml(description) || null
   const goalUpdate = Object.fromEntries(
     [
       ["title", title],
-      ["description", description],
+      ["description", safeDescription],
       ["status", status],
       ["type", type],
     ].filter(([, v]) => v !== undefined)
@@ -95,22 +98,52 @@ export async function PUT(
         where: { goalId },
         create: {
           goalId,
-          whyText: motivation.whyText ?? prev?.whyText ?? "",
-          consequenceText: motivation.consequenceText ?? prev?.consequenceText ?? "",
+          whyText:
+            sanitizeRichTextHtml(motivation.whyText) ||
+            prev?.whyText ||
+            "",
+          consequenceText:
+            sanitizeRichTextHtml(motivation.consequenceText) ||
+            prev?.consequenceText ||
+            "",
         },
         update: {
-          ...(motivation.whyText !== undefined && { whyText: motivation.whyText }),
+          ...(motivation.whyText !== undefined && {
+            whyText: sanitizeRichTextHtml(motivation.whyText),
+          }),
           ...(motivation.consequenceText !== undefined && {
-            consequenceText: motivation.consequenceText,
+            consequenceText: sanitizeRichTextHtml(motivation.consequenceText),
           }),
         },
+      })
+    }
+
+    if (
+      status === "COMPLETED" &&
+      existing.status !== "COMPLETED"
+    ) {
+      await tx.achievement.upsert({
+        where: {
+          userId_type: { userId: session.user.id, type: "goal_completed" },
+        },
+        create: {
+          userId: session.user.id,
+          type: "goal_completed",
+          title: "Goal Crusher",
+        },
+        update: {},
       })
     }
 
     return updated
   })
 
-  return NextResponse.json({ data: goal })
+  const achievementUnlocked =
+    status === "COMPLETED" && existing.status !== "COMPLETED"
+      ? "goal_completed"
+      : null
+
+  return NextResponse.json({ data: goal, achievementUnlocked })
 }
 
 export async function DELETE(

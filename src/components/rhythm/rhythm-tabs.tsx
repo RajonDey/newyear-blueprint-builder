@@ -3,21 +3,22 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { ListChecks, CalendarCheck, CalendarDays, Activity } from "lucide-react"
 
 const tabs = [
-  { name: "Daily Systems", href: "/rhythm/daily" },
-  { name: "Weekly Rhythm", href: "/rhythm/weekly" },
-  { name: "Monthly Review", href: "/rhythm/monthly" },
-  { name: "Quarterly Milestones", href: "/rhythm/quarterly" },
+  { name: "Daily", href: "/rhythm/daily", icon: ListChecks },
+  { name: "Weekly", href: "/rhythm/weekly", icon: CalendarCheck },
+  { name: "Monthly", href: "/rhythm/monthly", icon: CalendarDays },
+  { name: "Quarterly", href: "/rhythm/quarterly", icon: Activity },
 ]
 
 export function RhythmTabs() {
   const pathname = usePathname()
 
   return (
-    <div className="border-b bg-background sticky top-0 z-20">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <nav className="-mb-px flex gap-6 overflow-x-auto no-scrollbar" aria-label="Tabs">
+    <div className="border-b bg-background sticky top-0 z-20 px-4 sm:px-6">
+      <div className="mx-auto max-w-3xl">
+        <nav className="-mb-px flex gap-1" aria-label="Rhythm cadence">
           {tabs.map((tab) => {
             const isActive = pathname === tab.href || pathname.startsWith(tab.href + "/")
             return (
@@ -25,12 +26,13 @@ export function RhythmTabs() {
                 key={tab.name}
                 href={tab.href}
                 className={cn(
-                  "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors",
+                  "flex items-center gap-1.5 whitespace-nowrap border-b-2 py-3 px-3 text-sm font-medium transition-colors",
                   isActive
-                    ? "border-primary text-foreground"
-                    : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
+                    ? "border-accent text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 )}
               >
+                <tab.icon className={cn("h-4 w-4", isActive && "text-accent")} />
                 {tab.name}
               </Link>
             )

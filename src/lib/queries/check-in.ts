@@ -1,10 +1,16 @@
 import { db } from "@/lib/db"
-import { getWeekNumber } from "@/lib/utils"
+import { getIsoWeekContextInTimeZone } from "@/lib/utils"
 
 export async function getCheckInFormData(userId: string) {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { timezone: true },
+  })
   const now = new Date()
-  const weekNumber = getWeekNumber(now)
-  const year = now.getFullYear()
+  const { weekNumber, year } = getIsoWeekContextInTimeZone(
+    now,
+    user?.timezone || "UTC"
+  )
 
   const plan = await db.yearlyPlan.findFirst({
     where: { userId, status: "ACTIVE" },

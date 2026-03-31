@@ -2,7 +2,8 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { z } from "zod"
-import { getWeekNumber } from "@/lib/utils"
+import { sanitizeRichTextHtml } from "@/lib/sanitize"
+import { getIsoWeekContextInTimeZone, getPreviousIsoWeekContext } from "@/lib/utils"
 
 const createCheckInSchema = z.object({
   planId: z.string().min(1),
@@ -54,28 +55,63 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 })
   }
 
+  const plan = await db.yearlyPlan.findFirst({
+    where: { id: parsed.data.planId, userId: session.user.id },
+    select: { id: true, user: { select: { timezone: true } } },
+  })
+  if (!plan) {
+    return NextResponse.json({ error: "Plan not found" }, { status: 404 })
+  }
+
+  const allowedGoalIds = new Set(
+    (
+      await db.goal.findMany({
+        where: { planId: plan.id },
+        select: { id: true },
+      })
+    ).map((g) => g.id)
+  )
+  if (parsed.data.goalCheckIns.some((gc) => !allowedGoalIds.has(gc.goalId))) {
+    return NextResponse.json(
+      { error: "Goal check-ins must belong to goals on this plan." },
+      { status: 400 }
+    )
+  }
+
   const now = new Date()
-  const weekNumber = getWeekNumber(now)
-  const year = now.getFullYear()
+  const { weekNumber, year } = getIsoWeekContextInTimeZone(
+    now,
+    plan.user.timezone || "UTC"
+  )
+
+  const safeNotes = sanitizeRichTextHtml(parsed.data.notes)
+  const safeNextWeekFocus = sanitizeRichTextHtml(parsed.data.nextWeekFocus)
+  const safeGoalCheckIns = parsed.data.goalCheckIns.map((g) => ({
+    ...g,
+    notes: sanitizeRichTextHtml(g.notes) || undefined,
+    blockers: sanitizeRichTextHtml(g.blockers) || undefined,
+  }))
 
   const checkIn = await db.$transaction(async (tx) => {
     const created = await tx.weeklyCheckIn.create({
       data: {
-        planId: parsed.data.planId,
+        planId: plan.id,
         weekNumber,
         year,
         overallMood: parsed.data.overallMood,
-        notes: parsed.data.notes,
-        nextWeekFocus: parsed.data.nextWeekFocus?.trim() || null,
+        notes: safeNotes || null,
+        nextWeekFocus: safeNextWeekFocus || null,
         goalCheckIns: {
-          create: parsed.data.goalCheckIns,
+          create: safeGoalCheckIns,
         },
       },
       include: { goalCheckIns: true },
     })
 
-    const prevWeek = weekNumber === 1 ? 52 : weekNumber - 1
-    const prevYear = weekNumber === 1 ? year - 1 : year
+    const { weekNumber: prevWeek, year: prevYear } = getPreviousIsoWeekContext(
+      weekNumber,
+      year
+    )
 
     const hadPrevWeek = await tx.weeklyCheckIn.findFirst({
       where: {
@@ -109,23 +145,35 @@ export async function POST(req: Request) {
     })
 
     const streakMilestones = [1, 4, 12, 26, 52]
+    const newAchievements: string[] = []
     for (const m of streakMilestones) {
       if (newCurrent >= m) {
         const type = m === 1 ? "first_check_in" : `streak_${m}`
-        await tx.achievement.upsert({
+        const existing = await tx.achievement.findUnique({
           where: { userId_type: { userId: session.user.id, type } },
-          create: {
-            userId: session.user.id,
-            type,
-            title: m === 1 ? "First Step" : `${m}-week streak`,
-          },
-          update: {},
         })
+        if (!existing) {
+          await tx.achievement.create({
+            data: {
+              userId: session.user.id,
+              type,
+              title: m === 1 ? "First Step" : `${m}-week streak`,
+            },
+          })
+          newAchievements.push(type)
+        }
       }
     }
 
-    return created
+    return { created, newAchievements, streak: newCurrent }
   })
 
-  return NextResponse.json({ data: checkIn }, { status: 201 })
+  return NextResponse.json(
+    {
+      data: checkIn.created,
+      streak: checkIn.streak,
+      newAchievements: checkIn.newAchievements,
+    },
+    { status: 201 }
+  )
 }

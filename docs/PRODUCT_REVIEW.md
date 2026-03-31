@@ -147,7 +147,7 @@ This document satisfies the product checklist (sections 1–10) with **evidence*
 - **Weekly rhythm** page combines:
   - **This week’s plan** (`WeeklyPlan` model): priority goals, life area to protect, core/follow-up commitments (`/api/weekly-plan`).
   - **Weekly review / check-in** with optional **next week focus** stored on the check-in and surfaced as a **suggestion** the following week (`weekly-workspace` query + check-in API).
-- **Daily Systems** today API exposes **weekly focus** for in-context execution (`systems-tracker.tsx`).
+- **Daily Habits** today API exposes **weekly focus** for in-context execution (`systems-tracker.tsx`).
 
 **Assessment**
 

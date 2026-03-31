@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { getWeekNumber } from "@/lib/utils"
+import { getIsoWeekContext } from "@/lib/utils"
 
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization")
@@ -9,8 +9,7 @@ export async function GET(req: Request) {
   }
 
   const now = new Date()
-  const weekNumber = getWeekNumber(now)
-  const year = now.getFullYear()
+  const { weekNumber, year } = getIsoWeekContext(now)
 
   const streaks = await db.streak.findMany({
     where: { type: "WEEKLY_CHECK_IN" },

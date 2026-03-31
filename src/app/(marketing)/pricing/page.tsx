@@ -13,11 +13,11 @@ export const metadata: Metadata = {
 const freeFeatures = [
   "Full planning wizard",
   "Up to 3 intentional goals",
-  "Weekly rhythm (plan + review)",
-  "Daily systems tied to goals",
+  "Weekly planner",
+  "Daily habits tied to goals",
   "Basic streak tracking",
   "Wheel of Life assessment",
-  "PDF export",
+  "90-day habits heatmap",
 ]
 
 const proFeatures = [
@@ -25,10 +25,8 @@ const proFeatures = [
   "Unlimited goals & categories",
   "Quarterly review wizard",
   "Advanced progress analytics",
-  "AI Planning Coach",
-  "Accountability sharing",
-  "Streak shields (2 per quarter)",
-  "Premium Year Wrapped",
+  "Monthly review workspace",
+  "Year Wrapped summary",
 ]
 
 export default function PricingPage() {

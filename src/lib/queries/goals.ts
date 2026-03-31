@@ -30,9 +30,15 @@ export async function getGoalById(goalId: string, userId: string) {
       actions: { orderBy: { type: "asc" } },
       goalCheckIns: {
         orderBy: { weeklyCheckIn: { completedAt: "desc" } },
-        take: 10,
-        include: { weeklyCheckIn: { select: { weekNumber: true, year: true } } },
+        take: 20,
+        include: {
+          weeklyCheckIn: {
+            select: { weekNumber: true, year: true, completedAt: true },
+          },
+        },
       },
+      keyResults: { orderBy: { sortOrder: "asc" } },
+      goalNotes: { orderBy: { createdAt: "desc" }, take: 30 },
     },
   })
 }

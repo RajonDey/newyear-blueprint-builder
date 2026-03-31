@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { planLimits } from "@/lib/config"
+import { sanitizeRichTextHtml } from "@/lib/sanitize"
 import { wizardSubmitSchema } from "@/lib/validations/wizard"
 
 export async function POST(req: Request) {
@@ -19,10 +20,29 @@ export async function POST(req: Request) {
     )
   }
 
-  const { year, reflections, goals, antiGoals } =
-    parsed.data
+  const { year, reflections, goals, antiGoals } = parsed.data
   const userId = session.user.id
   const limits = planLimits[session.user.planTier]
+
+  const safeReflections = {
+    wins: sanitizeRichTextHtml(reflections.wins),
+    challenges: sanitizeRichTextHtml(reflections.challenges),
+    gratitude: sanitizeRichTextHtml(reflections.gratitude),
+    lessons: sanitizeRichTextHtml(reflections.lessons),
+  }
+
+  const safeGoals = goals.map((g) => ({
+    ...g,
+    description: sanitizeRichTextHtml(g.description) || null,
+    motivation: {
+      whyText: sanitizeRichTextHtml(g.motivation.whyText),
+      consequenceText: sanitizeRichTextHtml(g.motivation.consequenceText),
+    },
+    checkpoints: g.checkpoints.map((cp) => ({
+      ...cp,
+      description: sanitizeRichTextHtml(cp.description) || null,
+    })),
+  }))
 
   const existingPlan = await db.yearlyPlan.findUnique({
     where: { userId_year: { userId, year } },
@@ -46,7 +66,7 @@ export async function POST(req: Request) {
     )
   }
 
-  if (goals.length > limits.maxGoalsPerPlan) {
+  if (safeGoals.length > limits.maxGoalsPerPlan) {
     return NextResponse.json(
       { error: `Goal limit is ${limits.maxGoalsPerPlan}. Upgrade to Pro for more.` },
       { status: 403 }
@@ -59,7 +79,7 @@ export async function POST(req: Request) {
     if (existingPlan) {
       newPlan = await tx.yearlyPlan.update({
         where: { id: existingPlan.id },
-        data: { status: "ACTIVE", reflections },
+        data: { status: "ACTIVE", reflections: safeReflections },
       })
     } else {
       await tx.yearlyPlan.updateMany({
@@ -72,20 +92,20 @@ export async function POST(req: Request) {
           userId,
           year,
           status: "ACTIVE",
-          reflections,
+          reflections: safeReflections,
         },
       })
     }
 
-    for (let i = 0; i < goals.length; i++) {
-      const g = goals[i]
+    for (let i = 0; i < safeGoals.length; i++) {
+      const g = safeGoals[i]
       const goal = await tx.goal.create({
         data: {
           planId: newPlan.id,
           category: g.category,
           type: g.type,
           title: g.title,
-          description: g.description || null,
+          description: g.description,
           sortOrder: i,
         },
       })
@@ -94,8 +114,8 @@ export async function POST(req: Request) {
         await tx.motivation.create({
           data: {
             goalId: goal.id,
-            whyText: g.motivation.whyText,
-            consequenceText: g.motivation.consequenceText,
+            whyText: g.motivation.whyText || "",
+            consequenceText: g.motivation.consequenceText || "",
           },
         })
       }
@@ -106,7 +126,7 @@ export async function POST(req: Request) {
             goalId: goal.id,
             quarter: cp.quarter,
             title: cp.title,
-            description: cp.description || null,
+            description: cp.description,
           })),
         })
       }
@@ -126,7 +146,7 @@ export async function POST(req: Request) {
       await tx.antiGoal.createMany({
         data: antiGoals.map((ag) => ({
           planId: newPlan.id,
-          description: ag.description,
+          description: sanitizeRichTextHtml(ag.description),
           category: ag.category || null,
         })),
       })

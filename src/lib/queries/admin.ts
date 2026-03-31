@@ -1,5 +1,5 @@
 import { db } from "@/lib/db"
-import { getWeekNumber } from "@/lib/utils"
+import { getIsoWeekContext } from "@/lib/utils"
 
 export async function getAdminDashboardStats() {
   const now = new Date()
@@ -73,8 +73,7 @@ export async function getAdminSubscriptions(page = 1, limit = 20) {
 
 export async function getAdminAnalytics() {
   const now = new Date()
-  const currentWeek = getWeekNumber(now)
-  const currentYear = now.getFullYear()
+  const { weekNumber: currentWeek, year: currentYear } = getIsoWeekContext(now)
 
   const twelveMonthsAgo = new Date(now)
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)

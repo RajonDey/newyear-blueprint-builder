@@ -1,8 +1,10 @@
 import Link from "next/link"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
+import { getStatusStyle } from "@/lib/constants/status"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { sanitizeRichTextHtml } from "@/lib/sanitize-client"
 import { Flame, ArrowRight, Calendar, Repeat } from "lucide-react"
 
 interface GoalCardProps {
@@ -19,18 +21,9 @@ interface GoalCardProps {
   }
 }
 
-const STATUS_MAP: Record<string, { label: string; className: string }> = {
-  NOT_STARTED: { label: "Not Started", className: "bg-muted text-muted-foreground" },
-  IN_PROGRESS: { label: "In Progress", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-  ON_TRACK: { label: "On Track", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
-  AT_RISK: { label: "At Risk", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
-  COMPLETED: { label: "Completed", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
-  ABANDONED: { label: "Abandoned", className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
-}
-
 export function GoalCard({ goal }: GoalCardProps) {
   const catInfo = LIFE_CATEGORIES.find((c) => c.id === goal.category)
-  const status = STATUS_MAP[goal.status] || STATUS_MAP.NOT_STARTED
+  const status = getStatusStyle(goal.status)
   const completedCPs = goal.checkpointGoals.filter((cp) => cp.status === "COMPLETED").length
   const totalCPs = goal.checkpointGoals.length
   const progress = totalCPs > 0 ? (completedCPs / totalCPs) * 100 : 0
@@ -67,7 +60,7 @@ export function GoalCard({ goal }: GoalCardProps) {
               {goal.description && (
                 <div 
                   className="text-sm text-muted-foreground mt-1 line-clamp-2 prose prose-sm dark:prose-invert"
-                  dangerouslySetInnerHTML={{ __html: goal.description }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(goal.description) }}
                 />
               )}
 
@@ -98,7 +91,7 @@ export function GoalCard({ goal }: GoalCardProps) {
               <Badge variant="secondary" className={`text-xs ${status.className}`}>
                 {status.label}
               </Badge>
-              <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
             </div>
           </div>
         </CardContent>

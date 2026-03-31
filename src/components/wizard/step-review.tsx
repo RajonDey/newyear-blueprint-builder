@@ -17,6 +17,7 @@ import {
   Loader2,
 } from "lucide-react"
 import { toast } from "sonner"
+import { sanitizeRichTextHtml } from "@/lib/sanitize-client"
 
 const CATEGORY_LABELS: Record<string, string> = {
   HEALTH: "Health",
@@ -149,7 +150,7 @@ export function StepReview() {
                 {goal.description && (
                   <div 
                     className="text-sm text-muted-foreground mt-0.5 prose prose-sm dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: goal.description }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(goal.description) }}
                   />
                 )}
                 <div className="flex gap-4 mt-2 text-xs text-muted-foreground">

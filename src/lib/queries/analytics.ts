@@ -1,5 +1,5 @@
 import { db } from "@/lib/db"
-import { getWeekNumber } from "@/lib/utils"
+import { getIsoWeekContextInTimeZone } from "@/lib/utils"
 
 const CATEGORY_LABELS: Record<string, string> = {
   HEALTH: "Health",
@@ -11,31 +11,38 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 export async function getAnalyticsData(userId: string) {
-  const plan = await db.yearlyPlan.findFirst({
-    where: { userId, status: "ACTIVE" },
-    include: {
-      goals: {
-        select: {
-          id: true,
-          title: true,
-          category: true,
-          status: true,
-          checkpointGoals: { select: { id: true, status: true } },
+  const [user, plan] = await Promise.all([
+    db.user.findUnique({
+      where: { id: userId },
+      select: { timezone: true },
+    }),
+    db.yearlyPlan.findFirst({
+      where: { userId, status: "ACTIVE" },
+      include: {
+        goals: {
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            status: true,
+            checkpointGoals: { select: { id: true, status: true } },
+          },
+          orderBy: { sortOrder: "asc" },
         },
-        orderBy: { sortOrder: "asc" },
+        weeklyCheckIns: {
+          orderBy: { completedAt: "asc" },
+          include: { goalCheckIns: true },
+        },
+        wheelEntries: { orderBy: { recordedAt: "asc" } },
+        quarterlyReviews: { orderBy: { quarter: "asc" } },
       },
-      weeklyCheckIns: {
-        orderBy: { completedAt: "asc" },
-        include: { goalCheckIns: true },
-      },
-      wheelEntries: { orderBy: { recordedAt: "asc" } },
-      quarterlyReviews: { orderBy: { quarter: "asc" } },
-    },
-  })
+    }),
+  ])
 
   if (!plan) return null
 
   const now = new Date()
+  const { weekNumber } = getIsoWeekContextInTimeZone(now, user?.timezone || "UTC")
   const year = plan.year
 
   const moodOverTime = plan.weeklyCheckIns
@@ -95,6 +102,6 @@ export async function getAnalyticsData(userId: string) {
     completedGoals,
     totalGoals,
     quarterlyReviews: plan.quarterlyReviews,
-    currentWeek: getWeekNumber(now),
+    currentWeek: weekNumber,
   }
 }
