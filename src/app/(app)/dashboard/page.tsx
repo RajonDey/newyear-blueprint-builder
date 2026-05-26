@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { Compass, Sparkles, Target } from "lucide-react"
+import { Compass, Sparkles } from "lucide-react"
 import { requireAuth } from "@/lib/auth-guard"
 import { getDashboardData } from "@/lib/queries/dashboard"
 import { getAreasForUser } from "@/lib/queries/areas"
@@ -123,14 +123,6 @@ export default async function DashboardPage() {
         description="Your year at a glance — small reps today keep the long arc alive."
       />
 
-      <WeekOneChecklistCard initial={weekOneChecklist} />
-
-      <VisionProjectsStrip
-        linkedMilestoneCount={data.visionLinkSummary.linkedMilestoneCount}
-      />
-
-      <AreasPulse areas={areasPulse} />
-
       <TodayCard
         systems={data.todaySystemsList}
         todayYmd={data.todayYmd}
@@ -144,13 +136,6 @@ export default async function DashboardPage() {
         currentWeekNumber={data.weeklyPriorities.weekNumber}
       />
 
-      <DriftInboxCard
-        total={driftInbox.total}
-        rows={driftInbox.rows}
-        projects={projectList}
-        areas={areaList}
-      />
-
       <StatsCards
         projectStats={data.projectStats}
         streak={data.streak}
@@ -160,7 +145,22 @@ export default async function DashboardPage() {
         weeklyPriorityCount={data.weeklyPriorities.priorityProjectIds.length}
       />
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <WeekOneChecklistCard initial={weekOneChecklist} />
+
+      <VisionProjectsStrip
+        linkedMilestoneCount={data.visionLinkSummary.linkedMilestoneCount}
+      />
+
+      <AreasPulse areas={areasPulse} />
+
+      <DriftInboxCard
+        total={driftInbox.total}
+        rows={driftInbox.rows}
+        projects={projectList}
+        areas={areaList}
+      />
+
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-10">
         <WheelChart scores={data.wheelScores} />
         {hasGoals ? (
           <ProjectsOverview
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
       </div>
 
       {data.achievements.length > 0 ? (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-8 lg:grid-cols-2 lg:gap-10">
           <QuickActions primaryAction={primaryAction} />
           <AchievementsBadge achievements={data.achievements} />
         </div>
@@ -187,21 +187,22 @@ export default async function DashboardPage() {
 
 function EmptyProjectsCard() {
   return (
-    <section className="rounded-2xl border border-dashed border-border bg-card/40 p-6">
-      <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-widest uppercase text-amber">
-        <Target className="h-3 w-3" />
-        Plan · Empty
-      </div>
-      <h3 className="font-display text-xl tracking-tight mt-1.5">
-        Your plan is waiting for a project
-      </h3>
-      <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+    <section className="space-y-4">
+      <header>
+        <h3 className="font-display text-xl md:text-2xl tracking-tight">
+          Projects
+        </h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          Your plan is waiting for a project
+        </p>
+      </header>
+      <p className="text-sm text-muted-foreground leading-relaxed">
         Open the Projects page and add the first thing you want to move on this
         year. One per Area is plenty to start.
       </p>
       <Link
         href="/projects"
-        className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-foreground text-background px-3 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity"
+        className="inline-flex items-center gap-1.5 rounded-md bg-foreground text-background px-3 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity"
       >
         <Compass className="h-3.5 w-3.5" />
         Open Projects

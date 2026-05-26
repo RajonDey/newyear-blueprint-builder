@@ -1,6 +1,7 @@
 "use client"
 
-import { OrnamentDivider } from "@/components/shared/ornament-divider"
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { Heart } from "lucide-react"
 import { sanitizeRichTextHtml } from "@/lib/sanitize-client"
 import type { ProjectDetail } from "@/types/project-detail"
@@ -15,12 +16,13 @@ export function ProjectDetailMotivation({
   const hasContent = Boolean(whyText || consequenceText)
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6">
-      <div className="mb-4">
-        <h2 className="font-display text-xl tracking-tight flex items-center gap-2">
-          <Heart className="h-4 w-4 text-accent" /> Your why
+    <section className="space-y-4 border border-border p-5 md:p-6">
+      <div>
+        <h2 className="font-display text-lg tracking-tight flex items-center gap-2">
+          <Heart className="h-4 w-4 text-muted-foreground" aria-hidden />
+          Your why
         </h2>
-        <p className="text-xs text-muted-foreground mt-0.5">
+        <p className="text-sm text-muted-foreground mt-1">
           The emotional anchor when execution gets hard.
         </p>
       </div>
@@ -35,7 +37,7 @@ export function ProjectDetailMotivation({
         <div className="space-y-4">
           {whyText ? (
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+              <p className="text-sm font-medium text-muted-foreground mb-1">
                 Why this matters
               </p>
               <div
@@ -46,10 +48,12 @@ export function ProjectDetailMotivation({
               />
             </div>
           ) : null}
-          {whyText && consequenceText ? <OrnamentDivider variant="dot" /> : null}
+          {whyText && consequenceText ? (
+            <hr className="border-border" />
+          ) : null}
           {consequenceText ? (
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+              <p className="text-sm font-medium text-muted-foreground mb-1">
                 What&apos;s at stake
               </p>
               <div

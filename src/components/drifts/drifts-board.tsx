@@ -1,5 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Full drift inbox — divided list, Undo on archive/delete (§7, Wave D4).
+ */
+
 import { useEffect, useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
@@ -22,7 +26,10 @@ import {
   DriftProcessDialog,
   type ProcessDialogMode,
 } from "@/components/drifts/drift-process-dialog"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+
+const UNDO_MS = 7000
 
 type Tab = "inbox" | "resolved"
 
@@ -36,22 +43,6 @@ interface DriftsBoardProps {
   focusId?: string | null
 }
 
-/**
- * `/drifts` board — full triage surface.
- *
- * Two tabs share the same row component (`<DriftRow>`):
- *
- *   - **Inbox** (default) — unresolved drifts, with the same Process / Archive
- *     / Delete actions as the dashboard card. Processing removes the row
- *     from this tab and moves it into Resolved.
- *   - **Resolved** — read-only history with the resolution badge (task /
- *     note / archived) and the time it was processed. Users can still
- *     delete a resolved row from here.
- *
- * Search is server-side (the page does the query and passes results in).
- * We re-fetch via `router.refresh()` after every mutation so the counts
- * + tabs stay accurate.
- */
 export function DriftsBoard({
   initialInbox,
   initialResolved,
@@ -73,7 +64,6 @@ export function DriftsBoard({
   const [processing, setProcessing] = useState<Drift | null>(null)
   const [mode, setMode] = useState<ProcessDialogMode | null>(null)
 
-  // Sync state when server data changes (after router.refresh()).
   useEffect(() => {
     setInboxItems(initialInbox)
   }, [initialInbox])
@@ -81,7 +71,6 @@ export function DriftsBoard({
     setResolvedItems(initialResolved)
   }, [initialResolved])
 
-  // Debounce search → URL (so the server re-queries with the new filter).
   useEffect(() => {
     const handle = setTimeout(() => {
       const next = search.trim()
@@ -94,7 +83,6 @@ export function DriftsBoard({
     return () => clearTimeout(handle)
   }, [search, router])
 
-  // Pre-fill search from `?q=`.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const q = params.get("q") ?? ""
@@ -119,16 +107,43 @@ export function DriftsBoard({
         toast.error("Could not archive.")
         return
       }
-      toast.success("Archived")
       startTransition(() => router.refresh())
+      toast("Archived", {
+        duration: UNDO_MS,
+        action: {
+          label: "Undo",
+          onClick: () => void restoreArchive(d),
+        },
+      })
     } catch {
       setInboxItems((prev) => [d, ...prev])
       toast.error("Network error.")
     }
   }
 
+  async function restoreArchive(d: Drift) {
+    try {
+      const res = await fetch(`/api/drifts/${d.id}/restore`, { method: "POST" })
+      if (!res.ok) {
+        toast.error("Could not restore.")
+        return
+      }
+      setInboxItems((prev) => {
+        if (prev.some((x) => x.id === d.id)) return prev
+        return [d, ...prev].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+      })
+      startTransition(() => router.refresh())
+    } catch {
+      toast.error("Network error.")
+    }
+  }
+
   async function destroy(d: Drift, fromTab: Tab) {
     const setter = fromTab === "inbox" ? setInboxItems : setResolvedItems
+    const snapshot = { content: d.content, kind: d.kind }
     setter((prev) => prev.filter((x) => x.id !== d.id))
     try {
       const res = await fetch(`/api/drifts/${d.id}`, { method: "DELETE" })
@@ -138,8 +153,43 @@ export function DriftsBoard({
         return
       }
       startTransition(() => router.refresh())
+      toast("Deleted", {
+        duration: UNDO_MS,
+        action: {
+          label: "Undo",
+          onClick: () => void recreate(snapshot, d, fromTab),
+        },
+      })
     } catch {
       setter((prev) => [d, ...prev])
+      toast.error("Network error.")
+    }
+  }
+
+  async function recreate(
+    snapshot: { content: string; kind: Drift["kind"] },
+    original: Drift,
+    fromTab: Tab,
+  ) {
+    const setter = fromTab === "inbox" ? setInboxItems : setResolvedItems
+    try {
+      const res = await fetch("/api/drifts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(snapshot),
+      })
+      if (!res.ok) {
+        toast.error("Could not restore.")
+        return
+      }
+      const body = (await res.json()) as { data: Drift }
+      setter((prev) => {
+        const next = prev.filter((x) => x.id !== original.id)
+        if (next.some((x) => x.id === body.data.id)) return next
+        return [body.data, ...next]
+      })
+      startTransition(() => router.refresh())
+    } catch {
       toast.error("Network error.")
     }
   }
@@ -187,7 +237,7 @@ export function DriftsBoard({
       {visibleItems.length === 0 ? (
         <EmptyState tab={tab} hasSearch={search.trim().length > 0} />
       ) : (
-        <ul className="space-y-2">
+        <ul className="divide-y divide-border border-y border-border">
           {visibleItems.map((d) => (
             <DriftRow
               key={d.id}
@@ -231,10 +281,6 @@ export function DriftsBoard({
     </div>
   )
 }
-
-/* -------------------------------------------------------------------------- */
-/*  Sub-components                                                             */
-/* -------------------------------------------------------------------------- */
 
 function Tabs({
   tab,
@@ -314,13 +360,13 @@ function SearchBox({
 }) {
   return (
     <div className="relative max-w-md">
-      <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-      <input
-        type="text"
+      <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground pointer-events-none z-10" />
+      <Input
+        type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search your captures…"
-        className="w-full rounded-md border border-border bg-background/60 pl-9 pr-9 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground/30 transition-colors"
+        className="pl-9 pr-9"
       />
       {value && (
         <button
@@ -374,10 +420,8 @@ function DriftRow({
     <li
       id={`drift-${drift.id}`}
       className={cn(
-        "group flex flex-col gap-3 rounded-xl border bg-card/60 p-4 text-sm transition-colors sm:flex-row sm:items-start",
-        highlight
-          ? "border-amber/40 bg-amber/[0.04] ring-1 ring-amber/20"
-          : "border-border/70",
+        "group flex flex-col gap-3 py-3.5 text-sm transition-colors sm:flex-row sm:items-start sm:py-4",
+        highlight && "bg-amber-tint",
       )}
     >
       <Brain className="hidden h-3.5 w-3.5 text-muted-foreground mt-1 shrink-0 sm:block" />
@@ -385,58 +429,60 @@ function DriftRow({
         <Brain className="h-3.5 w-3.5 text-muted-foreground mt-1 shrink-0 sm:hidden" />
         <div className="min-w-0 flex-1">
           {editing ? (
-          <textarea
-            autoFocus
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault()
-                commit()
-              }
-              if (e.key === "Escape") cancel()
-            }}
-            rows={Math.max(2, Math.min(8, draft.split("\n").length + 1))}
-            className="w-full resize-none rounded-md border border-border bg-background/60 p-2 text-sm leading-relaxed outline-none focus:border-amber/40"
-          />
-        ) : (
-          <p className="leading-relaxed whitespace-pre-wrap">{drift.content}</p>
-        )}
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-          <span>
-            Captured{" "}
-            {formatDistanceToNowStrict(drift.createdAt, { addSuffix: true })}
-          </span>
-          {tab === "resolved" && resolvedLabel && (
-            <>
-              <span aria-hidden>·</span>
-              <span className="inline-flex items-center gap-1 text-foreground/80">
-                {resolvedLabel.icon}
-                {resolvedLabel.text}
-                {drift.resolvedAt && (
-                  <span className="text-muted-foreground">
-                    {" "}
-                    ·{" "}
-                    {formatDistanceToNowStrict(drift.resolvedAt, {
-                      addSuffix: true,
-                    })}
-                  </span>
-                )}
-              </span>
-            </>
+            <textarea
+              autoFocus
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                  e.preventDefault()
+                  commit()
+                }
+                if (e.key === "Escape") cancel()
+              }}
+              rows={Math.max(2, Math.min(8, draft.split("\n").length + 1))}
+              className="w-full resize-none rounded-md border border-border bg-background/60 p-2 text-sm leading-relaxed outline-none focus:border-amber/40"
+            />
+          ) : (
+            <p className="leading-relaxed whitespace-pre-wrap">{drift.content}</p>
           )}
-          {editing && (
-            <span className="text-muted-foreground/70">
-              ⌘Enter to save · Esc to cancel
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+            <span>
+              Captured{" "}
+              {formatDistanceToNowStrict(drift.createdAt, { addSuffix: true })}
             </span>
-          )}
-        </div>
+            {tab === "resolved" && resolvedLabel && (
+              <>
+                <span aria-hidden>·</span>
+                <span className="inline-flex items-center gap-1 text-foreground/80">
+                  {resolvedLabel.icon}
+                  {resolvedLabel.text}
+                  {drift.resolvedAt && (
+                    <span className="text-muted-foreground">
+                      {" "}
+                      ·{" "}
+                      {formatDistanceToNowStrict(drift.resolvedAt, {
+                        addSuffix: true,
+                      })}
+                    </span>
+                  )}
+                </span>
+              </>
+            )}
+            {editing && (
+              <span className="text-muted-foreground/70">
+                ⌘Enter to save · Esc to cancel
+              </span>
+            )}
+          </div>
         </div>
       </div>
       <div
         className={cn(
           "flex flex-wrap items-center gap-1 sm:shrink-0",
-          editing ? "opacity-100" : "opacity-100 sm:opacity-0 sm:group-hover:opacity-100",
+          editing
+            ? "opacity-100"
+            : "opacity-100 sm:opacity-0 sm:group-hover:opacity-100",
         )}
       >
         {editing ? (
@@ -448,7 +494,7 @@ function DriftRow({
             />
             <RowAction
               label="Save"
-              icon={<Check className="h-3.5 w-3.5 text-emerald-600" />}
+              icon={<Check className="h-3.5 w-3.5 text-status-positive" />}
               onClick={commit}
             />
           </>
@@ -510,7 +556,7 @@ function RowAction({
       className={cn(
         "inline-flex min-h-11 min-w-11 items-center justify-center rounded-md transition-colors sm:min-h-0 sm:min-w-0 sm:p-1.5",
         destructive
-          ? "text-muted-foreground/60 hover:text-rose-500 hover:bg-rose-500/10"
+          ? "text-muted-foreground hover:text-status-risk hover:bg-status-risk/10"
           : "text-muted-foreground hover:text-foreground hover:bg-muted",
       )}
     >
@@ -522,7 +568,7 @@ function RowAction({
 function EmptyState({ tab, hasSearch }: { tab: Tab; hasSearch: boolean }) {
   if (hasSearch) {
     return (
-      <div className="rounded-xl border border-dashed border-border/60 bg-card/40 p-8 text-center">
+      <div className="border border-dashed border-border px-6 py-8 text-center">
         <p className="text-sm text-muted-foreground">
           No drifts match this search. Try a shorter query, or clear it to see
           everything.
@@ -532,7 +578,7 @@ function EmptyState({ tab, hasSearch }: { tab: Tab; hasSearch: boolean }) {
   }
   if (tab === "inbox") {
     return (
-      <div className="rounded-xl border border-dashed border-border/60 bg-card/40 p-8 text-center">
+      <div className="border border-dashed border-border px-6 py-8 text-center">
         <Inbox className="mx-auto h-6 w-6 text-muted-foreground/60" />
         <h3 className="font-display text-lg mt-3">Inbox zero</h3>
         <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto leading-relaxed">
@@ -547,7 +593,7 @@ function EmptyState({ tab, hasSearch }: { tab: Tab; hasSearch: boolean }) {
     )
   }
   return (
-    <div className="rounded-xl border border-dashed border-border/60 bg-card/40 p-8 text-center">
+    <div className="border border-dashed border-border px-6 py-8 text-center">
       <p className="text-sm text-muted-foreground">
         Nothing resolved yet. As you process drifts they&apos;ll move here so
         you can see the trail.

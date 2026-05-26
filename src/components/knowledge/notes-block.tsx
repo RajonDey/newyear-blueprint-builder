@@ -1,5 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Embedded notes block — workbench section, status tokens (Wave D4).
+ */
+
 import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -190,7 +194,7 @@ export function NotesBlock({
   return (
     <section
       className={cn(
-        variant === "card" && "rounded-2xl border border-border bg-card p-6",
+        variant === "card" && "border border-border p-6",
       )}
     >
       <div className="mb-4 flex items-baseline justify-between gap-3">
@@ -285,7 +289,7 @@ export function NotesBlock({
               id={`note-${n.id}`}
               className={cn(
                 "group rounded-lg border border-border/70 p-3 text-sm bg-background/40 transition-colors scroll-mt-24",
-                n.pinned && "border-amber/40 bg-amber/[0.04]",
+                n.pinned && "border-amber/40 bg-amber-tint",
               )}
             >
               <div className="flex items-start justify-between gap-2">
@@ -321,7 +325,7 @@ export function NotesBlock({
                     <button
                       onClick={() => saveEdit(n)}
                       aria-label="Save note"
-                      className="rounded p-1 text-emerald-600 hover:bg-emerald-500/10 transition-colors"
+                      className="rounded p-1 text-status-positive hover:bg-status-positive/10 transition-colors"
                     >
                       <Check className="h-3.5 w-3.5" />
                     </button>
@@ -356,7 +360,7 @@ export function NotesBlock({
                     <button
                       onClick={() => remove(n)}
                       aria-label="Delete note"
-                      className="rounded p-1 text-muted-foreground hover:text-rose-500 transition-colors"
+                      className="rounded p-1 text-muted-foreground hover:text-status-risk transition-colors"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>

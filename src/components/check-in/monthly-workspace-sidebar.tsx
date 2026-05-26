@@ -1,10 +1,12 @@
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
 import { RhythmRecapLink } from "@/components/rhythm/rhythm-recap-link"
 import { cadencePlanHasContent } from "@/lib/cadence-plan-utils"
 import { CalendarDays, Target } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface Goal {
   id: string
@@ -66,19 +68,19 @@ export function MonthlyWorkspaceSidebar({
 
   return (
     <>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+      <section className="border border-border">
+        <header className="border-b border-border px-4 py-3">
+          <h2 className="text-sm font-medium text-muted-foreground">
             {year} progress
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+          </h2>
+        </header>
+        <div className="px-4 py-4 space-y-3">
           <div className="flex items-end justify-between gap-2">
             <p className="font-display text-3xl tracking-tight tabular-nums">
               {reviewedCount}
               <span className="text-lg text-muted-foreground">/12</span>
             </p>
-            <Badge variant="secondary" className="text-[10px] uppercase">
+            <Badge variant="secondary" className="text-[10px]">
               reviewed
             </Badge>
           </div>
@@ -106,15 +108,16 @@ export function MonthlyWorkspaceSidebar({
                 <div
                   key={month}
                   title={MONTH_NAMES[i]}
-                  className={`h-2 rounded-sm ${
+                  className={cn(
+                    "h-2 rounded-sm",
                     reviewed
-                      ? "bg-emerald-500/80"
+                      ? "bg-status-positive/80"
                       : planned
-                        ? "bg-sky-500/70"
+                        ? "bg-amber/70"
                         : isCurrent
                           ? "bg-accent/40"
-                          : "bg-muted"
-                  }`}
+                          : "bg-muted",
+                  )}
                 />
               )
             })}
@@ -124,18 +127,18 @@ export function MonthlyWorkspaceSidebar({
               Last reviewed: <span className="text-foreground">{latestLabel}</span>
             </p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {projects.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-1.5">
+        <section className="border border-border">
+          <header className="border-b border-border px-4 py-3">
+            <h2 className="text-sm font-medium flex items-center gap-1.5">
               <Target className="h-3.5 w-3.5 text-accent" />
               Active projects
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </h2>
+          </header>
+          <div className="px-4 py-4">
             <ul className="space-y-2 text-sm">
               {projects.slice(0, 6).map((g) => {
                 const cat = LIFE_CATEGORIES.find((c) => c.id === g.category)
@@ -165,19 +168,19 @@ export function MonthlyWorkspaceSidebar({
                 </Link>
               </p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       )}
 
-      <Card className="border-dashed">
-        <CardContent className="pt-4 pb-4">
+      <section className="border border-dashed border-border">
+        <div className="px-4 py-4">
           <p className="text-xs text-muted-foreground flex items-start gap-2 leading-relaxed">
             <CalendarDays className="h-3.5 w-3.5 shrink-0 mt-0.5 text-accent" />
             Monthly reflections roll up into your quarterly review and year-end
             recap.
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <RhythmRecapLink cadence="monthly" />
     </>

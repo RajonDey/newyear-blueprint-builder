@@ -1,8 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useState } from "react"
 import type { GoalStatus } from "@prisma/client"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Select,
   SelectContent,
@@ -31,10 +32,10 @@ const STATUS_OPTIONS: { value: GoalStatus; label: string }[] = [
 ]
 
 const STATUS_TONE: Partial<Record<GoalStatus, string>> = {
-  ON_TRACK: "text-emerald-600 dark:text-emerald-400",
-  AT_RISK: "text-red-600 dark:text-red-400",
-  COMPLETED: "text-emerald-600 dark:text-emerald-400",
-  IN_PROGRESS: "text-blue-600 dark:text-blue-400",
+  ON_TRACK: "text-status-positive",
+  AT_RISK: "text-status-risk",
+  COMPLETED: "text-status-positive",
+  IN_PROGRESS: "text-foreground",
 }
 
 export function MonthlyProjectStatusRow({
@@ -57,7 +58,6 @@ export function MonthlyProjectStatusRow({
       setProjects((prev) =>
         prev.map((g) => (g.id === projectId ? { ...g, status } : g)),
       )
-      toast.success("Project status updated")
     } catch {
       toast.error("Failed to update project status")
     } finally {
@@ -68,17 +68,17 @@ export function MonthlyProjectStatusRow({
   if (projects.length === 0) return null
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-display flex items-center gap-2">
+    <section className="border border-border">
+      <header className="border-b border-border px-4 py-3 space-y-1">
+        <h2 className="text-base font-display flex items-center gap-2">
           <Target className="h-4 w-4 text-accent" />
           Project health check
-        </CardTitle>
-        <p className="text-sm text-muted-foreground font-normal">
+        </h2>
+        <p className="text-sm text-muted-foreground">
           Reset where each project stands before you close the month.
         </p>
-      </CardHeader>
-      <CardContent className="space-y-2">
+      </header>
+      <div className="px-4 py-4 space-y-2">
         {projects.map((g) => {
           const cat = LIFE_CATEGORIES.find((c) => c.id === g.category)
           const isUpdating = updatingId === g.id
@@ -125,7 +125,7 @@ export function MonthlyProjectStatusRow({
             </div>
           )
         })}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }

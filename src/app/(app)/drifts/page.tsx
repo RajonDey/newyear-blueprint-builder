@@ -43,7 +43,6 @@ export default async function DriftsPage({
   return (
     <PageContainer>
       <PageHeader
-        eyebrow="Today · Drift inbox"
         title="Process your captures"
         description={description}
       />

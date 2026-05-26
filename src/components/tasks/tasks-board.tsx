@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -139,7 +141,6 @@ export function TasksBoard({
       toast.error(result.message)
       return
     }
-    toast.success("Task moved")
     startTransition(() => router.refresh())
   }
 
@@ -196,7 +197,7 @@ export function TasksBoard({
       )}
 
       {rows.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card/40 p-10 text-center">
+        <div className="border-y border-dashed border-border py-12 text-center">
           <p className="text-sm text-muted-foreground">
             Nothing in {BUCKET_LABELS[bucket].label.toLowerCase()}.
           </p>
@@ -217,12 +218,11 @@ export function TasksBoard({
           </p>
         </div>
       ) : (
-        <ul className="rounded-2xl border border-border bg-card overflow-hidden">
-          {rows.map((t, i) => (
+        <ul className="border-y border-border divide-y divide-border">
+          {rows.map((t) => (
             <TaskListRow
               key={t.id}
               task={t}
-              isLast={i === rows.length - 1}
               isPriority={prioritySet.has(t.project.id)}
               projectOptions={projectOptions}
               onToggle={() => toggle(t)}
@@ -246,7 +246,6 @@ export function TasksBoard({
 
 function TaskListRow({
   task,
-  isLast,
   isPriority,
   projectOptions,
   onToggle,
@@ -255,7 +254,6 @@ function TaskListRow({
   onMoveToProject,
 }: {
   task: TaskRow
-  isLast: boolean
   isPriority: boolean
   projectOptions: { id: string; title: string }[]
   onToggle: () => void
@@ -281,12 +279,11 @@ function TaskListRow({
     <li
       className={cn(
         "flex flex-col gap-2 px-4 py-3 transition-colors hover:bg-muted/30 sm:grid sm:grid-cols-[auto_1fr_auto_auto] sm:items-center sm:gap-3",
-        !isLast && "border-b border-border/70",
         isCompleted && "opacity-70",
       )}
       style={{
         borderLeft: isPriority
-          ? "3px solid rgb(217 119 6 / 0.85)"
+          ? "3px solid hsl(var(--amber) / 0.85)"
           : `3px solid hsl(${hue} / 0.55)`,
       }}
     >
@@ -397,7 +394,7 @@ function TaskListRow({
         onClick={onEdit}
         className={cn(
           "self-start rounded px-2 py-1.5 text-[11px] tabular-nums text-left transition-colors hover:bg-muted/60 sm:col-start-3 sm:-mx-1.5 sm:px-1.5 sm:py-0.5",
-          overdue ? "text-rose-600" : "text-muted-foreground",
+          overdue ? "text-status-risk" : "text-muted-foreground",
         )}
         title="Edit due date"
       >

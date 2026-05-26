@@ -1,47 +1,61 @@
-import { Sparkles, CalendarX, Gauge } from "lucide-react"
+import { ScatterOrbitVisual } from "@/components/marketing/scatter-orbit-visual"
+
+/* Hallmark · design-system: design.md · designed-as-app
+ * Problem section — split layout with animated scatter→orbit visual (§11).
+ */
 
 const PROBLEMS = [
   {
-    icon: Sparkles,
-    title: "January energy, gone by March",
-    body: "You set thoughtful goals — then life scatters them across notes, tabs, and forgotten resolutions.",
+    title: "January energy, gone by March.",
+    body:
+      "You set thoughtful goals — then life scatters them across notes, tabs, and forgotten resolutions.",
   },
   {
-    icon: CalendarX,
-    title: "Plans that don't reach Tuesday",
-    body: "Annual planning lives in one tool. Daily life lives in another. The two never meet.",
+    title: "Plans that don\u2019t reach Tuesday.",
+    body:
+      "Annual planning lives in one tool. Daily life lives in another. The two never meet.",
   },
   {
-    icon: Gauge,
-    title: "Dashboards that punish you",
-    body: "Productivity tools were built for output, not reflection. They guilt you for being human.",
+    title: "Dashboards that punish you.",
+    body:
+      "Productivity tools were built for output, not reflection. They guilt you for being human.",
   },
 ]
 
 export function Problem() {
   return (
-    <section className="container py-24 md:py-32">
-      <div className="mx-auto max-w-2xl text-center mb-14">
-        <div className="text-[10px] font-semibold tracking-[0.28em] uppercase text-muted-foreground mb-4">
-          The quiet problem
+    <section className="container py-20 md:py-28">
+      <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20">
+        <div>
+          <h2 className="font-display text-3xl md:text-4xl tracking-tight leading-[1.1] text-foreground">
+            You don{"\u2019"}t need more apps.
+            <br />
+            <span className="text-muted-foreground/80">
+              You need a year that holds together.
+            </span>
+          </h2>
+          <ul className="mt-10 divide-y divide-border/60 border-y border-border/60">
+            {PROBLEMS.map((p, i) => (
+              <li
+                key={p.title}
+                className="grid grid-cols-[2.5rem_1fr] gap-x-4 py-6"
+              >
+                <span className="font-display text-sm text-amber tabular-nums mt-1">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <h3 className="font-display text-xl md:text-2xl tracking-tight text-foreground">
+                    {p.title}
+                  </h3>
+                  <p className="mt-2 text-base text-muted-foreground leading-relaxed">
+                    {p.body}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
-        <h2 className="font-display text-3xl md:text-5xl tracking-tight leading-[1.1]">
-          You don&apos;t need more apps. You need a year that holds together.
-        </h2>
-      </div>
-      <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
-        {PROBLEMS.map((p) => (
-          <div
-            key={p.title}
-            className="rounded-2xl border border-border bg-card p-6"
-          >
-            <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center mb-4">
-              <p.icon className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <h3 className="font-display text-lg tracking-tight mb-2">{p.title}</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">{p.body}</p>
-          </div>
-        ))}
+        <ScatterOrbitVisual />
       </div>
     </section>
   )

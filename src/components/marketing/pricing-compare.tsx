@@ -1,3 +1,7 @@
+/* Hallmark · design-system: design.md · designed-as-app
+ * F3 tabular spec sheet — hairline rows, tabular numerics (Wave E).
+ */
+
 import { Check, Minus } from "lucide-react"
 import { marketingPlanCopy as m } from "@/lib/marketing-plan-copy"
 
@@ -9,11 +13,6 @@ interface CompareRow {
   pro: CellValue
 }
 
-/**
- * Detailed feature comparison table used on the Pricing page.
- *
- * Limits come from `lib/marketing-plan-copy.ts` → `planLimits`.
- */
 const ROWS: CompareRow[] = [
   { label: "Life areas", free: "6", pro: "Up to 50" },
   {
@@ -53,7 +52,7 @@ function Cell({ value }: { value: CellValue }) {
   if (value === true)
     return (
       <span
-        className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber/15 text-amber"
+        className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-tint text-amber"
         aria-label="Included"
       >
         <Check className="h-3 w-3" />
@@ -66,35 +65,35 @@ function Cell({ value }: { value: CellValue }) {
         aria-label="Not included"
       />
     )
-  return <span className="text-sm text-foreground">{value}</span>
+  return <span className="text-sm tabular-nums text-foreground">{value}</span>
 }
 
 export function PricingCompare() {
   return (
-    <div className="rounded-3xl border border-border bg-card overflow-hidden">
-      <div className="grid grid-cols-[1.6fr_1fr_1fr] text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground border-b border-border">
-        <div className="px-5 py-4">Compare</div>
-        <div className="px-5 py-4 text-center">Free</div>
-        <div className="px-5 py-4 text-center text-amber">Pro</div>
+    <div className="overflow-x-auto">
+      <div className="min-w-[32rem] border-y border-border">
+        <div className="grid grid-cols-[1.6fr_1fr_1fr] border-b border-border text-xs font-medium text-muted-foreground">
+          <div className="py-3 pr-4">Feature</div>
+          <div className="py-3 text-center">Free</div>
+          <div className="py-3 text-center text-foreground">Pro</div>
+        </div>
+        <ul>
+          {ROWS.map((r) => (
+            <li
+              key={r.label}
+              className="grid grid-cols-[1.6fr_1fr_1fr] items-center border-b border-border last:border-b-0 text-sm"
+            >
+              <div className="py-3.5 pr-4 text-foreground/90">{r.label}</div>
+              <div className="py-3.5 flex justify-center">
+                <Cell value={r.free} />
+              </div>
+              <div className="py-3.5 flex justify-center">
+                <Cell value={r.pro} />
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
-      <ul>
-        {ROWS.map((r, i) => (
-          <li
-            key={r.label}
-            className={`grid grid-cols-[1.6fr_1fr_1fr] items-center text-sm ${
-              i % 2 === 1 ? "bg-background/40" : ""
-            }`}
-          >
-            <div className="px-5 py-3 text-foreground/90">{r.label}</div>
-            <div className="px-5 py-3 flex justify-center">
-              <Cell value={r.free} />
-            </div>
-            <div className="px-5 py-3 flex justify-center">
-              <Cell value={r.pro} />
-            </div>
-          </li>
-        ))}
-      </ul>
     </div>
   )
 }

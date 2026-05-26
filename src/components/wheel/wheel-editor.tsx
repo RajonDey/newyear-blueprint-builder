@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import Link from "next/link"
 import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
@@ -113,15 +115,6 @@ export function WheelEditor({
         toast.error(body?.error || "Could not save snapshot.")
         return
       }
-      toast.success(
-        mode === "update" ? "Snapshot updated." : "Snapshot saved.",
-        {
-          description:
-            mode === "update"
-              ? "Latest snapshot now reflects these scores."
-              : "Your wheel just got an honest update.",
-        },
-      )
       startTransition(() => router.refresh())
     } catch (err) {
       console.error(err)
@@ -142,7 +135,7 @@ export function WheelEditor({
   return (
     <>
       <section className="grid lg:grid-cols-5 gap-6">
-        <div className="lg:col-span-3 rounded-2xl border border-border bg-card p-6">
+        <div className="lg:col-span-3 border border-border p-6">
           <div className="flex items-baseline justify-between mb-4">
             <h2 className="font-display text-xl tracking-tight">
               Current vs previous snapshot
@@ -189,7 +182,7 @@ export function WheelEditor({
           </div>
         </div>
 
-        <aside className="lg:col-span-2 grid gap-4">
+        <aside className="lg:col-span-2 grid gap-0 border border-border divide-y divide-border lg:self-start">
           <SnapshotCard
             label="Average"
             value={avg.toFixed(1)}
@@ -210,7 +203,7 @@ export function WheelEditor({
         </aside>
       </section>
 
-      <section className="rounded-2xl border border-border bg-card p-6">
+      <section className="border border-border p-6">
         <div className="mb-5">
           <h2 className="font-display text-xl tracking-tight">
             Re-rate each category
@@ -293,7 +286,7 @@ export function WheelEditor({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-card p-6">
+      <section className="border border-border p-6">
         <h2 className="font-display text-xl mb-1 tracking-tight">History</h2>
         <p className="text-sm text-muted-foreground mb-5">
           Each row is a snapshot you saved. The bar fills with the rating.
@@ -303,30 +296,30 @@ export function WheelEditor({
             No history yet — your first snapshot will land here.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px]">
+          <div className="overflow-x-auto border border-border">
+            <table className="w-full min-w-[640px] text-sm">
               <thead>
-                <tr className="text-left">
-                  <th className="text-xs text-muted-foreground font-medium pb-3 pr-4 w-36">
+                <tr className="border-b border-border bg-muted/30">
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground w-36">
                     Snapshot
                   </th>
                   {lifeCategoryOrder.map((c) => (
                     <th
                       key={c}
-                      className="text-xs text-muted-foreground font-medium pb-3 px-1.5 text-center"
+                      className="px-2 py-2.5 text-center text-xs font-medium text-muted-foreground"
                     >
                       {lifeCategoryLabels[c].slice(0, 4)}
                     </th>
                   ))}
-                  <th className="text-xs text-muted-foreground font-medium pb-3 pl-4 w-16 text-right">
+                  <th className="px-4 py-2.5 text-right text-xs font-medium text-muted-foreground w-16">
                     Avg
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-border">
                 {[...history].reverse().map((h) => (
-                  <tr key={h.bucketKey} className="border-t border-border">
-                    <td className="py-3 pr-4">
+                  <tr key={h.bucketKey}>
+                    <td className="px-4 py-3">
                       <div className="text-sm font-medium">
                         {format(h.recordedAt, "MMM d, yyyy")}
                       </div>
@@ -337,11 +330,11 @@ export function WheelEditor({
                       )}
                     </td>
                     {lifeCategoryOrder.map((c) => (
-                      <td key={c} className="px-1.5 py-3">
+                      <td key={c} className="px-2 py-3">
                         <ScoreBar value={h.scores[c]} />
                       </td>
                     ))}
-                    <td className="pl-4 py-3 text-right text-sm tabular-nums font-medium">
+                    <td className="px-4 py-3 text-right tabular-nums font-medium">
                       {h.average.toFixed(1)}
                     </td>
                   </tr>
@@ -367,7 +360,7 @@ function SnapshotCard({
   tone?: "up" | "down"
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="p-5">
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="font-display text-3xl mt-1.5 leading-tight tracking-tight">
         {value}
@@ -377,7 +370,7 @@ function SnapshotCard({
           className={cn(
             "text-xs mt-2",
             tone === "up"
-              ? "text-emerald-700"
+              ? "text-status-positive"
               : tone === "down"
                 ? "text-amber"
                 : "text-muted-foreground",
@@ -403,7 +396,7 @@ function DeltaBadge({ delta }: { delta: number }) {
     <span
       className={cn(
         "ml-2 inline-flex items-center text-xs",
-        up ? "text-emerald-600" : "text-rose-600",
+        up ? "text-status-positive" : "text-status-risk",
       )}
     >
       {up ? (

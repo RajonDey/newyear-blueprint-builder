@@ -1,5 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Year settings — workbench panels, silent saves (Wave D5).
+ */
+
 import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -22,6 +26,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import type { YearlyPlanSettingsData } from "@/lib/queries/yearly-plan"
+import { cn } from "@/lib/utils"
 
 const THEME_SUGGESTIONS = [
   "Momentum",
@@ -69,7 +74,6 @@ export function YearSettingsSection({ data }: YearSettingsSectionProps) {
         const j = await res.json().catch(() => ({}))
         throw new Error(j.error || "Failed to save theme")
       }
-      toast.success("Year theme updated")
       startTransition(() => router.refresh())
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Failed to save theme")
@@ -91,7 +95,6 @@ export function YearSettingsSection({ data }: YearSettingsSectionProps) {
       if (!res.ok) {
         throw new Error(json.error || json.message || "Failed to archive")
       }
-      toast.success(`${active.year} archived — your data is safe in Wrapped`)
       setArchiveOpen(false)
       startTransition(() => router.refresh())
     } catch (e: unknown) {
@@ -127,7 +130,6 @@ export function YearSettingsSection({ data }: YearSettingsSectionProps) {
       if (!res.ok) {
         throw new Error(json.message || json.error || "Failed to create year")
       }
-      toast.success(`${yearNum} is live — theme: ${trimmedTheme}`)
       setNewYearOpen(false)
       startTransition(() => {
         router.push("/dashboard")
@@ -144,12 +146,10 @@ export function YearSettingsSection({ data }: YearSettingsSectionProps) {
     <div className="space-y-5">
       {active ? (
         <>
-          <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="border border-border p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
-                  Active year
-                </div>
+                <p className="text-xs text-muted-foreground">Active year</p>
                 <div className="font-display text-3xl tabular-nums tracking-tight mt-1">
                   {active.year}
                 </div>
@@ -172,10 +172,7 @@ export function YearSettingsSection({ data }: YearSettingsSectionProps) {
 
             <div className="mt-5 space-y-3">
               <div className="space-y-1.5">
-                <Label
-                  htmlFor="year-theme"
-                  className="text-xs uppercase tracking-widest text-muted-foreground"
-                >
+                <Label htmlFor="year-theme" className="text-xs text-muted-foreground">
                   Theme word
                 </Label>
                 <Input
@@ -192,11 +189,12 @@ export function YearSettingsSection({ data }: YearSettingsSectionProps) {
                     key={t}
                     type="button"
                     onClick={() => setTheme(t)}
-                    className={`rounded-full border px-2.5 py-0.5 text-[11px] transition-colors ${
+                    className={cn(
+                      "rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
                       theme === t
                         ? "border-amber/50 bg-amber/10 text-foreground"
-                        : "border-border text-muted-foreground hover:border-amber/30"
-                    }`}
+                        : "border-border text-muted-foreground hover:border-amber/30",
+                    )}
                   >
                     {t}
                   </button>
@@ -214,7 +212,7 @@ export function YearSettingsSection({ data }: YearSettingsSectionProps) {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-dashed border-border/70 bg-card/40 p-5">
+          <div className="border border-dashed border-border p-5">
             <h3 className="text-sm font-medium">Archive this year</h3>
             <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
               Marks {active.year} as read-only. Your projects, check-ins, and
@@ -239,10 +237,8 @@ export function YearSettingsSection({ data }: YearSettingsSectionProps) {
           </div>
         </>
       ) : (
-        <div className="rounded-2xl border border-dashed border-border bg-card/40 p-5">
-          <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
-            No active year
-          </div>
+        <div className="border border-dashed border-border p-5">
+          <p className="text-xs text-muted-foreground">No active year</p>
           <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
             Your previous year is archived. Open Wrapped to revisit it, or start
             a new year when you&apos;re ready.
@@ -276,15 +272,13 @@ export function YearSettingsSection({ data }: YearSettingsSectionProps) {
       )}
 
       {data.archivedPlans.length > 0 && (
-        <div className="rounded-2xl border border-border/70 bg-card/30 p-4">
-          <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2">
-            Past years
-          </div>
-          <ul className="space-y-1.5 text-sm">
+        <div className="border border-border p-4">
+          <p className="text-xs text-muted-foreground mb-2">Past years</p>
+          <ul className="divide-y divide-border border-y border-border">
             {data.archivedPlans.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center justify-between gap-2 text-muted-foreground"
+                className="flex items-center justify-between gap-2 py-2 text-sm text-muted-foreground"
               >
                 <span>
                   {p.year}
@@ -377,11 +371,12 @@ export function YearSettingsSection({ data }: YearSettingsSectionProps) {
                     key={t}
                     type="button"
                     onClick={() => setNewTheme(t)}
-                    className={`rounded-full border px-2.5 py-0.5 text-[11px] ${
+                    className={cn(
+                      "rounded-full border px-2.5 py-0.5 text-[11px]",
                       newTheme === t
                         ? "border-amber/50 bg-amber/10"
-                        : "border-border text-muted-foreground"
-                    }`}
+                        : "border-border text-muted-foreground",
+                    )}
                   >
                     {t}
                   </button>
@@ -430,8 +425,8 @@ function ProPlanLimitNote({
   }
 
   return (
-    <div className="rounded-xl border border-amber/30 bg-amber/[0.04] p-4 flex-1 min-w-[240px]">
-      <div className="inline-flex items-center gap-1 text-[10px] font-semibold tracking-widest uppercase text-amber">
+    <div className="border border-amber/40 bg-amber-tint p-4 flex-1 min-w-[240px]">
+      <div className="inline-flex items-center gap-1 text-xs font-medium text-amber">
         <Sparkles className="h-3 w-3" />
         Pro
       </div>

@@ -1,31 +1,24 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { MarketingMobileNav } from "@/components/shared/marketing-mobile-nav"
+import { BrandMark } from "@/components/shared/brand-mark"
 import { MarketingLogoLink } from "@/components/marketing/marketing-logo-link"
-import { cn } from "@/lib/utils"
+import { MarketingMobileNav } from "@/components/shared/marketing-mobile-nav"
 
-const navLinkClass =
-  "text-sm text-muted-foreground transition-colors hover:text-foreground"
-
-const footerLinkClass =
-  "text-sm text-muted-foreground/90 transition-colors hover:text-foreground"
+/* Hallmark · design-system: design.md · designed-as-app
+ * Marketing shell — balanced sticky nav + letter close footer.
+ *
+ * Replaced the N6 newspaper masthead (centred logo + split sign-in/nav/CTA
+ * rows) with a single aligned row: wordmark left, nav centre, actions right.
+ */
 
 const primaryNav = [
   { href: "/how-it-works", label: "How it works" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/faq", label: "FAQ" },
+  { href: "/faq", label: "Letters" },
   { href: "/about", label: "About" },
 ] as const
 
-const footerExploreNav = [
-  { href: "/how-it-works", label: "How it works" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/faq", label: "FAQ" },
-  { href: "/about", label: "About" },
-  { href: "/blog", label: "Wisdom" },
-] as const
-
-const footerLegalNav = [
+const legalNav = [
   { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },
   { href: "/cookies", label: "Cookies" },
@@ -40,26 +33,33 @@ export default function MarketingLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/70 backdrop-blur-md">
-        <div className="container flex h-16 items-center justify-between gap-4">
-          <MarketingLogoLink />
+      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
+        <div className="container flex h-16 items-center gap-6 md:h-[4.25rem]">
+          <MarketingLogoLink className="shrink-0" />
 
           <nav
-            className="hidden md:flex items-center gap-8"
             aria-label="Primary"
+            className="hidden flex-1 items-center justify-center gap-x-8 md:flex"
           >
             {primaryNav.map((item) => (
-              <Link key={item.href} href={item.href} className={navLinkClass}>
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
                 {item.label}
               </Link>
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
-            <Link href="/login" className={cn(navLinkClass, "hidden sm:inline-flex px-3 py-1.5")}>
+          <div className="ml-auto flex items-center gap-3 md:gap-4">
+            <Link
+              href="/login"
+              className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
+            >
               Sign in
             </Link>
-            <Button size="sm" asChild>
+            <Button size="sm" className="hidden sm:inline-flex" asChild>
               <Link href="/signup">Begin your year</Link>
             </Button>
             <MarketingMobileNav />
@@ -69,54 +69,53 @@ export default function MarketingLayout({
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t border-border/60 mt-20">
-        <div className="container py-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-            <Link
-              href="/"
-              className="inline-flex items-baseline gap-2 group"
-              aria-label="YearInReview home"
-            >
-              <span className="text-amber leading-none">✦</span>
-              <span className="font-display text-lg tracking-tight text-foreground transition-colors group-hover:text-foreground/80">
-                YearInReview
-              </span>
-            </Link>
-
-            <nav
-              aria-label="Footer primary"
-              className="flex items-center gap-x-6 gap-y-2 flex-wrap md:justify-end"
-            >
-              {footerExploreNav.map((item) => (
+      <footer className="mt-24 md:mt-32 border-t border-border/60 bg-secondary/30">
+        <div className="container py-14 md:py-20">
+          <div className="grid gap-12 lg:grid-cols-[1fr_auto] lg:items-end lg:gap-16">
+            <div className="max-w-xl">
+              <p className="font-display italic text-xl md:text-2xl leading-snug text-foreground">
+                Yours,
+                <br />
+                <span className="not-italic font-semibold tracking-tight">
+                  — the YearInReview team
+                </span>
+              </p>
+              <p className="mt-5 text-sm md:text-base text-muted-foreground leading-relaxed">
+                P.S. — if you{"\u2019"}re reading this and the year feels heavier
+                than it should,{" "}
                 <Link
-                  key={item.href}
-                  href={item.href}
-                  className={footerLinkClass}
+                  href="/signup"
+                  className="text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors"
                 >
-                  {item.label}
+                  start a plan
                 </Link>
-              ))}
-            </nav>
-          </div>
-
-          <div className="mt-6 pt-6 border-t border-border/40 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs text-muted-foreground/80">
-            <span>
-              &copy; {new Date().getFullYear()} YearInReview · Calm by design
-            </span>
-            <nav
-              aria-label="Footer legal"
-              className="flex items-center gap-x-5 gap-y-2 flex-wrap md:justify-end"
-            >
-              {footerLegalNav.map((item) => (
+                . The first one is free, and it takes about ninety seconds.
+              </p>
+              <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground/80">
+                <span>&copy; {new Date().getFullYear()} YearInReview</span>
+                {legalNav.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
                 <Link
-                  key={item.href}
-                  href={item.href}
+                  href="/blog"
                   className="hover:text-foreground transition-colors"
                 >
-                  {item.label}
+                  Wisdom
                 </Link>
-              ))}
-            </nav>
+              </div>
+            </div>
+            <div className="hidden lg:flex flex-col items-center gap-3 opacity-80">
+              <BrandMark size="xl" />
+              <p className="font-display text-sm text-muted-foreground italic">
+                One year. One system.
+              </p>
+            </div>
           </div>
         </div>
       </footer>

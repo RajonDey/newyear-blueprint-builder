@@ -3,7 +3,8 @@ import { requireAuth } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { planLimits } from "@/lib/config"
 import { hasProProductAccess } from "@/lib/plan-access"
-import { AppContent } from "@/components/shared/app-content"
+import { PageContainer } from "@/components/shared/page-container"
+import { PageHeader } from "@/components/shared/page-header"
 import { AntiGoalsList } from "@/components/anti-goals/anti-goals-list"
 
 export const metadata: Metadata = { title: "Anti-goals" }
@@ -27,13 +28,17 @@ export default async function AntiGoalsPage() {
   const isPro = hasProProductAccess(session.user.planTier, session.user.role)
 
   return (
-    <AppContent variant="wide">
+    <PageContainer>
+      <PageHeader
+        title="The quiet noes that protect the year"
+        description="Year-level guardrails — what you won't chase so the real yeses have room. Today shows one rotating pill; this page is where you manage them all."
+      />
       <AntiGoalsList
         initial={items}
         cap={cap}
         isPro={isPro}
         hasActivePlan={Boolean(plan)}
       />
-    </AppContent>
+    </PageContainer>
   )
 }

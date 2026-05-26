@@ -1,8 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { EmptyState } from "@/components/shared/empty-state"
@@ -157,9 +158,6 @@ export function MonthlyReviewForm({
         }),
       })
       if (!res.ok) throw new Error("Failed to save")
-      const monthLabel =
-        MONTH_OPTIONS.find((m) => m.value === month)?.full ?? `Month ${month}`
-      toast.success(`${monthLabel} review saved!`)
       router.refresh()
     } catch {
       toast.error("Failed to save")
@@ -214,7 +212,7 @@ export function MonthlyReviewForm({
               aria-valuemax={12}
             >
               <div
-                className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                className="h-full rounded-full bg-status-positive transition-all duration-500"
                 style={{ width: `${(reviewedMonths.size / 12) * 100}%` }}
               />
             </div>
@@ -237,13 +235,13 @@ export function MonthlyReviewForm({
                       : "hover:bg-muted/50",
                     isReviewed &&
                       !isActive &&
-                      "border-emerald-500/40 bg-emerald-500/15 text-foreground",
+                      "border-status-positive/40 bg-status-positive/15 text-foreground",
                     isCurrent && !isActive && !isReviewed && "border-accent/30",
                   )}
                 >
                   {m.label}
                   {isReviewed && (
-                    <CheckCircle2 className="absolute top-1 right-1 h-3 w-3 text-emerald-500" />
+                    <CheckCircle2 className="absolute top-1 right-1 h-3 w-3 text-status-positive" />
                   )}
                 </button>
               )
@@ -252,20 +250,20 @@ export function MonthlyReviewForm({
         </>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-display flex items-center gap-2">
+      <section className="border border-border">
+        <header className="border-b border-border px-4 py-3 space-y-1">
+          <h2 className="text-base font-display flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-accent" />
             {activeMonthData.full} {data.plan.year}
-          </CardTitle>
+          </h2>
           {existing && (
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+            <p className="text-xs text-status-positive flex items-center gap-1">
               <Trophy className="h-3 w-3" /> Reviewed on{" "}
               {new Date(existing.completedAt).toLocaleDateString()}
             </p>
           )}
-        </CardHeader>
-        <CardContent className="space-y-5">
+        </header>
+        <div className="px-4 py-4 space-y-5">
           {templateFields.map((field) => {
             const Icon = iconForFieldKey(field.key)
             const val = state[field.key] ?? ""
@@ -327,8 +325,8 @@ export function MonthlyReviewForm({
             )}
             Save {activeMonthData.full} review
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   )
 }

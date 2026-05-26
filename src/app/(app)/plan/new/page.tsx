@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation"
 
+/* Hallmark · design-system: design.md · legacy redirect (Wave D5). */
+
 /**
  * Legacy route — replaced by `/onboarding` (first-run wizard) and per-section
  * planning on `/areas`, `/goals`, `/systems`. We keep a permanent redirect so

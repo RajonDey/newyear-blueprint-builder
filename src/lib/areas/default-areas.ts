@@ -31,27 +31,34 @@ export async function ensureDefaultAreasForUser(
   userId: string,
   client: DbClient = db,
 ) {
-  for (let i = 0; i < lifeCategoryOrder.length; i++) {
-    const category = lifeCategoryOrder[i]
-    const existing = await client.area.findFirst({
-      where: { userId, category, isDefault: true },
-      select: { id: true },
-    })
-    if (existing) continue
+  const existing = await client.area.findMany({
+    where: {
+      userId,
+      isDefault: true,
+      category: { in: [...lifeCategoryOrder] },
+    },
+    select: { category: true },
+  })
 
-    await client.area.create({
-      data: {
-        userId,
-        name: lifeCategoryLabels[category],
-        color: areaHexByCategory[category],
-        icon: DEFAULT_AREA_ICONS[category],
-        description: DEFAULT_AREA_DESCRIPTIONS[category],
-        category,
-        isDefault: true,
-        sortOrder: i,
-      },
-    })
-  }
+  const existingCategories = new Set(
+    existing.map((row) => row.category).filter(Boolean) as LifeCategory[],
+  )
+
+  const missing = lifeCategoryOrder.filter((cat) => !existingCategories.has(cat))
+  if (missing.length === 0) return
+
+  await client.area.createMany({
+    data: missing.map((category) => ({
+      userId,
+      name: lifeCategoryLabels[category],
+      color: areaHexByCategory[category],
+      icon: DEFAULT_AREA_ICONS[category],
+      description: DEFAULT_AREA_DESCRIPTIONS[category],
+      category,
+      isDefault: true,
+      sortOrder: lifeCategoryOrder.indexOf(category),
+    })),
+  })
 }
 
 /** Default area row for a life category — used when creating projects without an explicit area. */

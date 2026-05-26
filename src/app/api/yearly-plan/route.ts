@@ -65,23 +65,27 @@ export async function POST(req: Request) {
       )
     }
 
-    const plan = await db.$transaction(async (tx) => {
-      await ensureDefaultAreasForUser(userId, tx)
-      return tx.yearlyPlan.create({
-        data: {
-          userId,
-          year,
-          status: "ACTIVE",
-          reflections: { theme },
-        },
-        select: {
-          id: true,
-          year: true,
-          status: true,
-          reflections: true,
-        },
-      })
-    })
+    await ensureDefaultAreasForUser(userId)
+
+    const plan = await db.$transaction(
+      async (tx) => {
+        return tx.yearlyPlan.create({
+          data: {
+            userId,
+            year,
+            status: "ACTIVE",
+            reflections: { theme },
+          },
+          select: {
+            id: true,
+            year: true,
+            status: true,
+            reflections: true,
+          },
+        })
+      },
+      { timeout: 15_000, maxWait: 10_000 },
+    )
 
     return apiCreated({
       plan,

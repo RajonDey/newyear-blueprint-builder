@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useState } from "react"
 import * as Collapsible from "@radix-ui/react-collapsible"
 import { ChevronDown } from "lucide-react"
@@ -8,16 +10,11 @@ import { cn } from "@/lib/utils"
 interface ProjectDetailSectionProps {
   title: string
   count?: number
-  /** Shown on the collapsed trigger when the section is closed. */
   hint?: string
   defaultOpen?: boolean
   children: React.ReactNode
 }
 
-/**
- * Collapsible secondary section on the project detail page.
- * Primary execution blocks (header, tasks, systems, motivation) stay expanded.
- */
 export function ProjectDetailSection({
   title,
   count,
@@ -30,8 +27,8 @@ export function ProjectDetailSection({
 
   return (
     <Collapsible.Root open={open} onOpenChange={setOpen}>
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
-        <Collapsible.Trigger className="flex w-full min-h-11 items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/30 sm:px-5 sm:py-4">
+      <div className="border-y border-border">
+        <Collapsible.Trigger className="flex w-full min-h-11 items-center gap-3 py-3.5 text-left transition-colors hover:bg-muted/30">
           <ChevronDown
             className={cn(
               "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
@@ -47,7 +44,7 @@ export function ProjectDetailSection({
             </span>
           ) : null}
         </Collapsible.Trigger>
-        <Collapsible.Content className="border-t border-border px-4 py-4 sm:px-5 sm:py-5">
+        <Collapsible.Content className="border-t border-border py-4">
           {children}
         </Collapsible.Content>
       </div>

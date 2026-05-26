@@ -1,3 +1,5 @@
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { cn } from "@/lib/utils"
 import type { AreaHealth, AreaHealthTone } from "@/lib/queries/area-health"
 
@@ -11,9 +13,9 @@ const TONE_STYLES: Record<
     ring: "ring-muted-foreground/20",
   },
   green: {
-    dot: "bg-emerald-500/80",
-    text: "text-emerald-700 dark:text-emerald-400",
-    ring: "ring-emerald-500/20",
+    dot: "bg-status-positive/80",
+    text: "text-status-positive",
+    ring: "ring-status-positive/20",
   },
   amber: {
     dot: "bg-amber/80",
@@ -49,7 +51,7 @@ export function AreaHealthIndicator({
         aria-hidden
       />
       {showLabel ? (
-        <span className="text-[10px] font-medium uppercase tracking-wider">
+        <span className="text-[10px] font-medium">
           {health.tone === "quiet"
             ? "Quiet"
             : health.tone === "green"

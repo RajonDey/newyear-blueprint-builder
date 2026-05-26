@@ -1,5 +1,6 @@
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
 import { Target } from "lucide-react"
 import type { WeeklyCommitment } from "@/types/weekly"
@@ -23,12 +24,12 @@ interface WeeklyPlanSummaryProps {
 export function WeeklyPlanSummary({ projects, weeklyPlan }: WeeklyPlanSummaryProps) {
   if (!weeklyPlan) {
     return (
-      <Card className="border-dashed">
-        <CardContent className="py-4 text-sm text-muted-foreground">
+      <section className="border border-dashed border-border">
+        <div className="px-4 py-4 text-sm text-muted-foreground">
           No weekly plan saved yet. Switch to the Plan tab to set priorities before
           you review.
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     )
   }
 
@@ -48,27 +49,27 @@ export function WeeklyPlanSummary({ projects, weeklyPlan }: WeeklyPlanSummaryPro
 
   if (!hasContent) {
     return (
-      <Card className="border-dashed">
-        <CardContent className="py-4 text-sm text-muted-foreground">
+      <section className="border border-dashed border-border">
+        <div className="px-4 py-4 text-sm text-muted-foreground">
           Your plan tab is open but empty — add priorities or commitments before
           closing the week.
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     )
   }
 
   return (
-    <Card className="border-accent/20 bg-accent/[0.03]">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-display flex items-center gap-2">
+    <section className="border border-accent/20 bg-accent/[0.03]">
+      <header className="border-b border-accent/20 px-4 py-3">
+        <h2 className="text-base font-display flex items-center gap-2">
           <Target className="h-4 w-4 text-accent" />
           Your plan this week
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        </h2>
+      </header>
+      <div className="px-4 py-4 space-y-4">
         {priorityGoals.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+            <p className="text-xs font-medium text-muted-foreground mb-2">
               Priority projects
             </p>
             <div className="flex flex-wrap gap-2">
@@ -96,7 +97,7 @@ export function WeeklyPlanSummary({ projects, weeklyPlan }: WeeklyPlanSummaryPro
 
         {weeklyPlan.commitments.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+            <p className="text-xs font-medium text-muted-foreground mb-2">
               Commitments
             </p>
             <ul className="space-y-1">
@@ -117,7 +118,7 @@ export function WeeklyPlanSummary({ projects, weeklyPlan }: WeeklyPlanSummaryPro
             </ul>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }

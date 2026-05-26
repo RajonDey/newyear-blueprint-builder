@@ -23,7 +23,7 @@ import { WeeklyWorkspaceSidebar } from "@/components/check-in/weekly-workspace-s
 import { WeekNavigator } from "@/components/check-in/week-navigator"
 import { WeeklyPastView } from "@/components/check-in/weekly-past-view"
 import { Button } from "@/components/ui/button"
-import { RhythmWorkspaceShell } from "@/components/rhythm/rhythm-workspace-shell"
+import { RhythmWorkspaceShell, rhythmWorkspacePageClass } from "@/components/rhythm/rhythm-workspace-shell"
 import { WeeklyHistoryStrip } from "@/components/rhythm/weekly-history-strip"
 import { getRhythmStats } from "@/lib/queries/rhythm-stats"
 
@@ -77,7 +77,6 @@ export default async function WeeklyPage({
     return (
       <PageContainer width="wide">
         <PageHeader
-          eyebrow="Rhythm · Weekly"
           title="Weekly planner"
           description="Each week you'll set priorities, protect what matters, then reflect and carry a note into the next week."
         />
@@ -130,9 +129,8 @@ export default async function WeeklyPage({
   )
 
   return (
-    <PageContainer width="wide" className="space-y-4">
+    <PageContainer width="wide" spacing="compact" className={rhythmWorkspacePageClass}>
       <PageHeader
-        eyebrow="Rhythm · Weekly"
         title="Weekly planner"
         description={
           data.isCurrentWeek

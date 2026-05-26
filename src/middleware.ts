@@ -66,6 +66,10 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
+  if (isLoggedIn && (pathname === "/login" || pathname === "/signup")) {
+    return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin))
+  }
+
   if (pathname.startsWith("/admin")) {
     if (token?.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin))

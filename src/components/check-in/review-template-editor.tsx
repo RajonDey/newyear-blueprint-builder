@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import {
@@ -86,7 +88,6 @@ export function ReviewTemplateEditor({
         toast.error(body?.message || body?.error || "Could not save template.")
         return
       }
-      toast.success("Review fields saved.")
       setFields(body.data.fields as ReviewTemplateField[])
       router.refresh()
     } catch {

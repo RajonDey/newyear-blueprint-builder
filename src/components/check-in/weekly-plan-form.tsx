@@ -1,8 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -118,7 +119,6 @@ export function WeeklyPlanForm({
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(json.error || "Failed to save")
-      toast.success("Weekly plan saved")
       router.refresh()
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to save")
@@ -163,7 +163,7 @@ export function WeeklyPlanForm({
 
       {monthlyFocus?.topIntentions && monthlyFocus.topIntentions.length > 0 && (
         <div className="rounded-lg border border-border bg-card px-4 py-3 space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="text-xs font-medium text-muted-foreground">
             {monthlyFocus.monthLabel} plan — top intentions
           </p>
           <ul className="space-y-1.5 text-sm">
@@ -183,7 +183,7 @@ export function WeeklyPlanForm({
         <div className="flex items-start gap-3 rounded-lg border border-accent/20 bg-accent/5 p-3 text-sm">
           <Compass className="h-4 w-4 text-accent mt-0.5 shrink-0" />
           <div className="min-w-0">
-            <p className="font-medium text-xs uppercase tracking-wide text-muted-foreground mb-1">From last week&apos;s review</p>
+            <p className="font-medium text-xs text-muted-foreground mb-1">From last week&apos;s review</p>
             <div
               className="prose prose-sm dark:prose-invert max-w-none text-sm"
               dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(suggestionFromLastWeek) }}
@@ -192,17 +192,17 @@ export function WeeklyPlanForm({
         </div>
       )}
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-display flex items-center gap-2">
+      <section className="border border-border">
+        <header className="border-b border-border px-4 py-3 space-y-1">
+          <h2 className="text-base font-display flex items-center gap-2">
             <Target className="h-4 w-4 text-accent" />
             Priority projects (up to 3)
-          </CardTitle>
-          <p className="text-sm text-muted-foreground font-normal">
+          </h2>
+          <p className="text-sm text-muted-foreground">
             These stay top-of-mind on your Dashboard Today card.
           </p>
-        </CardHeader>
-        <CardContent className="space-y-2">
+        </header>
+        <div className="px-4 py-4 space-y-2">
           {projects.map((g) => {
             const cat = LIFE_CATEGORIES.find((c) => c.id === g.category)
             const checked = priorityIds.includes(g.id)
@@ -242,19 +242,19 @@ export function WeeklyPlanForm({
               </label>
             )
           })}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-display">
+      <section className="border border-border">
+        <header className="border-b border-border px-4 py-3 space-y-1">
+          <h2 className="text-base font-display">
             Life area to protect
-          </CardTitle>
-          <p className="text-sm text-muted-foreground font-normal">
+          </h2>
+          <p className="text-sm text-muted-foreground">
             Optional — one domain you won&apos;t let slip this week.
           </p>
-        </CardHeader>
-        <CardContent>
+        </header>
+        <div className="px-4 py-4">
           <Select value={protect} onValueChange={setProtect}>
             <SelectTrigger>
               <SelectValue placeholder="None" />
@@ -268,17 +268,17 @@ export function WeeklyPlanForm({
               ))}
             </SelectContent>
           </Select>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-display">Commitments</CardTitle>
-          <p className="text-sm text-muted-foreground font-normal">
+      <section className="border border-border">
+        <header className="border-b border-border px-4 py-3 space-y-1">
+          <h2 className="text-base font-display">Commitments</h2>
+          <p className="text-sm text-muted-foreground">
             Core = tied to yearly projects. Follow-up = admin, errands, small wins.
           </p>
-        </CardHeader>
-        <CardContent className="space-y-3">
+        </header>
+        <div className="px-4 py-4 space-y-3">
           {commitments.map((row, i) => (
             <div key={i} className="flex flex-col gap-2 sm:flex-row sm:items-end">
               <div className="flex-1 space-y-1.5">
@@ -334,8 +334,8 @@ export function WeeklyPlanForm({
               <Plus className="h-3.5 w-3.5 mr-1" /> Follow-up
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <Button size="lg" className="w-full" onClick={save} disabled={saving}>
         {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

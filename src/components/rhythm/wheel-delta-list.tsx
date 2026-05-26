@@ -1,3 +1,5 @@
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { cn } from "@/lib/utils"
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -15,7 +17,6 @@ interface WheelDeltaListProps {
   className?: string
 }
 
-/** Per-category quarter-over-quarter wheel delta. */
 export function WheelDeltaList({
   current,
   previous,
@@ -27,8 +28,8 @@ export function WheelDeltaList({
   if (categories.length === 0) return null
 
   return (
-    <div className={cn("rounded-xl border border-border bg-card p-4 space-y-2", className)}>
-      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+    <div className={cn("border border-border p-4 space-y-2", className)}>
+      <p className="text-xs font-medium text-muted-foreground">
         vs last quarter
       </p>
       <ul className="space-y-1.5">
@@ -50,8 +51,8 @@ export function WheelDeltaList({
                 <span
                   className={cn(
                     "text-xs font-medium min-w-[2.5rem] text-right",
-                    delta > 0 && "text-emerald-600 dark:text-emerald-400",
-                    delta < 0 && "text-red-600 dark:text-red-400",
+                    delta > 0 && "text-status-positive",
+                    delta < 0 && "text-status-risk",
                     delta === 0 && "text-muted-foreground",
                   )}
                 >

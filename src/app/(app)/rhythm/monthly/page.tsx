@@ -10,7 +10,7 @@ import { MonthlyWorkspaceSidebar } from "@/components/check-in/monthly-workspace
 import { EmptyState } from "@/components/shared/empty-state"
 import { PageContainer } from "@/components/shared/page-container"
 import { PageHeader } from "@/components/shared/page-header"
-import { RhythmWorkspaceShell } from "@/components/rhythm/rhythm-workspace-shell"
+import { RhythmWorkspaceShell, rhythmWorkspacePageClass } from "@/components/rhythm/rhythm-workspace-shell"
 import { Button } from "@/components/ui/button"
 import { hasProProductAccess } from "@/lib/plan-access"
 import { getReviewTemplateFields } from "@/lib/review-templates"
@@ -48,7 +48,6 @@ export default async function MonthlyPage({
     return (
       <PageContainer width="wide">
         <PageHeader
-          eyebrow="Rhythm · Monthly"
           title="Monthly planner"
           description="Plan the month ahead, then review what happened."
         />
@@ -84,7 +83,6 @@ export default async function MonthlyPage({
     return (
       <PageContainer width="wide">
         <PageHeader
-          eyebrow="Rhythm · Monthly"
           title="Monthly planner"
           description="Plan each month forward, then look back — celebrate wins, name friction, and adjust for the next four weeks."
         />
@@ -176,9 +174,8 @@ export default async function MonthlyPage({
   }))
 
   return (
-    <PageContainer width="wide">
+    <PageContainer width="wide" spacing="compact" className={rhythmWorkspacePageClass}>
       <PageHeader
-        eyebrow="Rhythm · Monthly"
         title="Monthly planner"
         description={`${plannedCount} planned · ${reviewedCount} reviewed — set intentions, then reflect at month-end.`}
       />

@@ -4,10 +4,14 @@ import { notFound } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { requireAuth } from "@/lib/auth-guard"
 import { getRecapData, type RecapPeriod, type RecapData } from "@/lib/queries/recap"
-import { OrnamentDivider } from "@/components/shared/ornament-divider"
-import { ProMark } from "@/components/atmosphere/pro-mark"
+import { BrandMark } from "@/components/shared/brand-mark"
+import {
+  CeremonySequence,
+  CeremonyStep,
+} from "@/components/shared/ceremony-entrance"
 import { RecapActions } from "@/components/recap/recap-actions"
 import { WheelRadar } from "@/components/recap/wheel-radar"
+import { cn } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
@@ -60,11 +64,11 @@ export default async function RecapPage({ params }: RecapPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
+      <header className="border-b border-border print:hidden">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link
             href={RHYTHM_BACK_HREF[recapPeriod]}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors print:hidden"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" /> {RHYTHM_BACK_LABEL[recapPeriod]}
           </Link>
@@ -73,43 +77,57 @@ export default async function RecapPage({ params }: RecapPageProps) {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-10">
-        <div className="mb-6 text-center">
-          <h1 className="font-display text-4xl md:text-5xl tracking-tight">
-            {meta.title}
-          </h1>
-          <p className="text-muted-foreground mt-3 text-sm">
-            A shareable summary of what compounded — quietly.
-          </p>
-        </div>
-        <OrnamentDivider variant="asterisk" />
+        <CeremonySequence>
+          <CeremonyStep delay={0}>
+            <header className="mb-10 flex flex-col items-center gap-6 text-center">
+              <BrandMark size="xl" label="YearInReview" />
+              <div>
+                <h1 className="font-display text-4xl md:text-5xl tracking-tight">
+                  {meta.title}
+                </h1>
+                <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+                  A shareable summary of what compounded — quietly.
+                </p>
+              </div>
+            </header>
+          </CeremonyStep>
 
-        <div className="relative mx-auto w-full max-w-2xl aspect-[4/5] rounded-3xl border border-border bg-card overflow-hidden shadow-sm recap-card">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber/15 via-transparent to-foreground/5 pointer-events-none" />
-          <div className="relative h-full p-8 md:p-10 flex flex-col">
-            <CardHeader data={data} period={period as RecapPeriod} />
-            <div className="flex-1 flex items-center">
-              {data ? <CardBody data={data} /> : <EmptyCard period={period as RecapPeriod} />}
+          <CeremonyStep delay={80}>
+            <div className="relative mx-auto w-full max-w-2xl aspect-[4/5] border border-border bg-card overflow-hidden recap-card">
+              <div className="relative h-full p-8 md:p-10 flex flex-col">
+                <CardHeader data={data} period={recapPeriod} />
+                <div className="flex-1 flex items-center">
+                  {data ? (
+                    <CardBody data={data} />
+                  ) : (
+                    <EmptyCard period={recapPeriod} />
+                  )}
+                </div>
+                <CardFooter userName={data?.userName ?? null} />
+              </div>
             </div>
-            <CardFooter userName={data?.userName ?? null} />
-          </div>
-        </div>
+          </CeremonyStep>
 
-        <div className="mt-8 flex items-center justify-center gap-2 text-xs text-muted-foreground print:hidden">
-          <span>Switch view:</span>
-          {VALID.map((p) => (
-            <Link
-              key={p}
-              href={`/recap/${p}`}
-              className={`rounded-full border px-3 py-1 transition-colors ${
-                p === period
-                  ? "border-foreground text-foreground"
-                  : "border-border hover:bg-accent/10"
-              }`}
-            >
-              {p[0].toUpperCase() + p.slice(1)}
-            </Link>
-          ))}
-        </div>
+          <CeremonyStep delay={160}>
+            <div className="mt-8 flex items-center justify-center gap-2 text-xs text-muted-foreground print:hidden">
+              <span>Switch view:</span>
+              {VALID.map((p) => (
+                <Link
+                  key={p}
+                  href={`/recap/${p}`}
+                  className={cn(
+                    "rounded-md border px-3 py-1 transition-colors",
+                    p === period
+                      ? "border-foreground text-foreground"
+                      : "border-border hover:bg-muted/30",
+                  )}
+                >
+                  {p[0].toUpperCase() + p.slice(1)}
+                </Link>
+              ))}
+            </div>
+          </CeremonyStep>
+        </CeremonySequence>
       </main>
 
       <style>{`
@@ -139,8 +157,8 @@ function CardHeader({
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-baseline gap-2">
-        <ProMark className="text-xs" />
+      <div className="flex items-center gap-2">
+        <BrandMark size="sm" />
         <span className="font-display text-sm tracking-tight">YearInReview</span>
       </div>
       <span className="text-xs text-muted-foreground tabular-nums">{label}</span>
@@ -150,7 +168,7 @@ function CardHeader({
 
 function CardFooter({ userName }: { userName: string | null }) {
   return (
-    <div className="flex items-center justify-between pt-6 border-t border-border/60">
+    <div className="flex items-center justify-between pt-6 border-t border-border">
       <span className="text-xs text-muted-foreground">{userName || "Your year"}</span>
       <span className="text-xs text-muted-foreground">yearinreview.online</span>
     </div>
@@ -180,7 +198,7 @@ function EmptyCard({ period }: { period: RecapPeriod }) {
       </p>
       <Link
         href={href}
-        className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2 text-sm font-medium hover:opacity-90 transition-opacity"
+        className="inline-flex items-center gap-2 rounded-md bg-foreground text-background px-4 py-2 text-sm font-medium hover:opacity-90 transition-opacity"
       >
         Complete it now
       </Link>
@@ -193,11 +211,11 @@ function CardBody({ data }: { data: RecapData }) {
     const wins = data.projectCheckIns.filter((g) => g.progressRating >= 3)
     return (
       <div className="w-full">
-        <div className="text-xs text-muted-foreground mb-2">Theme of the week</div>
+        <p className="text-xs text-muted-foreground mb-2">Theme of the week</p>
         <h2 className="font-display text-3xl md:text-4xl tracking-tight leading-tight mb-8">
           {data.theme || data.nextWeekFocus || "Small reps. Steady hands."}
         </h2>
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-3 mb-8">
           <Stat
             value={data.mood !== null ? `${data.mood}/5` : "—"}
             label="Mood"
@@ -206,16 +224,11 @@ function CardBody({ data }: { data: RecapData }) {
             value={`${wins.length}/${data.projectCheckIns.length || data.priorityGoals.length || 0}`}
             label="Projects progressed"
           />
-          <Stat
-            value={`W${data.weekNumber}`}
-            label={data.quarter}
-          />
+          <Stat value={`W${data.weekNumber}`} label={data.quarter} />
         </div>
         {data.priorityGoals.length > 0 && (
           <div>
-            <div className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-3">
-              You said yes to
-            </div>
+            <p className="text-xs text-muted-foreground mb-3">You said yes to</p>
             <ul className="space-y-2">
               {data.priorityGoals.slice(0, 4).map((g) => (
                 <li key={g.id} className="text-sm">
@@ -231,15 +244,13 @@ function CardBody({ data }: { data: RecapData }) {
   if (data.kind === "monthly") {
     return (
       <div className="w-full">
-        <div className="text-xs text-muted-foreground mb-2">The month, in shape</div>
+        <p className="text-xs text-muted-foreground mb-2">The month, in shape</p>
         <h2 className="font-display text-3xl md:text-4xl tracking-tight leading-tight mb-8">
           {data.theme || `${data.monthName}, kept honest.`}
         </h2>
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <div className="text-[11px] font-semibold tracking-[0.2em] uppercase text-amber mb-3">
-              Wins
-            </div>
+            <p className="text-xs text-amber mb-3">Wins</p>
             <p className="text-sm leading-relaxed whitespace-pre-wrap">
               {data.winsText || (
                 <span className="text-muted-foreground italic">No wins noted.</span>
@@ -247,9 +258,7 @@ function CardBody({ data }: { data: RecapData }) {
             </p>
           </div>
           <div>
-            <div className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-3">
-              Adjustments
-            </div>
+            <p className="text-xs text-muted-foreground mb-3">Adjustments</p>
             <p className="text-sm leading-relaxed whitespace-pre-wrap">
               {data.adjustments || (
                 <span className="text-muted-foreground italic">None recorded.</span>
@@ -260,10 +269,9 @@ function CardBody({ data }: { data: RecapData }) {
       </div>
     )
   }
-  // quarterly
   return (
     <div className="w-full">
-      <div className="text-xs text-muted-foreground mb-2">Theme of the quarter</div>
+      <p className="text-xs text-muted-foreground mb-2">Theme of the quarter</p>
       <h2 className="font-display text-3xl md:text-4xl tracking-tight leading-tight mb-4">
         {data.theme || data.summary?.split(".")[0] || "A season of quiet building."}
       </h2>
@@ -277,7 +285,7 @@ function CardBody({ data }: { data: RecapData }) {
 
 function Stat({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-xl border border-border bg-background/60 p-3 text-center">
+    <div className="border border-border p-3 text-center">
       <div className="font-display text-2xl tabular-nums">{value}</div>
       <div className="text-[11px] text-muted-foreground mt-1">{label}</div>
     </div>

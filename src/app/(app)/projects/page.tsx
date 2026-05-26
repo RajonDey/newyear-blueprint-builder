@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Sparkles, Target } from "lucide-react"
+import { Target } from "lucide-react"
 import { requireAuth } from "@/lib/auth-guard"
 import { getProjectsForUser } from "@/lib/queries/projects"
 import { getWeeklyPriorityProjectIds } from "@/lib/queries/weekly-priorities"
@@ -34,7 +34,6 @@ export default async function ProjectsPage() {
     return (
       <PageContainer>
         <PageHeader
-          eyebrow="Planning · Projects"
           title="Your projects"
           description={
             hasPlan
@@ -85,7 +84,6 @@ export default async function ProjectsPage() {
   return (
     <PageContainer>
       <PageHeader
-        eyebrow="Planning · Projects"
         title="Your projects"
         description={`${projects.length} project${projects.length !== 1 ? "s" : ""} in ${activePlanYear}. Areas → Projects → Tasks. Keep them few, keep them honest.`}
         actions={
@@ -105,10 +103,10 @@ export default async function ProjectsPage() {
       />
 
       {primary.length > 0 && (
-        <section className="space-y-3">
-          <div className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground inline-flex items-center gap-1.5">
-            <Sparkles className="h-3 w-3 text-amber" /> Primary
-          </div>
+        <section className="space-y-4">
+          <h2 className="font-display text-lg tracking-tight text-foreground">
+            Primary
+          </h2>
           <div className="grid gap-4 md:grid-cols-2">
             {primary.map((p) => (
               <ProjectCardWithCounts
@@ -124,10 +122,10 @@ export default async function ProjectsPage() {
       )}
 
       {secondary.length > 0 && (
-        <section className="space-y-3">
-          <div className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+        <section className="space-y-4">
+          <h2 className="font-display text-lg tracking-tight text-foreground">
             Secondary
-          </div>
+          </h2>
           <div className="grid gap-4 md:grid-cols-2">
             {secondary.map((p) => (
               <ProjectCardWithCounts

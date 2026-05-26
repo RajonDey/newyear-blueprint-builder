@@ -78,66 +78,80 @@ export async function POST(req: Request) {
   const year = new Date().getFullYear();
 
   try {
-    const result = await db.$transaction(async (tx) => {
-      const existing = await tx.yearlyPlan.findUnique({
-        where: { userId_year: { userId, year } },
-      });
-      if (existing) {
-        throw new Error("PLAN_EXISTS");
-      }
-
-      await tx.yearlyPlan.updateMany({
-        where: { userId, status: "ACTIVE" },
-        data: { status: "ARCHIVED" },
-      });
-
-      const plan = await tx.yearlyPlan.create({
-        data: {
-          userId,
-          year,
-          status: "ACTIVE",
-          reflections: { theme: data.theme, name: data.name ?? null },
-        },
-      });
-
-      await tx.wheelOfLifeEntry.createMany({
-        data: ALL_CATEGORIES.map((category) => ({
-          planId: plan.id,
-          category,
-          rating:
-            category === data.strongest ? 8 : category === data.weakest ? 3 : 5,
-        })),
-      });
-
-      await ensureDefaultAreasForUser(userId, tx);
-      const goalAreaId = await findDefaultAreaIdForCategory(
-        userId,
-        data.goalCategory,
-        tx,
+    // Seed areas outside the plan transaction — idempotent, and keeps the
+    // interactive tx short (Neon / remote DBs often exceed Prisma's 5s default).
+    await ensureDefaultAreasForUser(userId);
+    const goalAreaId = await findDefaultAreaIdForCategory(
+      userId,
+      data.goalCategory,
+    );
+    if (!goalAreaId) {
+      return NextResponse.json(
+        { error: "Could not resolve area for your project. Please try again." },
+        { status: 500 },
       );
+    }
 
-      const goal = await tx.project.create({
-        data: {
-          planId: plan.id,
-          areaId: goalAreaId,
-          category: data.goalCategory,
-          type: "PRIMARY",
-          title: data.goalTitle,
-          sortOrder: 0,
-        },
-      });
+    const result = await db.$transaction(
+      async (tx) => {
+        const existing = await tx.yearlyPlan.findUnique({
+          where: { userId_year: { userId, year } },
+        });
+        if (existing) {
+          throw new Error("PLAN_EXISTS");
+        }
 
-      await tx.system.create({
-        data: {
-          projectId: goal.id,
-          description: data.systemTitle,
-          frequency: "DAILY",
-          isActive: true,
-        },
-      });
+        await tx.yearlyPlan.updateMany({
+          where: { userId, status: "ACTIVE" },
+          data: { status: "ARCHIVED" },
+        });
 
-      return { planId: plan.id, projectId: goal.id };
-    });
+        const plan = await tx.yearlyPlan.create({
+          data: {
+            userId,
+            year,
+            status: "ACTIVE",
+            reflections: { theme: data.theme, name: data.name ?? null },
+          },
+        });
+
+        await tx.wheelOfLifeEntry.createMany({
+          data: ALL_CATEGORIES.map((category) => ({
+            planId: plan.id,
+            category,
+            rating:
+              category === data.strongest
+                ? 8
+                : category === data.weakest
+                  ? 3
+                  : 5,
+          })),
+        });
+
+        const goal = await tx.project.create({
+          data: {
+            planId: plan.id,
+            areaId: goalAreaId,
+            category: data.goalCategory,
+            type: "PRIMARY",
+            title: data.goalTitle,
+            sortOrder: 0,
+          },
+        });
+
+        await tx.system.create({
+          data: {
+            projectId: goal.id,
+            description: data.systemTitle,
+            frequency: "DAILY",
+            isActive: true,
+          },
+        });
+
+        return { planId: plan.id, projectId: goal.id };
+      },
+      { timeout: 15_000, maxWait: 10_000 },
+    );
 
     return NextResponse.json({ data: result }, { status: 201 });
   } catch (err) {

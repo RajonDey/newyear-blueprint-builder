@@ -1,14 +1,14 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { apiFetch } from "@/lib/api-fetch"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { OrnamentDivider } from "@/components/shared/ornament-divider"
 import {
   Select,
   SelectContent,
@@ -63,7 +63,6 @@ export function ProjectDetailSystems({
     })
     setUpdating(false)
     if (!result.ok) return
-    toast.success("System updated")
     setEditingSystemId(null)
     router.refresh()
   }
@@ -76,7 +75,6 @@ export function ProjectDetailSystems({
     })
     setUpdating(false)
     if (!result.ok) return
-    toast.success("System removed")
     setEditingSystemId(null)
     router.refresh()
   }
@@ -98,24 +96,24 @@ export function ProjectDetailSystems({
     })
     setAddingSystem(false)
     if (!result.ok) return
-    toast.success("System added")
     setNewSystemDesc("")
     setNewSystemFreq("DAILY")
     router.refresh()
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6">
-      <CardHeader className="p-0 pb-3">
-        <CardTitle className="text-lg font-display flex items-center gap-2">
-          <Repeat className="h-4 w-4 text-accent" /> Daily &amp; weekly systems
-        </CardTitle>
-        <p className="text-sm text-muted-foreground font-normal">
+    <section className="space-y-4 border border-border p-5 md:p-6">
+      <div>
+        <h2 className="font-display text-lg tracking-tight flex items-center gap-2">
+          <Repeat className="h-4 w-4 text-muted-foreground" aria-hidden />
+          Daily &amp; weekly systems
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">
           These power your Dashboard Today card. Weekly/monthly items stay done for
           the whole week or month once checked.
         </p>
-      </CardHeader>
-      <CardContent className="space-y-4 p-0">
+      </div>
+      <div className="space-y-4">
         {systems.length === 0 && (
           <p className="text-sm text-muted-foreground">
             No systems yet. Add one below — small, repeatable actions work best.
@@ -212,7 +210,7 @@ export function ProjectDetailSystems({
           ),
         )}
 
-        <OrnamentDivider variant="dot" />
+        <hr className="border-border" />
 
         <div className="space-y-2">
           <p className="text-sm font-medium flex items-center gap-1.5">
@@ -251,7 +249,7 @@ export function ProjectDetailSystems({
             </Button>
           </div>
         </div>
-      </CardContent>
+      </div>
     </section>
   )
 }

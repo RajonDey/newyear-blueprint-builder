@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/shared/page-header"
 import { EmptyState } from "@/components/shared/empty-state"
 import { Button } from "@/components/ui/button"
 import { WheelEditor } from "@/components/wheel/wheel-editor"
-import { getQuarterLabel } from "@/lib/nav-config"
 
 export const metadata: Metadata = { title: "Wheel of Life" }
 
@@ -20,7 +19,6 @@ export default async function WheelPage() {
     return (
       <PageContainer>
         <PageHeader
-          eyebrow="Foundation · Wheel of Life"
           title="The honest snapshot"
           description="Six categories, rated 1–10 — the same life domains as your Areas in Plan. The point isn't a perfect circle; it's noticing which line moved."
         />
@@ -44,7 +42,6 @@ export default async function WheelPage() {
   return (
     <PageContainer>
       <PageHeader
-        eyebrow={`Wheel of Life · ${getQuarterLabel()} ${wheel.planYear}`}
         title="The honest snapshot"
         description="Six categories, rated 1–10 — the same life domains as your Areas in Plan. The point isn't a perfect circle; it's noticing which line moved."
       />

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { hasProProductAccess } from "@/lib/plan-access"
 import { getVisibleNavGroups, type NavLink } from "@/lib/nav-config"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { BrandMark } from "@/components/shared/brand-mark"
 import { ProMark } from "@/components/atmosphere/pro-mark"
 import type { PlanTier, Role } from "@prisma/client"
 
@@ -58,9 +59,7 @@ export function AppSidebar({ user, driftInboxCount = 0 }: AppSidebarProps) {
   return (
     <aside className="hidden md:flex w-64 flex-col border-r border-sidebar-border bg-sidebar">
       <div className="flex h-16 items-center gap-2.5 border-b border-sidebar-border px-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground text-background font-display text-sm font-semibold">
-          Y
-        </div>
+        <BrandMark size="md" />
         <Link href="/dashboard" className="flex flex-col leading-tight">
           <span className="font-display text-base text-sidebar-foreground">
             YearInReview

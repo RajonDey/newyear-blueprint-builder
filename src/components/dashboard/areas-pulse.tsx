@@ -1,3 +1,5 @@
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import Link from "next/link"
 import { Layers } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -7,7 +9,7 @@ import type { LifeCategory } from "@prisma/client"
 
 const TONE_DOT: Record<AreaHealthTone, string> = {
   quiet: "bg-muted-foreground/25 ring-muted-foreground/15",
-  green: "bg-emerald-500/85 ring-emerald-500/25",
+  green: "bg-status-positive/85 ring-status-positive/25",
   amber: "bg-amber/85 ring-amber/30",
 }
 
@@ -24,7 +26,7 @@ export function AreasPulse({ areas }: { areas: PulseArea[] }) {
   return (
     <Link
       href="/areas"
-      className="flex items-center gap-4 rounded-2xl border border-border/70 bg-card/50 px-4 py-3 transition-colors hover:bg-card/80"
+      className="flex items-center gap-4 border-y border-border py-3 transition-colors hover:bg-muted/30"
     >
       <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-muted/40 text-muted-foreground">
         <Layers className="h-4 w-4" />

@@ -18,7 +18,6 @@ export default async function AreasPage() {
   return (
     <PageContainer>
       <PageHeader
-        eyebrow="Life Areas"
         title="The shape of your year"
         description="Each area holds the projects you're moving on. Your six default areas use the same names and colors as the Wheel — Health, Career, Finance, and the rest. Custom areas (Pro) borrow a color family from those domains."
       />

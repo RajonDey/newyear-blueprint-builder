@@ -49,6 +49,14 @@ export const metadata: Metadata = {
     title: "YearInReview — Design a Life Worth Living",
     description:
       "A mindful annual planning platform. Reflect. Plan. Walk your path with clarity.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "YearInReview — Design a Life Worth Living",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -56,6 +64,10 @@ export const metadata: Metadata = {
     description:
       "Reflect on your journey. Set intentional goals. Walk your path all year long.",
     images: ["/opengraph-image"],
+  },
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
   },
 }
 

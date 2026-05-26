@@ -1,11 +1,12 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
 import { apiFetch } from "@/lib/api-fetch"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -85,8 +86,6 @@ export function ProjectDetailHeader({ project }: { project: ProjectDetail }) {
       (result.body as { achievementUnlocked?: boolean }).achievementUnlocked
     ) {
       setCompletionOpen(true)
-    } else {
-      toast.success(`Status updated to ${status.replace(/_/g, " ")}`)
     }
     router.refresh()
   }
@@ -113,7 +112,6 @@ export function ProjectDetailHeader({ project }: { project: ProjectDetail }) {
     })
     setUpdating(false)
     if (!result.ok) return
-    toast.success("Project updated")
     setEditingDetails(false)
     router.refresh()
   }
@@ -127,68 +125,65 @@ export function ProjectDetailHeader({ project }: { project: ProjectDetail }) {
     setDeleting(false)
     setDeleteOpen(false)
     if (!result.ok) return
-    toast.success("Project deleted")
     router.push("/projects")
     router.refresh()
   }
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3">
-        <Button variant="ghost" size="sm" asChild className="-ml-2 gap-1">
-          <Link href="/projects">
-            <ArrowLeft className="h-4 w-4" /> Projects
-          </Link>
-        </Button>
-        <div className="flex-1" />
-        {!editingDetails && (
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              onClick={beginEditing}
-            >
-              <Pencil className="h-3.5 w-3.5" /> Edit details
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1 text-destructive hover:text-destructive"
-              onClick={() => setDeleteOpen(true)}
-            >
-              <Trash2 className="h-3.5 w-3.5" /> Delete
-            </Button>
-          </>
-        )}
-      </div>
-
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <Badge
-            variant="outline"
-            className="gap-1"
-            style={{ borderColor: catInfo?.color, color: catInfo?.color }}
-          >
-            {catInfo && <catInfo.icon className="h-3 w-3" />}
-            {catInfo?.label}
-          </Badge>
-          {project.type === "PRIMARY" && (
-            <Badge variant="secondary" className="gap-1 text-accent">
-              <Flame className="h-3 w-3" /> Primary
-            </Badge>
+      <section className="-mx-4 space-y-6 border-b border-border px-4 pb-8 sm:-mx-6 sm:px-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="ghost" size="sm" asChild className="-ml-2 gap-1">
+            <Link href="/projects">
+              <ArrowLeft className="h-4 w-4" /> Projects
+            </Link>
+          </Button>
+          <div className="flex-1" />
+          {!editingDetails && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                onClick={beginEditing}
+              >
+                <Pencil className="h-3.5 w-3.5" /> Edit details
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1 text-destructive hover:text-destructive"
+                onClick={() => setDeleteOpen(true)}
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Delete
+              </Button>
+            </>
           )}
-          <Badge variant="outline" className="text-xs">
-            {project.plan.year}
-          </Badge>
         </div>
 
-        {editingDetails ? (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-display">Edit project</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <div>
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <Badge
+              variant="outline"
+              className="gap-1"
+              style={{ borderColor: catInfo?.color, color: catInfo?.color }}
+            >
+              {catInfo && <catInfo.icon className="h-3 w-3" />}
+              {catInfo?.label}
+            </Badge>
+            {project.type === "PRIMARY" && (
+              <Badge variant="secondary" className="gap-1 text-accent">
+                <Flame className="h-3 w-3" /> Primary
+              </Badge>
+            )}
+            <Badge variant="outline" className="text-xs">
+              {project.plan.year}
+            </Badge>
+          </div>
+
+          {editingDetails ? (
+            <div className="border border-border bg-card p-5 md:p-6 space-y-4">
+              <h2 className="font-display text-lg tracking-tight">Edit project</h2>
               <div className="space-y-2">
                 <Label htmlFor="g-title">Title</Label>
                 <Input
@@ -262,13 +257,12 @@ export function ProjectDetailHeader({ project }: { project: ProjectDetail }) {
                   Cancel
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <>
-            <h1 className="font-display text-2xl font-semibold sm:text-3xl">
-              {project.title}
-            </h1>
+            </div>
+          ) : (
+            <>
+              <h1 className="font-display text-2xl font-semibold sm:text-3xl tracking-tight">
+                {project.title}
+              </h1>
             {project.description && (
               <div
                 className="text-muted-foreground mt-1 prose prose-sm dark:prose-invert max-w-none"
@@ -279,42 +273,43 @@ export function ProjectDetailHeader({ project }: { project: ProjectDetail }) {
             )}
           </>
         )}
-      </div>
+        </div>
 
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-muted-foreground">Status</span>
-        <Select
-          value={project.status}
-          onValueChange={(v) => updateStatus(v)}
-          disabled={updating}
-        >
-          <SelectTrigger className="w-[200px]">
-            <SelectValue>
-              {(() => {
-                const current = STATUS_OPTIONS.find((o) => o.value === project.status)
-                if (!current) return project.status
-                return (
-                  <span className={`flex items-center gap-2 ${current.color}`}>
-                    <current.icon className="h-3.5 w-3.5" />
-                    {current.label}
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-muted-foreground">Status</span>
+          <Select
+            value={project.status}
+            onValueChange={(v) => updateStatus(v)}
+            disabled={updating}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue>
+                {(() => {
+                  const current = STATUS_OPTIONS.find((o) => o.value === project.status)
+                  if (!current) return project.status
+                  return (
+                    <span className={`flex items-center gap-2 ${current.color}`}>
+                      <current.icon className="h-3.5 w-3.5" />
+                      {current.label}
+                    </span>
+                  )
+                })()}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  <span className={`flex items-center gap-2 ${opt.color}`}>
+                    <opt.icon className="h-3.5 w-3.5" />
+                    {opt.label}
                   </span>
-                )
-              })()}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {STATUS_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                <span className={`flex items-center gap-2 ${opt.color}`}>
-                  <opt.icon className="h-3.5 w-3.5" />
-                  {opt.label}
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {updating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-      </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {updating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+        </div>
+      </section>
 
       <ProjectCompletionDialog
         open={completionOpen}

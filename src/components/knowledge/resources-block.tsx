@@ -1,5 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Embedded resources block — workbench section, silent upload (Wave D4).
+ */
+
 import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -140,7 +144,6 @@ export function ResourcesBlock({
         return
       }
       setItems((prev) => [body.data as ResourceRow, ...prev])
-      toast.success("Uploaded")
       startTransition(() => router.refresh())
     } catch (err) {
       console.error(err)
@@ -219,7 +222,7 @@ export function ResourcesBlock({
   return (
     <section
       className={cn(
-        variant === "card" && "rounded-2xl border border-border bg-card p-6",
+        variant === "card" && "border border-border p-6",
       )}
     >
       <div className="mb-4 flex items-baseline justify-between gap-3">
@@ -278,10 +281,8 @@ export function ResourcesBlock({
       />
 
       {mode === "upsell" && (
-        <div className="mb-4 rounded-2xl border border-amber/40 bg-amber/[0.04] p-5">
-          <div className="text-[10px] font-semibold tracking-widest uppercase text-amber mb-2">
-            Pro · File uploads
-          </div>
+        <div className="mb-4 border border-amber/40 bg-amber-tint p-5">
+          <div className="text-xs font-medium text-amber mb-2">Pro · File uploads</div>
           <h3 className="font-display text-lg leading-snug">
             Attach PDFs, images, and docs to any project
           </h3>
@@ -401,7 +402,7 @@ export function ResourcesBlock({
                       <button
                         onClick={() => saveEdit(r)}
                         aria-label="Save link"
-                        className="rounded p-1 text-emerald-600 hover:bg-emerald-500/10 transition-colors"
+                        className="rounded p-1 text-status-positive hover:bg-status-positive/10 transition-colors"
                       >
                         <Check className="h-3.5 w-3.5" />
                       </button>
@@ -437,7 +438,7 @@ export function ResourcesBlock({
                       <button
                         onClick={() => remove(r)}
                         aria-label="Remove resource"
-                        className="rounded p-1 text-muted-foreground/40 hover:text-rose-500 transition-colors"
+                        className="rounded p-1 text-muted-foreground/40 hover:text-status-risk transition-colors"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>

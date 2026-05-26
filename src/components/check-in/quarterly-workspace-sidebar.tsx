@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { Badge } from "@/components/ui/badge"
 import { WheelChart } from "@/components/dashboard/wheel-chart"
 import { WheelDeltaList } from "@/components/rhythm/wheel-delta-list"
@@ -57,19 +58,19 @@ export function QuarterlyWorkspaceSidebar({
 
   return (
     <>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+      <section className="border border-border">
+        <header className="border-b border-border px-4 py-3">
+          <h2 className="text-sm font-medium text-muted-foreground">
             {year} seasons
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+          </h2>
+        </header>
+        <div className="px-4 py-4 space-y-3">
           <div className="flex items-end justify-between gap-2">
             <p className="font-display text-3xl tracking-tight tabular-nums">
               {reviewedCount}
               <span className="text-lg text-muted-foreground">/4</span>
             </p>
-            <Badge variant="secondary" className="text-[10px] uppercase">
+            <Badge variant="secondary" className="text-[10px]">
               reviewed
             </Badge>
           </div>
@@ -96,11 +97,11 @@ export function QuarterlyWorkspaceSidebar({
                 <div
                   key={q}
                   className={cn(
-                    "rounded-lg border px-2 py-2 text-center text-xs font-medium",
-                    reviewed && "border-emerald-500/40 bg-emerald-500/10",
+                    "border px-2 py-2 text-center text-xs font-medium",
+                    reviewed && "border-status-positive/40 bg-status-positive/10",
                     planned &&
                       !reviewed &&
-                      "border-sky-500/40 bg-sky-500/10",
+                      "border-amber/30 bg-amber-tint",
                     isCurrent &&
                       !reviewed &&
                       !planned &&
@@ -113,36 +114,36 @@ export function QuarterlyWorkspaceSidebar({
               )
             })}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {projects.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-1.5">
+        <section className="border border-border">
+          <header className="border-b border-border px-4 py-3">
+            <h2 className="text-sm font-medium flex items-center gap-1.5">
               <Target className="h-3.5 w-3.5 text-accent" />
               Project health
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-3 gap-2 text-center text-xs">
-            <div className="rounded-lg border bg-muted/30 px-2 py-2">
+            </h2>
+          </header>
+          <div className="px-4 py-4 grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="border border-border px-2 py-2">
               <p className="text-muted-foreground">On track</p>
               <p className="font-display text-xl mt-0.5">{onTrack}</p>
             </div>
-            <div className="rounded-lg border bg-muted/30 px-2 py-2">
+            <div className="border border-border px-2 py-2">
               <p className="text-muted-foreground">At risk</p>
-              <p className="font-display text-xl mt-0.5 text-red-600 dark:text-red-400">
+              <p className="font-display text-xl mt-0.5 text-status-risk">
                 {atRisk}
               </p>
             </div>
-            <div className="rounded-lg border bg-muted/30 px-2 py-2">
+            <div className="border border-border px-2 py-2">
               <p className="text-muted-foreground">Done</p>
-              <p className="font-display text-xl mt-0.5 text-emerald-600 dark:text-emerald-400">
+              <p className="font-display text-xl mt-0.5 text-status-positive">
                 {completed}
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       )}
 
       {wheelScoresArray.length > 0 && (
@@ -155,15 +156,15 @@ export function QuarterlyWorkspaceSidebar({
         </>
       )}
 
-      <Card className="border-dashed">
-        <CardContent className="pt-4 pb-4">
+      <section className="border border-dashed border-border">
+        <div className="px-4 py-4">
           <p className="text-xs text-muted-foreground flex items-start gap-2 leading-relaxed">
             <Activity className="h-3.5 w-3.5 shrink-0 mt-0.5 text-accent" />
             Quarterly reviews reset the season — adjust projects before the next
             three months unfold.
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <RhythmRecapLink cadence="quarterly" />
     </>

@@ -1,8 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
@@ -108,7 +109,6 @@ export function QuarterlyPlanForm({
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(json.error || "Failed to save")
-      toast.success(`${quarterLabel(activeQuarter)} plan saved`)
       router.refresh()
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to save")
@@ -136,19 +136,19 @@ export function QuarterlyPlanForm({
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-display flex items-center gap-2">
+      <section className="border border-border">
+        <header className="border-b border-border px-4 py-3 space-y-1">
+          <h2 className="text-base font-display flex items-center gap-2">
             <Compass className="h-4 w-4 text-accent" />
             {quarterLabel(activeQuarter)} {data.plan.year} — plan
-          </CardTitle>
-          <p className="text-sm text-muted-foreground font-normal">
+          </h2>
+          <p className="text-sm text-muted-foreground">
             {quarterMonthsLabel(activeQuarter)} · set the season theme before
             months and weeks unfold. Your monthly planner picks this up
             automatically.
           </p>
-        </CardHeader>
-        <CardContent className="space-y-5">
+        </header>
+        <div className="px-4 py-4 space-y-5">
           <div className="space-y-1.5">
             <label className="text-sm font-medium flex items-center gap-1.5">
               <Compass className="h-3.5 w-3.5 text-accent shrink-0" />
@@ -263,8 +263,8 @@ export function QuarterlyPlanForm({
             )}
             Save {quarterLabel(activeQuarter)} plan
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   )
 }

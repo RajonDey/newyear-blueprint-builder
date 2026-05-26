@@ -1,6 +1,7 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { Badge } from "@/components/ui/badge"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
 import { sanitizeRichTextHtml } from "@/lib/sanitize-client"
@@ -41,7 +42,7 @@ export function WeeklyPastView({ data }: { data: PastWeekData }) {
 
   if (!hasPlan && !hasReview) {
     return (
-      <div className="rounded-lg border border-dashed bg-muted/20 p-8 text-center">
+      <div className="border border-dashed border-border bg-muted/20 p-8 text-center">
         <FileText className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
         <p className="text-sm font-medium text-muted-foreground">Nothing recorded this week</p>
         <p className="text-xs text-muted-foreground mt-1">
@@ -54,17 +55,17 @@ export function WeeklyPastView({ data }: { data: PastWeekData }) {
   return (
     <div className="space-y-6">
       {hasPlan && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-display flex items-center gap-2">
+        <section className="border border-border">
+          <header className="border-b border-border px-4 py-3">
+            <h2 className="text-base font-display flex items-center gap-2">
               <Target className="h-4 w-4 text-accent" />
-              Weekly Plan
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+              Weekly plan
+            </h2>
+          </header>
+          <div className="px-4 py-4 space-y-4">
             {data.weeklyPlan!.priorityProjectIds.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                <p className="text-xs font-medium text-muted-foreground mb-2">
                   Priority projects
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -84,7 +85,7 @@ export function WeeklyPastView({ data }: { data: PastWeekData }) {
 
             {data.weeklyPlan!.protectCategory && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                <p className="text-xs font-medium text-muted-foreground mb-1">
                   Protecting
                 </p>
                 <p className="text-sm">
@@ -95,7 +96,7 @@ export function WeeklyPastView({ data }: { data: PastWeekData }) {
 
             {data.weeklyPlan!.commitments.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                <p className="text-xs font-medium text-muted-foreground mb-2">
                   Commitments
                 </p>
                 <ul className="space-y-1">
@@ -108,22 +109,22 @@ export function WeeklyPastView({ data }: { data: PastWeekData }) {
                 </ul>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       )}
 
       {hasReview && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-display flex items-center gap-2">
+        <section className="border border-border">
+          <header className="border-b border-border px-4 py-3">
+            <h2 className="text-base font-display flex items-center gap-2">
               <ClipboardCheck className="h-4 w-4 text-accent" />
-              Weekly Review
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+              Weekly review
+            </h2>
+          </header>
+          <div className="px-4 py-4 space-y-4">
             {data.existingCheckIn!.overallMood && (
               <div className="flex items-center gap-3">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Mood</p>
+                <p className="text-xs font-medium text-muted-foreground">Mood</p>
                 <Badge variant="secondary">
                   {MOOD_LABELS[data.existingCheckIn!.overallMood]} ({data.existingCheckIn!.overallMood}/5)
                 </Badge>
@@ -132,7 +133,7 @@ export function WeeklyPastView({ data }: { data: PastWeekData }) {
 
             {data.existingCheckIn!.projectCheckIns.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                <p className="text-xs font-medium text-muted-foreground mb-2">
                   Project ratings
                 </p>
                 <div className="space-y-2">
@@ -157,7 +158,7 @@ export function WeeklyPastView({ data }: { data: PastWeekData }) {
                           <p className="text-xs text-muted-foreground ml-6">{gc.notes}</p>
                         )}
                         {gc.blockers && (
-                          <p className="text-xs text-amber-600 dark:text-amber-400 ml-6">
+                          <p className="text-xs text-status-attention ml-6">
                             Blocker: {gc.blockers}
                           </p>
                         )}
@@ -170,7 +171,7 @@ export function WeeklyPastView({ data }: { data: PastWeekData }) {
 
             {data.existingCheckIn!.notes && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Notes</p>
+                <p className="text-xs font-medium text-muted-foreground mb-1">Notes</p>
                 <div
                   className="text-sm prose prose-sm dark:prose-invert max-w-none"
                   dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(data.existingCheckIn!.notes) }}
@@ -179,8 +180,8 @@ export function WeeklyPastView({ data }: { data: PastWeekData }) {
             )}
 
             {data.existingCheckIn!.nextWeekFocus && (
-              <div className="rounded-lg bg-accent/5 border border-accent/20 p-3">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1 flex items-center gap-1.5">
+              <div className="border border-accent/20 bg-accent/5 p-3">
+                <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1.5">
                   <Compass className="h-3 w-3 text-accent" /> Looking ahead
                 </p>
                 <div
@@ -189,8 +190,8 @@ export function WeeklyPastView({ data }: { data: PastWeekData }) {
                 />
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       )}
     </div>
   )

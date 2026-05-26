@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import {
   Bar,
   BarChart,
@@ -9,7 +11,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { chartColors, axisDefaults, tooltipDefaults } from "@/lib/charts-theme"
 import type { WeeklyConsistencyWeek } from "@/lib/queries/rhythm-stats"
 import { TrendingUp } from "lucide-react"
@@ -30,9 +31,9 @@ export function WeeklyConsistencyChart({
   }))
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium flex items-center justify-between gap-2">
+    <section className="border border-border">
+      <header className="border-b border-border px-4 py-3">
+        <div className="text-sm font-medium flex items-center justify-between gap-2">
           <span className="flex items-center gap-1.5">
             <TrendingUp className="h-3.5 w-3.5 text-accent" />
             12-week consistency
@@ -40,9 +41,9 @@ export function WeeklyConsistencyChart({
           <span className="font-display text-lg tabular-nums text-foreground">
             {consistencyPct}%
           </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+        </div>
+      </header>
+      <div className="px-4 py-4">
         <div className="h-[140px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
@@ -82,7 +83,7 @@ export function WeeklyConsistencyChart({
               ? "Building momentum — aim for one more review this month."
               : "Small streaks compound — even a short weekly review counts."}
         </p>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }

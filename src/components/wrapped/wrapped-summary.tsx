@@ -1,18 +1,18 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Year Wrapped — ceremony header, editorial stat strip (Wave G).
+ */
+
 import type { WrappedData } from "@/lib/queries/wrapped"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { WheelChart } from "@/components/dashboard/wheel-chart"
-import { OrnamentDivider } from "@/components/shared/ornament-divider"
-import { EmptyState } from "@/components/shared/empty-state"
+import { BrandMark } from "@/components/shared/brand-mark"
 import {
-  Target,
-  ClipboardCheck,
-  Trophy,
-  Flame,
-  Sparkles,
-  Quote,
-} from "lucide-react"
+  CeremonySequence,
+  CeremonyStep,
+} from "@/components/shared/ceremony-entrance"
+import { WheelChart } from "@/components/dashboard/wheel-chart"
+import { EmptyState } from "@/components/shared/empty-state"
+import { Sparkles, Trophy } from "lucide-react"
 
 export function WrappedSummary({
   initialData,
@@ -26,17 +26,17 @@ export function WrappedSummary({
       <div className="space-y-6">
         {showOffSeasonBanner && <WrappedOffSeasonBanner />}
         <EmptyState
-        icon={Sparkles}
-        title="No year to wrap yet"
-        description="Create your yearly plan and live through the year. Your Year Wrapped will appear here with your progress, achievements, and reflections."
-        action={
-          <a
-            href="/onboarding"
-            className="inline-flex items-center gap-2 text-amber hover:underline font-medium"
-          >
-            Create your plan →
-          </a>
-        }
+          icon={Sparkles}
+          title="No year to wrap yet"
+          description="Create your yearly plan and live through the year. Your Year Wrapped will appear here with your progress, achievements, and reflections."
+          action={
+            <a
+              href="/onboarding"
+              className="inline-flex items-center gap-2 text-amber hover:underline font-medium"
+            >
+              Create your plan →
+            </a>
+          }
         />
       </div>
     )
@@ -44,149 +44,150 @@ export function WrappedSummary({
 
   const { plan, stats, completedGoals, wheelScores, achievements } = initialData
 
+  const statItems = [
+    {
+      key: "projects",
+      value: `${stats.completedGoals}/${stats.totalGoals}`,
+      qualifier: "Projects completed",
+    },
+    {
+      key: "checkins",
+      value: String(stats.totalCheckIns),
+      qualifier: "Weekly check-ins",
+    },
+    {
+      key: "streak",
+      value: `${stats.longestStreak}w`,
+      qualifier: "Longest streak",
+    },
+    {
+      key: "mood",
+      value: stats.avgMood != null ? stats.avgMood.toFixed(1) : "—",
+      qualifier: "Avg mood",
+    },
+  ]
+
   return (
-    <div className="max-w-2xl mx-auto space-y-12 py-8">
-      {showOffSeasonBanner && <WrappedOffSeasonBanner />}
-      <div className="text-center space-y-4">
-        <h1 className="font-display text-4xl font-semibold sm:text-5xl">
-          Your {plan.year} in Review
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          A mindful look back at your journey
-        </p>
-      </div>
+    <CeremonySequence className="mx-auto max-w-2xl space-y-12 py-8">
+      {showOffSeasonBanner && (
+        <CeremonyStep delay={0}>
+          <WrappedOffSeasonBanner />
+        </CeremonyStep>
+      )}
 
-      <OrnamentDivider variant="lotus" />
+      <CeremonyStep delay={showOffSeasonBanner ? 40 : 0}>
+        <header className="flex flex-col items-center gap-6 text-center">
+          <BrandMark size="xl" label="YearInReview" />
+          <div className="space-y-3">
+            <h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+              Your {plan.year} in review
+            </h1>
+            <p className="text-muted-foreground text-lg leading-relaxed">
+              {plan.theme
+                ? `The year you called “${plan.theme}” — looked back with care.`
+                : "A mindful look back at your journey."}
+            </p>
+          </div>
+        </header>
+      </CeremonyStep>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="border-accent/20">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
-                <Target className="h-6 w-6 text-accent" />
+      <CeremonyStep delay={showOffSeasonBanner ? 100 : 60}>
+        <section
+          aria-label="Year at a glance"
+          className="border border-border"
+        >
+          <div className="grid grid-cols-2 divide-x divide-y divide-border sm:grid-cols-4">
+            {statItems.map((stat) => (
+              <div key={stat.key} className="min-w-0 p-4 sm:p-5 text-center sm:text-left">
+                <p className="font-display text-2xl sm:text-3xl tabular-nums leading-none tracking-tight">
+                  {stat.value}
+                </p>
+                <p className="mt-1.5 text-xs font-medium text-foreground">
+                  {stat.qualifier}
+                </p>
               </div>
-              <div>
-                <p className="text-3xl font-bold">{stats.completedGoals}/{stats.totalGoals}</p>
-                <p className="text-sm text-muted-foreground">Projects completed</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-accent/20">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
-                <ClipboardCheck className="h-6 w-6 text-accent" />
-              </div>
-              <div>
-                <p className="text-3xl font-bold">{stats.totalCheckIns}</p>
-                <p className="text-sm text-muted-foreground">Weekly check-ins</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-accent/20">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
-                <Flame className="h-6 w-6 text-accent" />
-              </div>
-              <div>
-                <p className="text-3xl font-bold">{stats.longestStreak}w</p>
-                <p className="text-sm text-muted-foreground">Longest streak</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-accent/20">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
-                <Trophy className="h-6 w-6 text-accent" />
-              </div>
-              <div>
-                <p className="text-3xl font-bold">{stats.avgMood != null ? stats.avgMood.toFixed(1) : "—"}</p>
-                <p className="text-sm text-muted-foreground">Avg mood</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            ))}
+          </div>
+        </section>
+      </CeremonyStep>
 
       {wheelScores.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-display text-center">
-              Your Wheel of Life
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <CeremonyStep delay={showOffSeasonBanner ? 160 : 120}>
+          <div className="border border-border p-4 sm:p-6">
             <WheelChart scores={wheelScores} />
-          </CardContent>
-        </Card>
+          </div>
+        </CeremonyStep>
       )}
 
       {completedGoals.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-display flex items-center gap-2">
-              <Target className="h-4 w-4 text-accent" /> Projects you crushed
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
+        <CeremonyStep delay={showOffSeasonBanner ? 220 : 180}>
+          <section className="border border-border">
+            <header className="border-b border-border px-4 py-3">
+              <h2 className="font-display text-lg tracking-tight">
+                Projects you finished
+              </h2>
+            </header>
+            <ul className="divide-y divide-border">
               {completedGoals.map((g) => (
                 <li
                   key={g.id}
-                  className="flex items-center gap-2 rounded-lg border px-3 py-2"
+                  className="flex items-center gap-3 px-4 py-3 text-sm"
                 >
-                  <span className="text-accent">✓</span>
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-status-positive"
+                    aria-hidden
+                  />
                   <span>{g.title}</span>
                 </li>
               ))}
             </ul>
-          </CardContent>
-        </Card>
+          </section>
+        </CeremonyStep>
       )}
 
       {achievements.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-display flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-accent" /> Achievements Unlocked
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-3">
+        <CeremonyStep delay={showOffSeasonBanner ? 280 : 240}>
+          <section className="border border-border">
+            <header className="border-b border-border px-4 py-3">
+              <h2 className="font-display text-lg tracking-tight inline-flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-amber" aria-hidden />
+                Achievements
+              </h2>
+            </header>
+            <ul className="divide-y divide-border">
               {achievements.map((a) => (
-                <div
-                  key={a.id}
-                  className="flex items-center gap-2 rounded-lg border px-4 py-2"
-                  title={a.meta?.description}
-                >
-                  <span className="text-2xl">{a.meta?.icon ?? "🏅"}</span>
-                  <span className="font-medium">{a.meta?.title ?? a.title}</span>
-                </div>
+                <li key={a.id} className="px-4 py-3">
+                  <p className="text-sm font-medium">
+                    {a.meta?.title ?? a.title}
+                  </p>
+                  {a.meta?.description ? (
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                      {a.meta.description}
+                    </p>
+                  ) : null}
+                </li>
               ))}
-            </div>
-          </CardContent>
-        </Card>
+            </ul>
+          </section>
+        </CeremonyStep>
       )}
 
-      <div className="text-center py-8">
-        <Quote className="h-12 w-12 mx-auto text-accent/50 mb-4" />
-        <blockquote className="font-display text-xl italic text-muted-foreground max-w-md mx-auto">
-          &ldquo;The journey of a thousand miles begins with a single step.&rdquo;
-        </blockquote>
-        <p className="text-sm text-muted-foreground mt-2">— Lao Tzu</p>
-      </div>
-    </div>
+      <CeremonyStep delay={showOffSeasonBanner ? 340 : 300}>
+        <footer className="border-y border-border py-8 text-center">
+          <blockquote className="font-display text-xl italic text-muted-foreground max-w-md mx-auto leading-snug">
+            {plan.theme
+              ? `“${plan.theme}” — carried quietly, week by week.`
+              : "Small reps. Steady hands. The year adds up."}
+          </blockquote>
+        </footer>
+      </CeremonyStep>
+    </CeremonySequence>
   )
 }
 
 function WrappedOffSeasonBanner() {
   return (
-    <div className="rounded-2xl border border-amber/30 bg-amber/[0.04] px-4 py-3.5 text-sm text-muted-foreground leading-relaxed">
+    <div className="border border-amber/40 bg-amber-tint px-4 py-3.5 text-sm text-muted-foreground leading-relaxed">
       <p className="font-medium text-foreground">
         Your year-end story unlocks in December
       </p>

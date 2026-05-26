@@ -1,5 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Dashboard hero — TodayCard full-bleed workbench panel (Wave C).
+ */
+
 import { useEffect, useMemo, useRef, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -10,10 +14,8 @@ import {
   Heart,
   Pencil,
   Shield,
-  Sun,
 } from "lucide-react"
 import type { AntiGoal, DailyState } from "@prisma/client"
-import { Eyebrow } from "@/components/atmosphere/eyebrow"
 import {
   resolveAntiGoalHeldForPill,
   resolveReflectionText,
@@ -147,26 +149,26 @@ export function TodayCard({
   return (
     <section
       id="today"
-      className="scroll-mt-24 overflow-hidden rounded-2xl border border-border bg-card"
+      className="scroll-mt-24 -mx-4 overflow-hidden border-y border-border bg-card sm:-mx-6"
     >
-      <header className="flex items-start justify-between gap-4 border-b border-border/70 px-4 py-4 sm:px-6 sm:py-5">
+      <header className="flex items-start justify-between gap-4 border-b border-border px-6 py-6 sm:px-8 sm:py-8">
         <div>
-          <Eyebrow className="flex items-center gap-1.5 mb-1.5">
-            <Sun className="h-3 w-3" />
+          <h2 className="font-display text-2xl md:text-3xl tracking-tight leading-snug">
             Today
             {planTheme ? (
-              <span className="normal-case tracking-normal text-muted-foreground/80 font-normal">
+              <span className="text-muted-foreground font-normal text-xl md:text-2xl">
+                {" "}
                 · {planTheme}
               </span>
             ) : null}
-          </Eyebrow>
-          <h2 className="font-display text-2xl md:text-3xl tracking-tight leading-snug">
+          </h2>
+          <p className="font-display text-lg md:text-xl text-foreground/90 mt-1.5 tracking-tight leading-snug">
             {total === 0
               ? "A calm minute with yourself"
               : completed === total
                 ? "All done — that's the long arc."
                 : "Small reps, kept."}
-          </h2>
+          </p>
         </div>
         {total > 0 && (
           <div className="text-right shrink-0">
@@ -196,7 +198,7 @@ export function TodayCard({
         antiGoalCount={antiGoalCount}
       />
 
-      <div className="border-t border-border/70 px-4 py-4 sm:px-6 sm:py-5">
+      <div className="border-t border-border px-6 py-6 sm:px-8 sm:py-8">
         {total === 0 ? (
           <EmptyToday planYear={planYear} />
         ) : (
@@ -274,12 +276,21 @@ function DailyStateBlock({
   const [antiHeld, setAntiHeld] = useState<AntiGoalHeldChoice | null>(
     initialAntiHeld,
   )
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle")
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "error">("idle")
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savingDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastSavedTextRef = useRef(initialReflection)
 
+  function clearSavingDelay() {
+    if (savingDelayRef.current) {
+      clearTimeout(savingDelayRef.current)
+      savingDelayRef.current = null
+    }
+  }
+
   async function patch(payload: Record<string, unknown>) {
-    setSaveState("saving")
+    clearSavingDelay()
+    savingDelayRef.current = setTimeout(() => setSaveState("saving"), 250)
     try {
       const res = await fetch("/api/today", {
         method: "PATCH",
@@ -287,9 +298,10 @@ function DailyStateBlock({
         body: JSON.stringify({ date: todayYmd, ...payload }),
       })
       if (!res.ok) throw new Error(await res.text())
-      setSaveState("saved")
-      setTimeout(() => setSaveState((s) => (s === "saved" ? "idle" : s)), 1500)
+      clearSavingDelay()
+      setSaveState("idle")
     } catch {
+      clearSavingDelay()
       setSaveState("error")
     }
   }
@@ -316,6 +328,7 @@ function DailyStateBlock({
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
+      clearSavingDelay()
     }
   }, [])
 
@@ -330,9 +343,11 @@ function DailyStateBlock({
   }
 
   return (
-    <div className="px-4 py-4 sm:px-6 sm:py-5 space-y-4">
+    <div className="px-6 py-6 sm:px-8 sm:py-8 space-y-4">
       <div>
-        <Eyebrow className="mb-1.5">Today&apos;s prompt</Eyebrow>
+        <p className="text-xs font-medium text-muted-foreground mb-1.5">
+          Today&apos;s prompt
+        </p>
         <p className="font-display text-base md:text-lg italic text-foreground/85 leading-relaxed">
           &ldquo;{prompt.text}&rdquo;
         </p>
@@ -349,13 +364,13 @@ function DailyStateBlock({
       <div className="grid gap-4 sm:grid-cols-2">
         <ScalePicker
           label="Mood"
-          icon={<Heart className="h-3.5 w-3.5 text-rose-400" />}
+          icon={<Heart className="h-3.5 w-3.5 text-muted-foreground" />}
           value={mood}
           onChange={saveMood}
         />
         <ScalePicker
           label="Energy"
-          icon={<Battery className="h-3.5 w-3.5 text-emerald-500" />}
+          icon={<Battery className="h-3.5 w-3.5 text-muted-foreground" />}
           value={energy}
           onChange={saveEnergy}
         />
@@ -363,7 +378,7 @@ function DailyStateBlock({
 
       {rotatingAntiGoal && (
         <div className="space-y-2">
-          <div className="flex flex-col gap-3 rounded-lg border border-amber/30 bg-amber/[0.04] px-3 py-3 sm:flex-row sm:items-center sm:py-2.5">
+          <div className="flex flex-col gap-3 rounded-lg border border-amber/30 bg-amber-wash px-3 py-3 sm:flex-row sm:items-center sm:py-2.5">
             <div className="flex items-start gap-2 min-w-0 flex-1">
               <Shield className="h-3.5 w-3.5 text-amber shrink-0 mt-0.5" />
               <span className="text-xs text-foreground/85">
@@ -418,9 +433,8 @@ function DailyStateBlock({
 
       <div className="flex items-center justify-end text-[10px] text-muted-foreground h-3">
         {saveState === "saving" && <span>Saving…</span>}
-        {saveState === "saved" && <span className="text-emerald-600">Saved</span>}
         {saveState === "error" && (
-          <span className="text-rose-500">Couldn&apos;t save — check connection</span>
+          <span className="text-status-risk">Couldn&apos;t save — check connection</span>
         )}
       </div>
     </div>
