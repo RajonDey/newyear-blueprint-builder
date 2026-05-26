@@ -1,9 +1,12 @@
 import Link from "next/link"
 import { Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 import { marketingPlanCopy as m } from "@/lib/marketing-plan-copy"
+
+/* Hallmark · design-system: design.md · designed-as-app
+ * Pricing teaser — centred heading, balanced two-tier cards.
+ */
 
 const FREE = [
   "Whole loop, every week",
@@ -18,16 +21,17 @@ const PRO = [
 
 export function PricingTeaser() {
   return (
-    <section className="container py-24 md:py-32">
-      <div className="mx-auto max-w-2xl text-center mb-12">
-        <div className="text-[10px] font-semibold tracking-[0.28em] uppercase text-muted-foreground mb-4">
-          Pricing
-        </div>
-        <h2 className="font-display text-3xl md:text-5xl tracking-tight leading-[1.1]">
-          Free is real. Pro is for the year you want proof of.
+    <section className="container py-20 md:py-28">
+      <div className="mx-auto max-w-3xl text-center">
+        <h2 className="font-display text-3xl md:text-4xl tracking-tight leading-[1.1] text-foreground">
+          Free is real.
+          <br />
+          <span className="text-muted-foreground/80">
+            Pro is for the year you want proof of.
+          </span>
         </h2>
       </div>
-      <div className="grid gap-6 md:grid-cols-2 max-w-3xl mx-auto">
+      <div className="mt-14 grid gap-6 md:grid-cols-2 max-w-3xl mx-auto">
         <Tier name="Free" price="$0" cadence="forever" features={FREE} />
         <Tier
           name="Pro"
@@ -37,10 +41,13 @@ export function PricingTeaser() {
           highlight
         />
       </div>
-      <div className="mt-10 text-center">
-        <Button variant="ghost" asChild>
-          <Link href="/pricing">See full comparison →</Link>
-        </Button>
+      <div className="mt-8 text-center">
+        <Link
+          href="/pricing"
+          className="text-sm text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors"
+        >
+          See full comparison →
+        </Link>
       </div>
     </section>
   )
@@ -62,17 +69,19 @@ function Tier({
   return (
     <div
       className={cn(
-        "rounded-2xl border p-7",
+        "rounded-2xl border p-7 md:p-8",
         highlight
-          ? "border-amber/40 bg-gradient-to-br from-amber/[0.05] via-card to-card"
-          : "border-border bg-card",
+          ? "border-amber/40 bg-amber-tint shadow-sm"
+          : "border-border bg-card shadow-sm",
       )}
     >
-      <div className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-2">
+      <div className="font-display italic text-base text-foreground mb-2">
         {name}
       </div>
       <div className="flex items-baseline gap-2 mb-5">
-        <span className="font-display text-4xl tracking-tight">{price}</span>
+        <span className="font-display text-4xl tracking-tight tabular-nums">
+          {price}
+        </span>
         <span className="text-sm text-muted-foreground">{cadence}</span>
       </div>
       <ul className="space-y-2.5">
@@ -81,7 +90,9 @@ function Tier({
             <span
               className={cn(
                 "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full",
-                highlight ? "bg-amber/15 text-amber" : "bg-secondary text-muted-foreground",
+                highlight
+                  ? "bg-amber-emphasis text-amber"
+                  : "bg-secondary text-muted-foreground",
               )}
             >
               <Check className="h-3 w-3" />

@@ -6,6 +6,20 @@ interface MandalaWatermarkProps {
   position?: "center" | "top-right" | "bottom-left"
 }
 
+/* Hallmark · design-system: design.md · designed-as-app
+ *
+ * @deprecated Full-screen mandala wash is an "aurora-blob"-adjacent decoration
+ * anti-pattern (design.md §10). The mandala motif now lives as
+ * `<BrandMark size="sm | md | xl" />` for foreground brand usage and rare
+ * ceremony moments only.
+ *
+ * Still used by:
+ *   - `src/app/(marketing)/blog/page.tsx` (top-right wash)
+ *   - `src/app/(marketing)/blog/[slug]/page.tsx` (top-right wash)
+ *
+ * Scheduled for removal in Wave F (content redesign). Do not use this
+ * component on any new surface.
+ */
 export function MandalaWatermark({
   className,
   size = "md",

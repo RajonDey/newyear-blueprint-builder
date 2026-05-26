@@ -1,52 +1,68 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { SoftBackdrop } from "@/components/atmosphere/soft-backdrop"
+import { MarketingHeroVisual } from "@/components/marketing/marketing-hero-visual"
+import { Button } from "@/components/ui/button"
 import { getCurrentYear } from "@/lib/utils"
+
+/* Hallmark · design-system: design.md · designed-as-app
+ * Split hero — editorial lede left, mandala centerpiece right (design.md §11).
+ *
+ * Keeps the calm letter voice but fills the viewport with Tier-A enrichment
+ * so the page reads alive, not empty.
+ */
 
 export function Hero() {
   const year = getCurrentYear()
+
   return (
     <section className="relative overflow-hidden">
-      <SoftBackdrop />
-      <div className="container relative py-24 md:py-36 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-3 py-1 text-xs text-muted-foreground mb-8">
-          <span className="text-amber leading-none">✦</span>
-          Plan {year} once — execute it all year
+      <SoftBackdrop intensity="soft" />
+      <div className="container relative pt-14 md:pt-20 pb-16 md:pb-24">
+        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20">
+          <div className="max-w-xl lg:max-w-none">
+            <p className="font-display italic text-lg md:text-xl text-muted-foreground">
+              Dear reader,
+            </p>
+            <h1 className="mt-6 font-display text-4xl md:text-5xl xl:text-[3.25rem] leading-[1.06] tracking-tight text-foreground">
+              Most resolutions die in February. Ours did too — until we stopped
+              keeping plans in one place and life in another.
+            </h1>
+            <div className="mt-8 space-y-4 text-base md:text-lg text-muted-foreground leading-relaxed">
+              <p>
+                YearInReview is the calm system between your{" "}
+                <span className="text-foreground">ambition</span> and your{" "}
+                <span className="text-foreground">week</span>. One place where
+                the year you{"\u2019"}re planning, the rhythm you{"\u2019"}re
+                keeping, and the small things you{"\u2019"}re doing today all
+                live together.
+              </p>
+              <p>
+                We{"\u2019"}re writing this in {year}. We made it for the
+                version of you in December — the one who wants to look back
+                and find proof.
+              </p>
+            </div>
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <Button size="lg" asChild>
+                <Link href="/signup">
+                  Start a plan
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Link
+                href="/how-it-works"
+                className="text-sm text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground transition-colors"
+              >
+                See how it works
+              </Link>
+            </div>
+          </div>
+
+          <div className="relative lg:justify-self-end lg:w-full lg:max-w-[520px]">
+            <MarketingHeroVisual />
+          </div>
         </div>
-        <h1 className="mx-auto max-w-4xl font-display text-5xl md:text-7xl leading-[1.02] tracking-tight text-foreground">
-          End the year proud —{" "}
-          <span className="text-muted-foreground/80">with</span>{" "}
-          <em className="not-italic text-amber">proof</em>.
-        </h1>
-        <p className="mx-auto mt-7 max-w-xl text-base md:text-lg text-muted-foreground leading-relaxed">
-          Most resolutions die in February. YearInReview connects your{" "}
-          <span className="text-foreground">yearly plan</span>,{" "}
-          <span className="text-foreground">weekly rhythm</span>, and{" "}
-          <span className="text-foreground">daily systems</span> in one calm place —
-          so intentions turn into habits, not guilt.
-        </p>
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Button size="lg" className="gap-2 px-8 h-12 text-base" asChild>
-            <Link href="/signup">
-              Start free — create your plan <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button size="lg" variant="ghost" className="px-8 h-12 text-base" asChild>
-            <Link href="/pricing">See pricing</Link>
-          </Button>
-        </div>
-        <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-          <li className="inline-flex items-center gap-1.5">
-            <span className="h-1 w-1 rounded-full bg-amber" /> Free onboarding, no card
-          </li>
-          <li className="inline-flex items-center gap-1.5">
-            <span className="h-1 w-1 rounded-full bg-amber" /> Weekly plan + review in one flow
-          </li>
-          <li className="inline-flex items-center gap-1.5">
-            <span className="h-1 w-1 rounded-full bg-amber" /> Pro adds depth &amp; analytics
-          </li>
-        </ul>
       </div>
     </section>
   )

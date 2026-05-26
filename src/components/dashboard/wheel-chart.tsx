@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import {
   RadarChart,
   PolarGrid,
@@ -8,7 +10,6 @@ import {
   Radar,
   ResponsiveContainer,
 } from "recharts"
-import { Eyebrow } from "@/components/atmosphere/eyebrow"
 import { chartColors, axisDefaults, gridDefaults } from "@/lib/charts-theme"
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -36,21 +37,21 @@ export function WheelChart({ scores }: WheelChartProps) {
   const avg = scores.reduce((sum, s) => sum + s.rating, 0) / scores.length
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6">
-      <header className="flex items-end justify-between gap-3 mb-4">
+    <section className="space-y-4">
+      <header className="flex items-end justify-between gap-3">
         <div>
-          <Eyebrow className="mb-1.5">Wheel of life</Eyebrow>
           <h3 className="font-display text-xl md:text-2xl tracking-tight">
-            The shape of your year
+            Wheel of life
           </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            The shape of your year
+          </p>
         </div>
         <div className="text-right">
           <div className="font-display text-2xl tabular-nums leading-none">
             {avg.toFixed(1)}
           </div>
-          <div className="text-[10px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mt-1">
-            Average
-          </div>
+          <div className="text-[11px] text-muted-foreground mt-1">Average</div>
         </div>
       </header>
       <div className="h-[280px]">

@@ -1,16 +1,19 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Pricing tiers — Letter voice, balanced two-column (Wave E).
+ */
+
 import { useState } from "react"
 import Link from "next/link"
 import { Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { OrnamentDivider } from "@/components/shared/ornament-divider"
 import { marketingPlanCopy as m } from "@/lib/marketing-plan-copy"
 
 const FREE_FEATURES = [
   "Daily Habits surface — your today, calmly",
-  "Wheel of Life (full) — six areas, honest scoring",
+  "Wheel of Life — six areas, honest scoring",
   `Up to ${m.freeProjects} projects · ${m.freeAntiGoals} anti-goals · ${m.freeSystemsPerProject} systems per project`,
   "Weekly check-in + shareable weekly recap card",
   "Streaks, achievements, and habit heatmap",
@@ -38,15 +41,15 @@ export function PricingPlans() {
 
   return (
     <div className="space-y-10">
-      <div className="flex justify-center">
-        <div className="inline-flex items-center rounded-full border border-border bg-card p-1 text-sm">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="inline-flex items-center rounded-md border border-border bg-card p-1 text-sm">
           {(["monthly", "annual"] as Cycle[]).map((c) => (
             <button
               type="button"
               key={c}
               onClick={() => setCycle(c)}
               className={cn(
-                "px-4 py-1.5 rounded-full transition-colors capitalize",
+                "px-4 py-1.5 rounded-sm transition-colors capitalize",
                 cycle === c
                   ? "bg-foreground text-background"
                   : "text-muted-foreground hover:text-foreground",
@@ -54,23 +57,17 @@ export function PricingPlans() {
             >
               {c}
               {c === "annual" && (
-                <span className="ml-1.5 text-[10px] font-semibold tracking-wider uppercase text-amber">
-                  save 45%
-                </span>
+                <span className="ml-1.5 text-xs text-amber">save 45%</span>
               )}
               {c === "monthly" && (
-                <span className="ml-1.5 text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
-                  soon
-                </span>
+                <span className="ml-1.5 text-xs text-muted-foreground">soon</span>
               )}
             </button>
           ))}
         </div>
       </div>
 
-      <OrnamentDivider variant="asterisk" className="max-w-xs mx-auto !py-0" />
-
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 max-w-4xl">
         <PlanCard
           name="Year Companion"
           price="Free"
@@ -97,18 +94,11 @@ export function PricingPlans() {
           highlight
           cta={
             isAnnual ? (
-              <Button
-                className="w-full bg-foreground text-background hover:opacity-90"
-                asChild
-              >
+              <Button className="w-full" asChild>
                 <Link href="/signup">Upgrade to Pro</Link>
               </Button>
             ) : (
-              <Button
-                className="w-full bg-foreground text-background hover:opacity-90"
-                variant="secondary"
-                disabled
-              >
+              <Button className="w-full" variant="secondary" disabled>
                 Coming soon
               </Button>
             )
@@ -116,7 +106,7 @@ export function PricingPlans() {
         />
       </div>
 
-      <p className="text-center text-xs text-muted-foreground max-w-md mx-auto">
+      <p className="text-sm text-muted-foreground max-w-lg leading-relaxed">
         Calm by design. No upsells in your reflection. Cancel anytime — JSON
         export is in Settings for Free and Pro.
       </p>
@@ -146,18 +136,18 @@ function PlanCard({
   return (
     <div
       className={cn(
-        "relative rounded-3xl border p-7 md:p-8 flex flex-col",
-        highlight
-          ? "border-amber/40 bg-gradient-to-br from-amber/[0.06] via-card to-card shadow-sm"
-          : "border-border bg-card",
+        "flex flex-col border p-7 md:p-8",
+        highlight ? "border-amber/40 bg-amber-tint" : "border-border bg-card",
       )}
     >
       <div className="mb-5">
-        <div className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-2">
+        <div className="font-display italic text-base text-foreground mb-2">
           {name}
         </div>
         <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="font-display text-5xl tracking-tight">{price}</span>
+          <span className="font-display text-4xl md:text-5xl tracking-tight tabular-nums">
+            {price}
+          </span>
           <span className="text-sm text-muted-foreground">{cadence}</span>
         </div>
         <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
@@ -172,7 +162,7 @@ function PlanCard({
               className={cn(
                 "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full",
                 highlight
-                  ? "bg-amber/15 text-amber"
+                  ? "bg-amber-emphasis text-amber"
                   : "bg-secondary text-muted-foreground",
               )}
             >
@@ -184,7 +174,7 @@ function PlanCard({
       </ul>
 
       {footnote && (
-        <p className="text-xs text-muted-foreground/80 mb-4 leading-relaxed">
+        <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
           {footnote}
         </p>
       )}

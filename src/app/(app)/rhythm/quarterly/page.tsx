@@ -12,7 +12,7 @@ import { QuarterlyWorkspaceSidebar } from "@/components/check-in/quarterly-works
 import { getReviewTemplateFields } from "@/lib/review-templates"
 import { ProGate } from "@/components/upgrade/pro-gate"
 import { Button } from "@/components/ui/button"
-import { RhythmWorkspaceShell } from "@/components/rhythm/rhythm-workspace-shell"
+import { RhythmWorkspaceShell, rhythmWorkspacePageClass } from "@/components/rhythm/rhythm-workspace-shell"
 import { cadencePlanHasContent } from "@/lib/cadence-plan-utils"
 import { parseQuarterParam } from "@/lib/quarters"
 import { Activity, Sparkles } from "lucide-react"
@@ -47,7 +47,6 @@ export default async function QuarterlyPage({
     return (
       <PageContainer width="wide">
         <PageHeader
-          eyebrow="Rhythm · Quarterly"
           title="Quarterly planner"
           description="Plan the quarter ahead, then review the season."
         />
@@ -78,7 +77,6 @@ export default async function QuarterlyPage({
     return (
       <PageContainer width="wide">
         <PageHeader
-          eyebrow="Rhythm · Quarterly"
           title="Quarterly planner"
           description="Plan each quarter forward, then zoom out — reassess projects, celebrate wins, and adjust for the next season."
         />
@@ -127,9 +125,8 @@ export default async function QuarterlyPage({
   }))
 
   return (
-    <PageContainer width="wide">
+    <PageContainer width="wide" spacing="compact" className={rhythmWorkspacePageClass}>
       <PageHeader
-        eyebrow="Rhythm · Quarterly"
         title="Quarterly planner"
         description={`${plannedCount} planned · ${reviewedCount} reviewed — set intentions, then reflect at season-end.`}
       />

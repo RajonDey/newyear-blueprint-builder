@@ -2,11 +2,27 @@
 
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { AnimatePresence, motion } from "framer-motion"
-import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react"
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  Check,
+} from "lucide-react"
 import { toast } from "sonner"
 import { LifeCategory } from "@prisma/client"
+import { BrandMark } from "@/components/shared/brand-mark"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+
+/* Hallmark · design-system: design.md · designed-as-app
+ * Onboarding wizard — conversion Letter family (§6, §7, §11).
+ */
+
+const EASE_OUT = [0.16, 1, 0.3, 1] as const
 
 interface OnboardingWizardProps {
   initialName?: string
@@ -38,7 +54,10 @@ type State = {
 
 export function OnboardingWizard({ initialName = "" }: OnboardingWizardProps) {
   const router = useRouter()
+  const reduceMotion = useReducedMotion()
+  const [direction, setDirection] = useState(1)
   const [step, setStep] = useState(0)
+  const [complete, setComplete] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [s, setS] = useState<State>({
     name: initialName,
@@ -89,10 +108,7 @@ export function OnboardingWizard({ initialName = "" }: OnboardingWizardProps) {
       const body = await res.json().catch(() => null)
       if (!res.ok) {
         if (res.status === 401) {
-          toast.error(
-            body?.error ||
-              "Your session expired. Please sign in again.",
-          )
+          toast.error(body?.error || "Your session expired. Please sign in again.")
           router.replace("/login?error=SessionInvalid")
           setSubmitting(false)
           return
@@ -101,11 +117,8 @@ export function OnboardingWizard({ initialName = "" }: OnboardingWizardProps) {
         setSubmitting(false)
         return
       }
-      toast.success("Start with Today — everything else waits.", {
-        description: "Your starter plan is live.",
-      })
-      router.replace("/dashboard")
-      router.refresh()
+      setComplete(true)
+      setSubmitting(false)
     } catch (err) {
       console.error(err)
       toast.error("Network error. Please try again.")
@@ -118,45 +131,65 @@ export function OnboardingWizard({ initialName = "" }: OnboardingWizardProps) {
     if (step === stepLabels.length - 1) {
       void finish()
     } else {
+      setDirection(1)
       setStep((n) => n + 1)
     }
   }
-  const back = () => setStep((n) => Math.max(0, n - 1))
+
+  const back = () => {
+    setDirection(-1)
+    setStep((n) => Math.max(0, n - 1))
+  }
+
+  const transition = {
+    duration: reduceMotion ? 0.12 : 0.16,
+    ease: EASE_OUT,
+  }
+
+  if (complete) {
+    return (
+      <div className="max-w-xl">
+        <CompletionScreen onContinue={() => router.replace("/dashboard")} />
+      </div>
+    )
+  }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-6 py-10">
-      <header className="mb-10 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-amber/15 text-amber">
-            <Sparkles className="h-4 w-4" />
-          </span>
-          <span className="font-display text-base">YearInReview</span>
-        </div>
-        <div className="text-xs text-muted-foreground tabular-nums">
+    <div className="max-w-xl">
+      <div className="mb-8 flex items-center justify-between gap-4">
+        <p className="text-sm text-muted-foreground tabular-nums">
           Step {step + 1} of {stepLabels.length}
-        </div>
-      </header>
+        </p>
+        <p className="font-display text-sm text-muted-foreground">{stepLabels[step]}</p>
+      </div>
 
       <div className="mb-10 flex gap-1.5">
         {stepLabels.map((_, i) => (
           <div
             key={i}
             className={cn(
-              "h-1 flex-1 rounded-full transition-colors",
+              "h-1 flex-1 rounded-full transition-colors duration-short ease-out",
               i <= step ? "bg-amber" : "bg-border",
             )}
           />
         ))}
       </div>
 
-      <div className="flex-1">
-        <AnimatePresence mode="wait">
+      <div className="min-h-[320px]">
+        <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={step}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            custom={direction}
+            initial={{
+              opacity: 0,
+              x: reduceMotion ? 0 : direction * 8,
+            }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{
+              opacity: 0,
+              x: reduceMotion ? 0 : direction * -8,
+            }}
+            transition={transition}
           >
             {step === 0 && <StepYou s={s} update={update} />}
             {step === 1 && <StepWheel s={s} update={update} />}
@@ -165,37 +198,53 @@ export function OnboardingWizard({ initialName = "" }: OnboardingWizardProps) {
         </AnimatePresence>
       </div>
 
-      <div className="mt-10 flex items-center justify-between">
-        <button
+      <div className="mt-10 flex items-center justify-between gap-4">
+        <Button
+          type="button"
+          variant="ghost"
           onClick={back}
           disabled={step === 0 || submitting}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30"
+          className="gap-1.5 px-0 hover:bg-transparent"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
-        </button>
-        <button
-          onClick={next}
-          disabled={!canAdvance || submitting}
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-medium transition-colors",
-            canAdvance && !submitting
-              ? "bg-amber text-amber-foreground hover:bg-amber/90"
-              : "bg-muted text-muted-foreground cursor-not-allowed",
-          )}
-        >
+        </Button>
+        <Button type="button" onClick={next} disabled={!canAdvance || submitting} className="gap-1.5">
           {submitting
             ? "Saving…"
             : step === stepLabels.length - 1
               ? "Enter your year"
               : "Continue"}
           <ArrowRight className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
 
-      <p className="mt-6 text-center text-xs text-muted-foreground">
+      <p className="mt-6 text-sm text-muted-foreground">
         Takes about 90 seconds. The rest fills in as you live the year.
       </p>
+    </div>
+  )
+}
+
+function CompletionScreen({ onContinue }: { onContinue: () => void }) {
+  return (
+    <div className="space-y-8 py-4">
+      <div className="flex flex-col items-start gap-6">
+        <BrandMark size="xl" />
+        <div className="space-y-3">
+          <h1 className="font-display text-3xl md:text-4xl tracking-tight leading-[1.1]">
+            Your year is live.
+          </h1>
+          <p className="text-base text-muted-foreground leading-relaxed max-w-md">
+            Start with Today — everything else waits. Your starter plan, wheel,
+            and first project are ready.
+          </p>
+        </div>
+      </div>
+      <Button size="lg" onClick={onContinue} className="gap-2">
+        Open Today
+        <ArrowRight className="h-4 w-4" />
+      </Button>
     </div>
   )
 }
@@ -204,52 +253,51 @@ function StepYou({ s, update }: { s: State; update: (p: Partial<State>) => void 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-display text-3xl md:text-4xl tracking-tight">
+        <p className="font-display italic text-lg text-muted-foreground">First,</p>
+        <h1 className="mt-2 font-display text-3xl md:text-4xl tracking-tight leading-[1.1]">
           Let&apos;s start with you.
         </h1>
-        <p className="mt-2 text-muted-foreground">
+        <p className="mt-3 text-muted-foreground leading-relaxed">
           A name and a single word for the year. Nothing more.
         </p>
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs uppercase tracking-wider text-muted-foreground">
-          Your name
-        </label>
-        <input
+        <Label htmlFor="onboarding-name">Your name</Label>
+        <Input
+          id="onboarding-name"
           autoFocus
           value={s.name}
           onChange={(e) => update({ name: e.target.value })}
           placeholder="What should we call you?"
-          className="w-full rounded-md border border-border bg-background/50 px-3.5 py-3 text-base outline-none focus:border-amber/60"
+          className="h-11"
         />
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs uppercase tracking-wider text-muted-foreground">
-          One word for this year
-        </label>
-        <input
+        <Label htmlFor="onboarding-theme">One word for this year</Label>
+        <Input
+          id="onboarding-theme"
           value={s.theme}
           onChange={(e) => update({ theme: e.target.value })}
           placeholder="If this year had a name…"
-          className="w-full rounded-md border border-border bg-background/50 px-3.5 py-3 text-base outline-none focus:border-amber/60"
+          className="h-11"
         />
         <div className="flex flex-wrap gap-2 pt-1">
           {themeSuggestions.map((t) => (
-            <button
+            <Button
               key={t}
               type="button"
+              size="sm"
+              variant={s.theme === t ? "secondary" : "outline"}
               onClick={() => update({ theme: t })}
               className={cn(
-                "rounded-full border px-3 py-1 text-xs transition-colors",
-                s.theme === t
-                  ? "border-amber bg-amber/15 text-foreground"
-                  : "border-border bg-background/40 text-muted-foreground hover:bg-muted/50",
+                "rounded-full h-8 px-3 text-xs",
+                s.theme === t && "border-amber/40 bg-amber-tint text-foreground",
               )}
             >
               {t}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -261,32 +309,30 @@ function StepWheel({ s, update }: { s: State; update: (p: Partial<State>) => voi
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-display text-3xl md:text-4xl tracking-tight">
+        <h1 className="font-display text-3xl md:text-4xl tracking-tight leading-[1.1]">
           Where are you, honestly?
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          These six life areas are the same domains as{" "}
-          <span className="text-foreground">Areas</span> in Plan and the Wheel
-          — same colors, same shape. Pick where you feel{" "}
-          <span className="text-foreground">strongest</span> and where you feel{" "}
-          <span className="text-foreground">weakest</span>. The rest fills in over the next few weeks.
+        <p className="mt-3 text-muted-foreground leading-relaxed">
+          These six areas match <span className="text-foreground">Areas</span> in
+          Plan and the Wheel. Pick strongest and weakest — the rest fills in over
+          the next few weeks.
         </p>
       </div>
 
       <CategoryPicker
         title="Strongest right now"
+        icon={ArrowUp}
         selected={s.strongest}
         excluded={s.weakest}
         onSelect={(c) => update({ strongest: c })}
-        accent="emerald"
       />
 
       <CategoryPicker
         title="Weakest right now"
+        icon={ArrowDown}
         selected={s.weakest}
         excluded={s.strongest}
         onSelect={(c) => update({ weakest: c })}
-        accent="amber"
       />
     </div>
   )
@@ -294,50 +340,49 @@ function StepWheel({ s, update }: { s: State; update: (p: Partial<State>) => voi
 
 function CategoryPicker({
   title,
+  icon: Icon,
   selected,
   excluded,
   onSelect,
-  accent,
 }: {
   title: string
+  icon: typeof ArrowUp
   selected: LC | null
   excluded: LC | null
   onSelect: (c: LC) => void
-  accent: "emerald" | "amber"
 }) {
   return (
     <div className="space-y-2">
-      <label className="text-xs uppercase tracking-wider text-muted-foreground">
-        {title}
-      </label>
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4 text-amber" aria-hidden />
+        <Label>{title}</Label>
+      </div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {lifeCategories.map((c) => {
           const isSelected = selected === c.id
           const isExcluded = excluded === c.id
           return (
-            <button
+            <Button
               key={c.id}
               type="button"
+              variant="outline"
               disabled={isExcluded}
               onClick={() => onSelect(c.id)}
               className={cn(
-                "rounded-md border px-3 py-2.5 text-left text-sm transition-colors",
+                "h-auto w-full min-w-0 whitespace-normal flex-col items-start rounded-md px-3 py-2.5 text-left text-sm font-normal",
                 isExcluded && "opacity-30 cursor-not-allowed",
-                !isExcluded && !isSelected && "border-border bg-background/40 hover:bg-muted/50",
-                isSelected && accent === "emerald" &&
-                  "border-emerald-500/50 bg-emerald-500/10 text-foreground",
-                isSelected && accent === "amber" &&
-                  "border-amber bg-amber/15 text-foreground",
+                isSelected &&
+                  "border-amber bg-amber-tint text-foreground hover:bg-amber-tint hover:text-foreground",
               )}
             >
-              <div className="flex items-center gap-2">
-                {isSelected && <Check className="h-3.5 w-3.5" />}
+              <div className="flex w-full min-w-0 items-center gap-2">
+                {isSelected && <Check className="h-3.5 w-3.5 shrink-0 text-amber" />}
                 <span className="font-medium">{c.label}</span>
               </div>
-              <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
+              <p className="mt-1 w-full min-w-0 text-xs text-muted-foreground font-normal leading-snug text-pretty line-clamp-2">
                 {c.hint}
               </p>
-            </button>
+            </Button>
           )
         })}
       </div>
@@ -351,66 +396,60 @@ function StepKeystone({ s, update }: { s: State; update: (p: Partial<State>) => 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-display text-3xl md:text-4xl tracking-tight">
+        <h1 className="font-display text-3xl md:text-4xl tracking-tight leading-[1.1]">
           One project. One small daily move.
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          Don&apos;t plan your whole year today. Pick the Area this project
-          lives in — we&apos;ll place it there automatically.
+        <p className="mt-3 text-muted-foreground leading-relaxed">
+          Don&apos;t plan your whole year today. Pick the area this project lives
+          in — we&apos;ll place it there automatically.
         </p>
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs uppercase tracking-wider text-muted-foreground">
-          Area of life
-        </label>
+        <Label>Area of life</Label>
         <p className="text-xs text-muted-foreground">
-          Same domains as the Wheel and your{" "}
-          <span className="text-foreground">Areas</span> list. Projects attach
-          here.
+          Same domains as the Wheel and your <span className="text-foreground">Areas</span> list.
         </p>
         <div className="flex flex-wrap gap-2">
           {lifeCategories.map((c) => (
-            <button
+            <Button
               key={c.id}
               type="button"
+              size="sm"
+              variant={defaultCategory === c.id ? "secondary" : "outline"}
               onClick={() => update({ goalCategory: c.id })}
               className={cn(
-                "rounded-full border px-3 py-1 text-xs transition-colors",
-                defaultCategory === c.id
-                  ? "border-amber bg-amber/15 text-foreground"
-                  : "border-border bg-background/40 text-muted-foreground hover:bg-muted/50",
+                "rounded-full h-8 px-3 text-xs",
+                defaultCategory === c.id && "border-amber/40 bg-amber-tint text-foreground",
               )}
             >
               {c.label}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs uppercase tracking-wider text-muted-foreground">
-          The project
-        </label>
-        <input
+        <Label htmlFor="onboarding-project">The project</Label>
+        <Input
+          id="onboarding-project"
           value={s.goalTitle}
           onChange={(e) =>
             update({ goalTitle: e.target.value, goalCategory: defaultCategory })
           }
           placeholder="e.g. Build a sustainable training base"
-          className="w-full rounded-md border border-border bg-background/50 px-3.5 py-3 text-base outline-none focus:border-amber/60"
+          className="h-11"
         />
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs uppercase tracking-wider text-muted-foreground">
-          One small daily move
-        </label>
-        <input
+        <Label htmlFor="onboarding-system">One small daily move</Label>
+        <Input
+          id="onboarding-system"
           value={s.systemTitle}
           onChange={(e) => update({ systemTitle: e.target.value })}
           placeholder="The smallest thing you'll do, most days"
-          className="w-full rounded-md border border-border bg-background/50 px-3.5 py-3 text-base outline-none focus:border-amber/60"
+          className="h-11"
         />
         <p className="text-xs text-muted-foreground pt-1">
           Make it embarrassingly small. You can grow it later.

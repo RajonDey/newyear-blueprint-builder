@@ -47,7 +47,6 @@ export function WeekOneChecklistCard({
       })
       if (!res.ok) throw new Error("Failed")
       setHidden(true)
-      toast.success("Checklist hidden — you're in the flow.")
       startTransition(() => router.refresh())
     } catch {
       toast.error("Could not hide checklist. Try again.")
@@ -60,13 +59,13 @@ export function WeekOneChecklistCard({
   }
 
   return (
-    <section className="rounded-2xl border border-amber/25 bg-gradient-to-br from-amber/[0.06] to-card p-6">
+    <section className="border border-amber/25 bg-amber-wash p-6">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-amber mb-1.5">
+          <p className="inline-flex items-center gap-1.5 text-xs font-medium text-amber mb-1.5">
             <Sparkles className="h-3 w-3" />
             Your first week
-          </div>
+          </p>
           <h2 className="font-display text-xl md:text-2xl tracking-tight">
             {allDone ? "Week-one path complete" : "Start with Today — the rest can wait"}
           </h2>
@@ -90,7 +89,7 @@ export function WeekOneChecklistCard({
       <div className="mb-4 flex items-center gap-3">
         <div className="h-1.5 flex-1 rounded-full bg-border overflow-hidden">
           <div
-            className="h-full bg-amber transition-all duration-300"
+            className="h-full bg-amber"
             style={{
               width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%`,
             }}

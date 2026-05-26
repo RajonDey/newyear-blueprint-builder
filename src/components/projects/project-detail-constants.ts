@@ -1,11 +1,38 @@
 import { AlertTriangle, Check, Clock } from "lucide-react"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 export const STATUS_OPTIONS = [
-  { value: "NOT_STARTED", label: "Not Started", icon: Clock, color: "text-muted-foreground" },
-  { value: "IN_PROGRESS", label: "In Progress", icon: Clock, color: "text-blue-600 dark:text-blue-400" },
-  { value: "ON_TRACK", label: "On Track", icon: Check, color: "text-green-600 dark:text-green-400" },
-  { value: "AT_RISK", label: "At Risk", icon: AlertTriangle, color: "text-orange-600 dark:text-orange-400" },
-  { value: "COMPLETED", label: "Completed", icon: Check, color: "text-emerald-600 dark:text-emerald-400" },
+  {
+    value: "NOT_STARTED",
+    label: "Not Started",
+    icon: Clock,
+    color: "text-muted-foreground",
+  },
+  {
+    value: "IN_PROGRESS",
+    label: "In Progress",
+    icon: Clock,
+    color: "text-foreground",
+  },
+  {
+    value: "ON_TRACK",
+    label: "On Track",
+    icon: Check,
+    color: "text-status-positive",
+  },
+  {
+    value: "AT_RISK",
+    label: "At Risk",
+    icon: AlertTriangle,
+    color: "text-status-attention",
+  },
+  {
+    value: "COMPLETED",
+    label: "Completed",
+    icon: Check,
+    color: "text-status-positive",
+  },
 ] as const
 
 export const QUARTER_LABELS: Record<string, string> = {

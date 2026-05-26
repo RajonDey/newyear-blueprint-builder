@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { Lock, Plus } from "lucide-react"
@@ -9,6 +11,15 @@ import { AreaCard } from "@/components/areas/area-card"
 import { AreaActions } from "@/components/areas/area-actions"
 import type { AreaWithSummary } from "@/lib/queries/areas"
 import { lifeCategoryLabels, lifeCategoryOrder } from "@/lib/level-styles"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface AreasGridProps {
   areas: AreaWithSummary[]
@@ -58,22 +69,25 @@ export function AreasGrid({ areas, isPro }: AreasGridProps) {
   return (
     <>
       <div className="flex items-start justify-end -mt-2">
-        <button
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
           onClick={() => setAdding((v) => !v)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm hover:bg-accent transition-colors"
+          className="gap-1.5"
         >
           <Plus className="h-3.5 w-3.5" /> New area
           {!isPro && <Lock className="h-3 w-3 text-amber" />}
-        </button>
+        </Button>
       </div>
 
       {adding && (
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
+        <section className="border border-border p-4">
+          <p className="text-xs text-muted-foreground mb-3">
             New area {!isPro && "· requires Pro"}
-          </div>
+          </p>
           <div className="flex flex-wrap items-center gap-2">
-            <input
+            <Input
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -82,43 +96,47 @@ export function AreasGrid({ areas, isPro }: AreasGridProps) {
                 if (e.key === "Escape") setAdding(false)
               }}
               placeholder="Area name (e.g. Craft, Family)"
-              className="flex-1 min-w-[200px] rounded-lg border border-border bg-background/60 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber/40"
+              className="flex-1 min-w-[200px]"
             />
-            <select
+            <Select
               value={category}
-              onChange={(e) => setCategory(e.target.value as LifeCategory)}
-              className="rounded-lg border border-border bg-background/60 px-2 py-1.5 text-sm"
-              title="Visual family (color + icon)"
+              onValueChange={(v) => setCategory(v as LifeCategory)}
             >
-              {lifeCategoryOrder.map((c) => (
-                <option key={c} value={c}>
-                  {lifeCategoryLabels[c]} style
-                </option>
-              ))}
-            </select>
-            <button
+              <SelectTrigger className="w-[160px]" title="Visual family (color + icon)">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {lifeCategoryOrder.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {lifeCategoryLabels[c]} style
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              type="button"
               onClick={add}
               disabled={!name.trim() || submitting || !isPro}
-              className="rounded-lg bg-foreground text-background px-3 py-1.5 text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? "Adding…" : "Add"}
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
               onClick={() => setAdding(false)}
-              className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground"
             >
               Cancel
-            </button>
+            </Button>
           </div>
           {!isPro && (
             <p className="mt-2 text-xs text-muted-foreground">
               Free includes the six default areas. Custom areas unlock with Pro.
             </p>
           )}
-        </div>
+        </section>
       )}
 
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {areas.map((area) => (
           <AreaCard
             key={area.id}

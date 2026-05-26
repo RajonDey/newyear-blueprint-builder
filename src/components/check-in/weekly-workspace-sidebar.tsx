@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { Badge } from "@/components/ui/badge"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
 import { sanitizeRichTextHtml } from "@/lib/sanitize-client"
@@ -64,32 +65,32 @@ export function WeeklyWorkspaceSidebar({
 
   return (
     <>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+      <section className="border border-border">
+        <header className="border-b border-border px-4 py-3">
+          <h2 className="text-sm font-medium text-muted-foreground">
             This week
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+          </h2>
+        </header>
+        <div className="px-4 py-4 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-display text-lg tracking-tight">
               Week {weekNumber}, {year}
             </p>
             {isCurrentWeek && (
-              <Badge variant="secondary" className="text-[10px] uppercase">
+              <Badge variant="secondary" className="text-[10px]">
                 Current
               </Badge>
             )}
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="rounded-lg border bg-muted/30 px-3 py-2">
+            <div className="border border-border px-3 py-2">
               <p className="text-muted-foreground">Plan</p>
               <p className="font-medium mt-0.5 flex items-center gap-1">
                 <CalendarCheck className="h-3 w-3" />
                 {hasPlan ? "Saved" : "Not set"}
               </p>
             </div>
-            <div className="rounded-lg border bg-muted/30 px-3 py-2">
+            <div className="border border-border px-3 py-2">
               <p className="text-muted-foreground">Review</p>
               <p className="font-medium mt-0.5 flex items-center gap-1">
                 <ClipboardCheck className="h-3 w-3" />
@@ -97,37 +98,37 @@ export function WeeklyWorkspaceSidebar({
               </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {suggestionFromLastWeek && (
-        <Card className="border-accent/20 bg-accent/5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-1.5">
+        <section className="border border-accent/20 bg-accent/5">
+          <header className="border-b border-accent/20 px-4 py-3">
+            <h2 className="text-sm font-medium flex items-center gap-1.5">
               <Compass className="h-3.5 w-3.5 text-accent" />
               From last week
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </h2>
+          </header>
+          <div className="px-4 py-4">
             <div
               className="text-sm prose prose-sm dark:prose-invert max-w-none line-clamp-6"
               dangerouslySetInnerHTML={{
                 __html: sanitizeRichTextHtml(suggestionFromLastWeek),
               }}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       )}
 
       {hasPlan && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-1.5">
+        <section className="border border-border">
+          <header className="border-b border-border px-4 py-3">
+            <h2 className="text-sm font-medium flex items-center gap-1.5">
               <Target className="h-3.5 w-3.5 text-accent" />
               Plan snapshot
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
+            </h2>
+          </header>
+          <div className="px-4 py-4 space-y-3 text-sm">
             {priorityGoals.length > 0 ? (
               <ul className="space-y-1.5">
                 {priorityGoals.map((g) => {
@@ -162,22 +163,22 @@ export function WeeklyWorkspaceSidebar({
                 {weeklyPlan!.commitments.length === 1 ? "" : "s"} logged
               </p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       )}
 
       {hasReview && existingCheckIn?.overallMood && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Review mood</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <section className="border border-border">
+          <header className="border-b border-border px-4 py-3">
+            <h2 className="text-sm font-medium">Review mood</h2>
+          </header>
+          <div className="px-4 py-4">
             <Badge variant="secondary">
               {MOOD_LABELS[existingCheckIn.overallMood]} (
               {existingCheckIn.overallMood}/5)
             </Badge>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       )}
 
       {weeklyConsistency && weekConsistencyPct != null && (

@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation"
 
+/* Hallmark · design-system: design.md · legacy redirect (Wave D5). */
+
 /**
  * Legacy "yearly plan" page. The PARA refactor moves the year view into the
  * everyday `/dashboard` + `/goals` + `/recap/year` triad, so we keep a

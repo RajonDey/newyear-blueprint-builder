@@ -1,3 +1,5 @@
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -5,35 +7,19 @@ import { ProMark } from "@/components/atmosphere/pro-mark"
 import { cn } from "@/lib/utils"
 
 interface ProUpsellCardProps {
-  /** Editorial kicker over the title. Defaults to "Pro · {feature}" when `feature` is set. */
   eyebrow?: React.ReactNode
-  /** Name of the gated feature, used in the default eyebrow if `eyebrow` is omitted. */
   feature?: string
-  /** Display title. */
   title: string
-  /** Supporting body copy. Keep to one or two sentences. */
   description: string
-  /** Optional list of value-prop bullets shown beneath the description. */
   bullets?: string[]
-  /** Primary CTA. */
   ctaLabel?: string
   ctaHref?: string
-  /** Optional secondary CTA. */
   secondaryCtaLabel?: string
   secondaryCtaHref?: string
-  /** Use the highlighted (amber-tinted) variant. Default `true`. */
   highlight?: boolean
   className?: string
 }
 
-/**
- * Editorial Pro-upgrade card used as the fallback inside `<ProGate>` and as a
- * standalone in-page upsell (e.g. on `/anti-goals` when at cap, on `/wrapped`
- * for Free users).
- *
- * Visual language matches the marketing pricing cards (rounded-3xl, amber
- * gradient tint, ProMark glyph) so Free → Pro flows feel continuous.
- */
 export function ProUpsellCard({
   eyebrow,
   feature,
@@ -50,7 +36,7 @@ export function ProUpsellCard({
   const resolvedEyebrow =
     eyebrow ??
     (feature ? (
-      <span className="inline-flex items-baseline gap-1.5">
+      <span className="inline-flex items-baseline gap-1.5 text-sm text-amber">
         <ProMark className="text-[0.85em]" />
         Pro · {feature}
       </span>
@@ -59,23 +45,17 @@ export function ProUpsellCard({
   return (
     <section
       className={cn(
-        "relative rounded-3xl border p-8 md:p-10",
-        highlight
-          ? "border-amber/40 bg-gradient-to-br from-amber/[0.06] via-card to-card shadow-sm"
-          : "border-border bg-card",
+        "border p-6 md:p-8",
+        highlight ? "border-amber/40 bg-amber-wash" : "border-border bg-card",
         className,
       )}
     >
       <div className="max-w-2xl">
-        {resolvedEyebrow && (
-          <div className="text-[10px] font-semibold tracking-[0.28em] uppercase text-amber mb-4">
-            {resolvedEyebrow}
-          </div>
-        )}
-        <h2 className="font-display text-3xl md:text-4xl tracking-tight leading-[1.1]">
+        {resolvedEyebrow && <div className="mb-3">{resolvedEyebrow}</div>}
+        <h2 className="font-display text-2xl md:text-3xl tracking-tight leading-snug">
           {title}
         </h2>
-        <p className="text-muted-foreground mt-4 text-base leading-relaxed">
+        <p className="text-muted-foreground mt-3 text-base leading-relaxed">
           {description}
         </p>
         {bullets && bullets.length > 0 && (
@@ -94,7 +74,7 @@ export function ProUpsellCard({
             ))}
           </ul>
         )}
-        <div className="mt-7 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <Button asChild className="gap-2">
             <Link href={ctaHref}>
               {ctaLabel}

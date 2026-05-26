@@ -1,3 +1,8 @@
+/* Hallmark · design-system: design.md · designed-as-app
+ * Genre: editorial · Theme: warm ivory + ink + amber
+ * Source of truth: /design.md (Hallmark v1.0.0 · authored 2026-05-26)
+ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,8 +14,8 @@
      * "Editorial, calm, intentional."
      */
 
-    --background: 38 30% 96%;        /* ivory */
-    --foreground: 222 32% 16%;       /* ink */
+    --background: 38 30% 96%; /* ivory */
+    --foreground: 222 32% 16%; /* ink */
 
     --card: 0 0% 100%;
     --card-foreground: 222 32% 16%;
@@ -48,7 +53,7 @@
     --ring: 24 75% 55%;
 
     /* Brand tokens (used by amber/cyan/gold Tailwind utilities) */
-    --amber: 24 75% 55%;             /* #E58A3C warm amber */
+    --amber: 24 75% 55%; /* #E58A3C warm amber */
     --amber-foreground: 0 0% 100%;
     --cyan: 187 70% 42%;
     --cyan-foreground: 0 0% 100%;
@@ -65,11 +70,57 @@
     --sidebar-ring: 24 75% 55%;
 
     --radius: 0.625rem;
+
+    /* ── Amber opacity scale (design.md §3b) ──
+     * Replaces ad-hoc amber/[0.04] / amber/[0.05] / amber/[0.06] / amber/[0.10] sprawl.
+     * Three named tones. Use bg-amber-wash / bg-amber-tint / bg-amber-emphasis utilities.
+     */
+    --amber-wash: 24 75% 55%; /* alpha 0.04 — paper tint */
+    --amber-wash-alpha: 0.04;
+    --amber-tint-alpha: 0.1; /* card highlight, recommended state */
+    --amber-emphasis-alpha: 0.2; /* active chip, active border */
+
+    /* ── Status tokens (design.md §3c) ──
+     * Use bg-status-positive / text-status-attention / etc. via Tailwind config.
+     * Replaces raw Tailwind palette colours (emerald-500, rose-400, etc).
+     */
+    --color-status-positive: 152 50% 38%; /* emerald — "improving", on-track */
+    --color-status-attention: 38 80% 50%; /* gold — "at risk", attention */
+    --color-status-risk: 0 65% 48%; /* destructive — failures, dipped */
+
+    /* ── 4-pt spacing scale (design.md §5) ──
+     * Named scale. Use --space-md in custom CSS, or Tailwind's named spacing.
+     */
+    --space-3xs: 0.25rem; /* 4px */
+    --space-2xs: 0.5rem; /* 8px */
+    --space-xs: 0.75rem; /* 12px */
+    --space-sm: 1rem; /* 16px */
+    --space-md: 1.5rem; /* 24px */
+    --space-lg: 2rem; /* 32px */
+    --space-xl: 3rem; /* 48px */
+    --space-2xl: 4.5rem; /* 72px */
+    --space-3xl: 7rem; /* 112px */
+
+    /* ── Motion tokens (design.md §6) ──
+     * Stance: motion-cut except onboarding wizard step transition + Tier-A art orbit.
+     * No multi-layer perpetual motion. No transition-all. No bouncy/overshoot easings.
+     */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --dur-short: 160ms;
+    --dur-base: 220ms;
+    --dur-art-orbit: 48s; /* Tier-A art panels — slow but perceptible (design.md §6) */
+
+    /* Special pages (Wrapped / recap) — one orchestrated opacity entrance (§11) */
+    --dur-ceremony: 220ms;
+
+    /* ── Type scale anchor (design.md §4) ── */
+    --text-display: clamp(3rem, 6vw, 5rem);
   }
 
   .dark {
-    --background: 222 32% 8%;          /* deep ink */
-    --foreground: 38 30% 94%;          /* warm ivory text */
+    --background: 222 32% 8%; /* deep ink */
+    --foreground: 38 30% 94%; /* warm ivory text */
 
     --card: 222 28% 11%;
     --card-foreground: 38 30% 94%;
@@ -114,6 +165,12 @@
     --sidebar-accent-foreground: 38 30% 94%;
     --sidebar-border: 222 16% 18%;
     --sidebar-ring: 24 80% 60%;
+
+    /* Dark-mode amber + status tokens (design.md §3b, §3c) */
+    --amber-wash: 24 80% 60%;
+    --color-status-positive: 152 50% 38%;
+    --color-status-attention: 38 80% 50%;
+    --color-status-risk: 0 55% 45%;
   }
 }
 
@@ -124,10 +181,18 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1, "kern" 1, "cv11", "ss01";
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1,
+      "kern" 1,
+      "cv11",
+      "ss01";
   }
 
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     letter-spacing: -0.02em;
   }
 
@@ -139,9 +204,17 @@
 
 /* ── Decorative Utilities ── */
 @layer utilities {
+  /* DEPRECATED (design.md §4) — gradient headlines are banned anti-patterns.
+   * Use solid `text-foreground` with italic em-emphasis for "alive" text.
+   * Scheduled for removal in Wave A (marketing redesign).
+   */
   .text-gradient-brand {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(222 32% 16%), hsl(24 75% 55%));
+    background-image: linear-gradient(
+      135deg,
+      hsl(222 32% 16%),
+      hsl(24 75% 55%)
+    );
   }
 
   .dark .text-gradient-brand {
@@ -151,7 +224,11 @@
   /* Soft amber wash for subtle highlights */
   .glow-amber {
     background:
-      radial-gradient(60% 80% at 85% 50%, hsl(var(--amber) / 0.10) 0%, transparent 60%),
+      radial-gradient(
+        60% 80% at 85% 50%,
+        hsl(var(--amber) / 0.1) 0%,
+        transparent 60%
+      ),
       hsl(var(--card));
   }
 
@@ -174,7 +251,11 @@
     @apply ml-4;
   }
 
-  /* Watermark background pattern */
+  /* DEPRECATED (design.md §10) — full-screen mandala wash is an "aurora-blob"-adjacent
+   * decoration anti-pattern. The mandala motif lives on as <BrandMark size="xl" />
+   * for rare ceremony moments only. Still referenced by blog pages; scheduled for
+   * removal in Wave F (content redesign).
+   */
   .bg-mandala-watermark {
     background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='200' cy='200' r='180' stroke='%23D4B896' stroke-width='0.5' opacity='0.12'/%3E%3Ccircle cx='200' cy='200' r='140' stroke='%23D4B896' stroke-width='0.5' opacity='0.1'/%3E%3Ccircle cx='200' cy='200' r='100' stroke='%23D4B896' stroke-width='0.5' opacity='0.08'/%3E%3Ccircle cx='200' cy='200' r='60' stroke='%23D4B896' stroke-width='0.5' opacity='0.12'/%3E%3Ccircle cx='200' cy='200' r='20' fill='%23D4B896' opacity='0.06'/%3E%3Ccircle cx='200' cy='20' r='6' fill='%23D4B896' opacity='0.08'/%3E%3Ccircle cx='200' cy='380' r='6' fill='%23D4B896' opacity='0.08'/%3E%3Ccircle cx='20' cy='200' r='6' fill='%23D4B896' opacity='0.08'/%3E%3Ccircle cx='380' cy='200' r='6' fill='%23D4B896' opacity='0.08'/%3E%3Ccircle cx='72' cy='72' r='5' fill='%23D4B896' opacity='0.07'/%3E%3Ccircle cx='328' cy='72' r='5' fill='%23D4B896' opacity='0.07'/%3E%3Ccircle cx='72' cy='328' r='5' fill='%23D4B896' opacity='0.07'/%3E%3Ccircle cx='328' cy='328' r='5' fill='%23D4B896' opacity='0.07'/%3E%3Cline x1='200' y1='20' x2='200' y2='380' stroke='%23D4B896' stroke-width='0.3' opacity='0.06'/%3E%3Cline x1='20' y1='200' x2='380' y2='200' stroke='%23D4B896' stroke-width='0.3' opacity='0.06'/%3E%3Cline x1='72' y1='72' x2='328' y2='328' stroke='%23D4B896' stroke-width='0.3' opacity='0.04'/%3E%3Cline x1='328' y1='72' x2='72' y2='328' stroke='%23D4B896' stroke-width='0.3' opacity='0.04'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -182,11 +263,150 @@
     background-size: contain;
   }
 
-  /* Lotus-leaf decorative corners */
+  /* DEPRECATED (design.md §10) — decorative card backgrounds are not part of the
+   * editorial system. Still referenced by login form, blog list, wisdom MDX;
+   * scheduled for removal in Wave B (conversion) and Wave F (content).
+   */
   .bg-lotus-corner {
     background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 110 Q10 60 60 60 Q60 10 110 10' stroke='%23D4B896' stroke-width='0.8' fill='none' opacity='0.15'/%3E%3Cpath d='M15 110 Q15 65 65 65 Q65 15 115 15' stroke='%23D4B896' stroke-width='0.5' fill='none' opacity='0.1'/%3E%3Ccircle cx='60' cy='60' r='3' fill='%23D4B896' opacity='0.12'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: top right;
     background-size: 120px;
+  }
+
+  /* Tier-A art panels — one slow orbit rotation (design.md §6) */
+  .art-orbit-spin {
+    transform-origin: center center;
+    will-change: transform;
+    animation: art-orbit-spin var(--dur-art-orbit) linear infinite;
+  }
+
+  @keyframes art-orbit-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .art-orbit-spin {
+      animation: none;
+    }
+
+    .scatter-drift-1,
+    .scatter-drift-2,
+    .scatter-drift-3,
+    .scatter-drift-4,
+    .scatter-drift-5,
+    .scatter-drift-6,
+    .scatter-drift-7,
+    .scatter-drift-8,
+    .loop-flow-arc {
+      animation: none;
+    }
+  }
+
+  /* Problem section — scattered dot drift (Tier-A art, design.md §6) */
+  .scatter-drift-1 {
+    animation: scatter-drift-1 8s ease-in-out infinite;
+  }
+  .scatter-drift-2 {
+    animation: scatter-drift-2 9.5s ease-in-out infinite;
+  }
+  .scatter-drift-3 {
+    animation: scatter-drift-3 7.5s ease-in-out infinite;
+  }
+  .scatter-drift-4 {
+    animation: scatter-drift-4 10s ease-in-out infinite;
+  }
+  .scatter-drift-5 {
+    animation: scatter-drift-5 8.5s ease-in-out infinite;
+  }
+  .scatter-drift-6 {
+    animation: scatter-drift-6 9s ease-in-out infinite;
+  }
+  .scatter-drift-7 {
+    animation: scatter-drift-7 7s ease-in-out infinite;
+  }
+  .scatter-drift-8 {
+    animation: scatter-drift-8 11s ease-in-out infinite;
+  }
+
+  @keyframes scatter-drift-1 {
+    0%, 100% { transform: translate(0, 0); }
+    33% { transform: translate(14px, -10px); }
+    66% { transform: translate(-8px, 12px); }
+  }
+  @keyframes scatter-drift-2 {
+    0%, 100% { transform: translate(0, 0); }
+    40% { transform: translate(-12px, 8px); }
+    70% { transform: translate(10px, 14px); }
+  }
+  @keyframes scatter-drift-3 {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(8px, 16px); }
+    55% { transform: translate(-14px, -6px); }
+  }
+  @keyframes scatter-drift-4 {
+    0%, 100% { transform: translate(0, 0); }
+    35% { transform: translate(-10px, -12px); }
+    65% { transform: translate(12px, 6px); }
+  }
+  @keyframes scatter-drift-5 {
+    0%, 100% { transform: translate(0, 0); }
+    30% { transform: translate(16px, 4px); }
+    60% { transform: translate(-6px, -14px); }
+  }
+  @keyframes scatter-drift-6 {
+    0%, 100% { transform: translate(0, 0); }
+    45% { transform: translate(-8px, 10px); }
+    75% { transform: translate(14px, -8px); }
+  }
+  @keyframes scatter-drift-7 {
+    0%, 100% { transform: translate(0, 0); }
+    28% { transform: translate(6px, -16px); }
+    58% { transform: translate(-12px, 8px); }
+  }
+  @keyframes scatter-drift-8 {
+    0%, 100% { transform: translate(0, 0); }
+    38% { transform: translate(-14px, 6px); }
+    68% { transform: translate(8px, 12px); }
+  }
+
+  /* Plan loop — flow along connecting arcs */
+  .loop-flow-arc {
+    animation: loop-flow-dash 4s linear infinite;
+  }
+
+  @keyframes loop-flow-dash {
+    from {
+      stroke-dashoffset: 0;
+    }
+    to {
+      stroke-dashoffset: -32;
+    }
+  }
+
+  /* Wrapped / recap — opacity-only ceremony entrance (design.md §11) */
+  @keyframes ceremony-step-enter {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .ceremony-step {
+    opacity: 0;
+    animation: ceremony-step-enter var(--dur-ceremony) var(--ease-out) forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ceremony-step {
+      animation-duration: 120ms;
+    }
   }
 }

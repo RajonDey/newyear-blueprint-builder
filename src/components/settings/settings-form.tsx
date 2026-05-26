@@ -1,5 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Settings — workbench sections, silent saves, status tokens (Wave D5).
+ */
+
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { signOut } from "next-auth/react"
@@ -45,6 +49,7 @@ import type { YearlyPlanSettingsData } from "@/lib/queries/yearly-plan"
 import type { ResolvedEmailPreferences } from "@/lib/user-preferences"
 import { SITE_LEGAL_NAME, getSupportEmail } from "@/lib/legal"
 import { marketingPlanCopy } from "@/lib/marketing-plan-copy"
+import { cn } from "@/lib/utils"
 
 const COMMON_TIMEZONES = [
   "UTC",
@@ -121,7 +126,6 @@ export function SettingsForm({
         body: JSON.stringify({ name: name.trim() || undefined, timezone }),
       })
       if (!res.ok) throw new Error("Failed to save")
-      toast.success("Profile updated")
     } catch {
       toast.error("Failed to save")
     } finally {
@@ -138,17 +142,15 @@ export function SettingsForm({
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 [&>section+section]:border-t [&>section+section]:border-border [&>section+section]:pt-10">
       <PageHeader
-        eyebrow="Account"
         title="Settings"
         description="Your profile, plan, and the quieter details that make the app feel yours."
       />
 
       <Section
         id="billing"
-        icon={<Sparkles className="h-3.5 w-3.5 text-amber" />}
-        eyebrow="Plan"
+        icon={<Sparkles className="h-4 w-4 text-amber shrink-0" />}
         title="Membership"
         description="What you have access to today, and how to change it."
       >
@@ -187,8 +189,7 @@ export function SettingsForm({
       {yearlyPlan && (
         <Section
           id="your-year"
-          icon={<Calendar className="h-3.5 w-3.5 text-amber" />}
-          eyebrow="Year"
+          icon={<Calendar className="h-4 w-4 text-amber shrink-0" />}
           title="Your year"
           description="Edit your theme word, archive a finished year, or start the next one — no re-onboarding."
         >
@@ -198,22 +199,21 @@ export function SettingsForm({
 
       <Section
         id="knowledge"
-        icon={<BookOpen className="h-3.5 w-3.5 text-amber" />}
-        eyebrow="Knowledge"
+        icon={<BookOpen className="h-4 w-4 text-amber shrink-0" />}
         title="Notes & resources"
         description="Browse everything you've captured across areas and projects. Add new items from detail pages — these indexes are read-first."
       >
         <div className="flex flex-col gap-2 sm:flex-row">
           <Link
             href="/knowledge/notes"
-            className="inline-flex items-center justify-between gap-2 rounded-xl border border-border bg-card/60 px-4 py-3 text-sm hover:bg-accent/40 transition-colors"
+            className="inline-flex flex-1 items-center justify-between gap-2 border border-border px-4 py-3 text-sm hover:bg-muted/30 transition-colors"
           >
             <span>All notes</span>
             <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
           </Link>
           <Link
             href="/knowledge/resources"
-            className="inline-flex items-center justify-between gap-2 rounded-xl border border-border bg-card/60 px-4 py-3 text-sm hover:bg-accent/40 transition-colors"
+            className="inline-flex flex-1 items-center justify-between gap-2 border border-border px-4 py-3 text-sm hover:bg-muted/30 transition-colors"
           >
             <span>All resources</span>
             <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
@@ -222,15 +222,14 @@ export function SettingsForm({
       </Section>
 
       <Section
-        icon={<User className="h-3.5 w-3.5 text-amber" />}
-        eyebrow="You"
+        icon={<User className="h-4 w-4 text-amber shrink-0" />}
         title="Profile"
         description="Used in greetings, recap cards, and your account email."
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-xs uppercase tracking-widest text-muted-foreground">
+              <Label htmlFor="name" className="text-xs text-muted-foreground">
                 Name
               </Label>
               <Input
@@ -241,7 +240,7 @@ export function SettingsForm({
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-xs uppercase tracking-widest text-muted-foreground">
+              <Label htmlFor="email" className="text-xs text-muted-foreground">
                 Email
               </Label>
               <Input id="email" value={email} disabled className="bg-muted/40" />
@@ -255,14 +254,13 @@ export function SettingsForm({
       </Section>
 
       <Section
-        icon={<Globe className="h-3.5 w-3.5 text-amber" />}
-        eyebrow="Region"
+        icon={<Globe className="h-4 w-4 text-amber shrink-0" />}
         title="Timezone"
         description="Drives 'today' for your daily check-in, systems completion, and recap cards."
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="timezone" className="text-xs uppercase tracking-widest text-muted-foreground">
+            <Label htmlFor="timezone" className="text-xs text-muted-foreground">
               Current
             </Label>
             <Select value={timezone} onValueChange={setTimezone}>
@@ -284,8 +282,7 @@ export function SettingsForm({
 
       <Section
         id="export"
-        icon={<Download className="h-3.5 w-3.5 text-amber" />}
-        eyebrow="Portable"
+        icon={<Download className="h-4 w-4 text-amber shrink-0" />}
         title="Export your data"
         description="Take your full year with you — reflections, plans, projects, and rhythm history."
       >
@@ -294,8 +291,7 @@ export function SettingsForm({
 
       <Section
         id="notifications"
-        icon={<Bell className="h-3.5 w-3.5 text-amber" />}
-        eyebrow="Quiet"
+        icon={<Bell className="h-4 w-4 text-amber shrink-0" />}
         title="Notifications"
         description="Email reminders for your rhythm — all on by default; turn off anything you don't want."
       >
@@ -303,8 +299,7 @@ export function SettingsForm({
       </Section>
 
       <Section
-        icon={<ShieldAlert className="h-3.5 w-3.5 text-amber" />}
-        eyebrow="Account"
+        icon={<ShieldAlert className="h-4 w-4 text-amber shrink-0" />}
         title="Sign out & legal"
         description="Sign out on this device. For Google sign-in, you can also revoke the app from your Google account to remove access everywhere."
       >
@@ -341,13 +336,12 @@ export function SettingsForm({
       </Section>
 
       <Section
-        icon={<Trash2 className="h-3.5 w-3.5 text-rose-500" />}
-        eyebrow="Permanent"
+        icon={<Trash2 className="h-4 w-4 text-status-risk shrink-0" />}
         title="Danger zone"
         description="Delete your account and everything tied to it. Cannot be undone."
         tone="danger"
       >
-        <div className="rounded-2xl border border-rose-500/20 bg-rose-500/[0.04] p-5">
+        <div className="border border-status-risk/30 bg-status-risk/10 p-5">
           <p className="text-sm leading-relaxed">
             Export your data first if you want a copy — deletion is permanent.
             If you have an active Pro subscription, cancel billing in your Lemon
@@ -363,7 +357,7 @@ export function SettingsForm({
           <button
             type="button"
             onClick={() => setDeleteOpen(true)}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-rose-500/90 text-white px-3 py-1.5 text-sm font-medium hover:bg-rose-500 transition-colors"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-status-risk text-destructive-foreground px-3 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <Trash2 className="h-3.5 w-3.5" /> Delete my account
           </button>
@@ -416,7 +410,6 @@ export function SettingsForm({
                     const j = await res.json().catch(() => ({}))
                     throw new Error(j.error || "Failed to delete account")
                   }
-                  toast.success("Account deleted")
                   setDeleteOpen(false)
                   await signOut({ callbackUrl: "/" })
                 } catch (e: unknown) {
@@ -427,7 +420,7 @@ export function SettingsForm({
                   setDeleting(false)
                 }
               }}
-              className="inline-flex items-center gap-1.5 rounded-md bg-rose-500/90 text-white px-3 py-1.5 text-sm font-medium hover:bg-rose-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 rounded-md bg-status-risk text-destructive-foreground px-3 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Delete forever
@@ -439,14 +432,9 @@ export function SettingsForm({
   )
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Section primitive                                                          */
-/* -------------------------------------------------------------------------- */
-
 function Section({
   id,
   icon,
-  eyebrow,
   title,
   description,
   children,
@@ -454,7 +442,6 @@ function Section({
 }: {
   id?: string
   icon: React.ReactNode
-  eyebrow: string
   title: string
   description: string
   children: React.ReactNode
@@ -463,15 +450,15 @@ function Section({
   return (
     <section id={id} className="grid gap-6 md:grid-cols-[200px_1fr]">
       <header>
-        <div
-          className={`inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-widest uppercase ${
-            tone === "danger" ? "text-rose-500" : "text-amber"
-          }`}
+        <h2
+          className={cn(
+            "font-display text-xl tracking-tight inline-flex items-center gap-2",
+            tone === "danger" && "text-status-risk",
+          )}
         >
           {icon}
-          {eyebrow}
-        </div>
-        <h2 className="font-display text-xl tracking-tight mt-1.5">{title}</h2>
+          {title}
+        </h2>
         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
           {description}
         </p>
@@ -496,8 +483,8 @@ function SaveButton({ saving }: { saving: boolean }) {
 
 function ProActiveCard() {
   return (
-    <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-5">
-      <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-widest uppercase text-emerald-600">
+    <div className="border border-status-positive/30 bg-status-positive/10 p-5">
+      <div className="inline-flex items-center gap-1.5 text-xs font-medium text-status-positive">
         <Check className="h-3 w-3" />
         Pro · Active
       </div>
@@ -529,10 +516,8 @@ function ProUpsellCardInline({
   checkoutLoading: boolean
 }) {
   return (
-    <div className="rounded-2xl border border-amber/30 bg-gradient-to-br from-amber/[0.06] via-card to-card p-6 shadow-sm">
-      <div className="text-[10px] font-semibold tracking-widest uppercase text-amber mb-2">
-        Pro · $49 / year
-      </div>
+    <div className="border border-amber/40 bg-amber-tint p-6">
+      <div className="text-xs font-medium text-amber mb-2">Pro · $49 / year</div>
       <h3 className="font-display text-2xl tracking-tight leading-snug">
         The whole year, without the caps
       </h3>

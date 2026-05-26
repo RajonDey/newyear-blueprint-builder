@@ -1,11 +1,11 @@
 import Link from "next/link"
+import { BrandMark } from "@/components/shared/brand-mark"
 import { cn } from "@/lib/utils"
 
-/**
- * Marketing logo — calm editorial wordmark with the amber spark glyph.
- *
- * Adopted from the Lovable design language: a small amber asterisk to the left
- * of the wordmark replaces the older mandala compass icon.
+/* Hallmark · design-system: design.md · designed-as-app
+ * Marketing logo — calm editorial wordmark with the BrandMark mandala glyph.
+ * The ✦ Unicode glyph it replaced was an icon-voice tell (rendered differently
+ * per OS, didn't match Lucide stroke). See design.md §10.
  */
 export function MarketingLogoLink({
   className,
@@ -22,30 +22,25 @@ export function MarketingLogoLink({
     compact: "text-base",
     auth: "text-2xl",
   }
-  const sparkSizes = {
-    header: "text-base",
-    compact: "text-sm",
-    auth: "text-xl",
-  }
+  const markSize = {
+    header: "md",
+    compact: "sm",
+    auth: "md",
+  } as const
 
   return (
     <Link
       href="/"
       className={cn(
-        "flex items-baseline gap-2 min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm",
+        "flex items-center gap-2 min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm",
         className,
       )}
       aria-label="YearInReview home"
     >
-      <span
-        aria-hidden
-        className={cn("text-amber leading-none", sparkSizes[size])}
-      >
-        ✦
-      </span>
+      <BrandMark size={markSize[size]} />
       <span
         className={cn(
-          "font-display tracking-tight text-foreground",
+          "font-display tracking-tight text-foreground leading-none",
           textSizes[size],
           textClassName,
         )}

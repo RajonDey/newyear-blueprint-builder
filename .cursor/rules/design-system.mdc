@@ -1,0 +1,72 @@
+---
+description: Locked design system for YearInReview — must respect /design.md
+globs: ["src/**/*.tsx", "src/**/*.css", "tailwind.config.ts"]
+---
+
+# Design System — read `/design.md` before UI edits
+
+The project has a locked editorial design system at `/design.md` at the
+repo root. All UI changes — new components, redesigns, style edits — must
+honour it. Two reasons it matters: (1) the system was authored after a
+Hallmark audit found 50 design tells across marketing, app, and conversion
+surfaces, and the file encodes the fixes as rules; (2) page-level theme
+or macrostructure improvisation is **banned** on this project — pages within
+a family must share the system, not drift from it.
+
+When editing UI code, read `/design.md` for the full contract. The
+non-negotiables, summarised:
+
+## Tokens
+- Every colour references a named token. Never inline `#hex`, `oklch()`,
+  `rgb()`, or Tailwind palette colours like `emerald-500`, `rose-400`,
+  `amber-100`.
+- Amber transparency uses **only** `--amber-wash` (0.04), `--amber-tint`
+  (0.10), or `--amber-emphasis` (0.20). No `amber/[0.05]` improvisation.
+- Status colours use `--color-status-positive` · `attention` · `risk`.
+
+## Type
+- Fraunces (display) + Inter (body) + JetBrains Mono. No fourth font.
+- Section heads in Fraunces, `tracking-tight`, sentence case.
+
+## Section heads — eyebrows banned by default
+- `<Eyebrow>` is **opt-in**, ≤ 2 per page, only for genuinely ordinal /
+  contextual data (e.g. dashboard meta-line "Week 12 · Q1 · 2026").
+- Never use `<Eyebrow>` as decoration above a section heading.
+- Replace uppercase mono-cap labels above headings with the heading alone.
+
+## Components — atoms are locked
+- Every input goes through shadcn `<Input>` from `@/components/ui/input`.
+  Raw `<input>` is forbidden on auth, onboarding, and any new forms.
+- Every primary affordance goes through shadcn `<Button>` from
+  `@/components/ui/button`. Raw `<button>` allowed only for icon-only
+  inline controls (dismiss-X, action-row buttons).
+- Brand marks go through `<BrandMark size="sm|md|xl" />`. The `✦` Unicode
+  glyph and literal letter logomarks are deprecated.
+
+## Motion
+- Motion-cut everywhere except the onboarding-wizard step transition
+  (directional fade, 160ms, `--ease-out`).
+- No perpetual ambient motion. No scroll-triggered fade-up. No
+  `transition-all`. No `hover:scale-*` on non-clickable surfaces.
+- Honour `prefers-reduced-motion`.
+
+## Microinteractions
+- **Silent success.** No "Saved!" / "Archived!" / "Done!" toasts. Toasts
+  only for failures and async actions whose effect isn't visible.
+- Reversible destructive actions get an Undo toast (7s), never a
+  confirmation modal.
+
+## Card-in-card
+- One containment layer per surface. Don't wrap a `<Card>` around a row of
+  bordered items that already look card-shaped.
+
+## Anti-patterns (auto-fail on review)
+- Centered-card-on-empty-viewport auth/onboarding shells
+- 3-equal feature grids with icon-tile-above-heading-above-2-lines
+- Aurora-blob / mandala-wash decorative backgrounds (the mandala lives
+  only as `<BrandMark />` now)
+- Gradient-fill headlines (`bg-clip-text` with a linear gradient)
+- Invented metrics ("10× faster", "50,000+ teams")
+
+Stamp every file you redesign with:
+`/* Hallmark · design-system: design.md · designed-as-app */`

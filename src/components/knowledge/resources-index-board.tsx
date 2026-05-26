@@ -1,5 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Knowledge resources index — divided list, status tokens (Wave D4).
+ */
+
 import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -175,7 +179,7 @@ export function ResourcesIndexBoard({
           </p>
         </div>
       ) : (
-        <ul className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border/70">
+        <ul className="divide-y divide-border border-y border-border">
           {items.map((row) => {
             const Icon = iconFor(row.kind, row.mimeType)
             const size = formatBytes(row.sizeBytes)
@@ -185,7 +189,7 @@ export function ResourcesIndexBoard({
             return (
               <li
                 key={row.id}
-                className="group px-4 py-4 transition-colors hover:bg-muted/20"
+                className="group py-4 transition-colors hover:bg-muted/20"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
@@ -253,7 +257,7 @@ export function ResourcesIndexBoard({
                           type="button"
                           onClick={() => void saveEdit(row)}
                           aria-label="Save link"
-                          className="rounded p-1 text-emerald-600 hover:bg-emerald-500/10"
+                          className="rounded p-1 text-status-positive hover:bg-status-positive/10"
                         >
                           <Check className="h-3.5 w-3.5" />
                         </button>
@@ -289,7 +293,7 @@ export function ResourcesIndexBoard({
                           type="button"
                           onClick={() => void remove(row)}
                           aria-label="Delete resource"
-                          className="rounded p-1 text-muted-foreground hover:text-rose-500"
+                          className="rounded p-1 text-muted-foreground hover:text-status-risk"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>

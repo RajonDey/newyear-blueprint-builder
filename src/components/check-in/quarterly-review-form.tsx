@@ -1,9 +1,10 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { EmptyState } from "@/components/shared/empty-state"
@@ -155,7 +156,6 @@ export function QuarterlyReviewForm({
         }),
       })
       if (!res.ok) throw new Error("Failed to save")
-      toast.success(`${quarter} review saved!`)
       router.refresh()
     } catch {
       toast.error("Failed to save")
@@ -214,7 +214,7 @@ export function QuarterlyReviewForm({
                 <span className="text-sm font-medium">{q.label}</span>
                 <span className="block text-xs text-muted-foreground">{q.months}</span>
                 {isReviewed && (
-                  <CheckCircle2 className="absolute top-1 right-1 h-3 w-3 text-emerald-500" />
+                  <CheckCircle2 className="absolute top-1 right-1 h-3 w-3 text-status-positive" />
                 )}
               </button>
             )
@@ -224,7 +224,7 @@ export function QuarterlyReviewForm({
 
       {quarterMonths.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          <p className="text-xs font-medium text-muted-foreground">
             Monthly reviews in {activeQ.label}
           </p>
           <div className="grid grid-cols-3 gap-2">
@@ -238,13 +238,13 @@ export function QuarterlyReviewForm({
                   className={cn(
                     "flex flex-col items-center gap-1 rounded-lg border px-2 py-2.5 text-center text-sm transition-colors hover:bg-muted/50",
                     isReviewed
-                      ? "border-emerald-500/40 bg-emerald-500/10"
+                      ? "border-status-positive/40 bg-status-positive/10"
                       : "border-dashed border-border/80",
                   )}
                 >
                   <span className="font-medium">{label}</span>
                   {isReviewed ? (
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-status-positive" />
                   ) : (
                     <span className="text-[10px] text-muted-foreground">Not reviewed</span>
                   )}
@@ -259,7 +259,7 @@ export function QuarterlyReviewForm({
         data.monthlyReviews.some((r) => r.month === month),
       ) && (
         <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          <p className="text-xs font-medium text-muted-foreground">
             What happened each month
           </p>
           <div className="space-y-2">
@@ -271,7 +271,7 @@ export function QuarterlyReviewForm({
               return (
                 <details
                   key={month}
-                  className="group rounded-lg border border-border bg-card overflow-hidden"
+                  className="group border border-border overflow-hidden"
                 >
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium hover:bg-muted/40 transition-colors">
                     <span>{label} {data.plan.year}</span>
@@ -302,9 +302,9 @@ export function QuarterlyReviewForm({
             const cat = LIFE_CATEGORIES.find((c) => c.id === g.category)
             const statusColor =
               g.status === "COMPLETED"
-                ? "text-emerald-600 dark:text-emerald-400"
+                ? "text-status-positive"
                 : g.status === "AT_RISK"
-                  ? "text-red-600 dark:text-red-400"
+                  ? "text-status-risk"
                   : "text-muted-foreground"
             return (
               <div
@@ -322,19 +322,19 @@ export function QuarterlyReviewForm({
         </div>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-display flex items-center gap-2">
+      <section className="border border-border">
+        <header className="border-b border-border px-4 py-3 space-y-1">
+          <h2 className="text-base font-display flex items-center gap-2">
             <Activity className="h-4 w-4 text-accent" />
             {activeQ.label} — {activeQ.months}
-          </CardTitle>
+          </h2>
           {existing && (
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+            <p className="text-xs text-status-positive flex items-center gap-1">
               <Trophy className="h-3 w-3" /> Review saved
             </p>
           )}
-        </CardHeader>
-        <CardContent className="space-y-5">
+        </header>
+        <div className="px-4 py-4 space-y-5">
           {templateFields.map((field) => {
             const Icon = iconForFieldKey(field.key)
             const val = state[field.key] ?? ""
@@ -374,8 +374,8 @@ export function QuarterlyReviewForm({
             )}
             Save {activeQ.label} review
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <QuarterlyPastSeasons
         year={data.plan.year}

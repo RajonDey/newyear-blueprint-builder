@@ -1,3 +1,5 @@
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import Link from "next/link"
 import { Sparkles } from "lucide-react"
 
@@ -16,9 +18,9 @@ export function VisionProjectsStrip({
   return (
     <Link
       href="/vision"
-      className="flex items-center gap-3 rounded-2xl border border-border/70 bg-card/50 px-4 py-3 text-sm transition-colors hover:bg-card/80"
+      className="flex items-center gap-3 border-y border-border py-3 text-sm transition-colors hover:bg-muted/30"
     >
-      <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber/10 text-amber">
+      <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-tint text-amber">
         <Sparkles className="h-4 w-4" />
       </span>
       <span>

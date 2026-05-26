@@ -1,5 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Email notification toggles — divided list, silent saves (Wave D5).
+ */
+
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
@@ -65,7 +69,6 @@ export function EmailNotificationsSection({
       if (json.data?.emailPreferences) {
         setPrefs(json.data.emailPreferences)
       }
-      toast.success(enabled ? "Email reminder on" : "Email reminder off")
     } catch {
       setPrefs((current) => ({ ...current, [key]: previous }))
       toast.error("Failed to update email preferences")
@@ -75,16 +78,13 @@ export function EmailNotificationsSection({
   }
 
   return (
-    <div className="space-y-4">
+    <ul className="divide-y divide-border border-y border-border">
       {EMAIL_TOGGLES.map(({ key, label, description }) => {
         const id = `email-${key}`
         const saving = savingKey === key
 
         return (
-          <div
-            key={key}
-            className="flex items-start gap-3 rounded-2xl border border-border/70 bg-card/40 p-4"
-          >
+          <li key={key} className="flex items-start gap-3 py-4">
             <Checkbox
               id={id}
               checked={prefs[key]}
@@ -108,9 +108,9 @@ export function EmailNotificationsSection({
                 aria-hidden
               />
             )}
-          </div>
+          </li>
         )
       })}
-    </div>
+    </ul>
   )
 }

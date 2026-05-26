@@ -1,8 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
@@ -127,32 +128,8 @@ export function WeeklyCheckInForm({
         const err = await res.json()
         throw new Error(err.message || err.error || "Failed to save")
       }
-      const json = await res.json()
       if (alreadyDone && editing) {
-        toast.success("Weekly review updated!", {
-          description: "Your latest reflection now reflects this edit.",
-        })
         setEditing(false)
-      } else {
-        const streak = json.streak ?? 0
-        const newAchievements: string[] = json.newAchievements ?? []
-
-        if (newAchievements.length > 0) {
-          const label =
-            newAchievements.includes("first_check_in")
-              ? "Achievement unlocked: First Step!"
-              : `Achievement unlocked: ${streak}-week streak!`
-          toast.success(label, {
-            description: "You're building something real. Keep showing up.",
-            duration: 5000,
-          })
-        } else {
-          toast.success("Weekly review saved!", {
-            description: streak > 1
-              ? `${streak}-week streak and counting!`
-              : "Your streak is building. Keep it up!",
-          })
-        }
       }
       router.refresh()
     } catch (err: unknown) {
@@ -183,8 +160,8 @@ export function WeeklyCheckInForm({
     const mood = data.existingCheckIn?.overallMood
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-3 rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 p-4">
-          <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+        <div className="flex items-center gap-3 border border-status-positive/30 bg-status-positive/10 p-4">
+          <CheckCircle2 className="h-5 w-5 text-status-positive shrink-0" />
           <div className="flex-1">
             <p className="font-medium text-sm">Week {data.weekNumber} reviewed</p>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -203,11 +180,11 @@ export function WeeklyCheckInForm({
         </div>
 
         {data.existingCheckIn?.projectCheckIns && data.existingCheckIn.projectCheckIns.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Project ratings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
+          <section className="border border-border">
+            <header className="border-b border-border px-4 py-3">
+              <h2 className="text-sm font-medium text-muted-foreground">Project ratings</h2>
+            </header>
+            <div className="px-4 py-4 space-y-2">
               {data.existingCheckIn.projectCheckIns.map((gc) => {
                 const goal = data.projects.find((g) => g.id === gc.projectId)
                 if (!goal) return null
@@ -231,24 +208,24 @@ export function WeeklyCheckInForm({
                   </div>
                 )
               })}
-            </CardContent>
-          </Card>
+            </div>
+          </section>
         )}
 
         {data.existingCheckIn?.nextWeekFocus && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Note for next week</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <section className="border border-border">
+            <header className="border-b border-border px-4 py-3">
+              <h2 className="text-sm font-medium text-muted-foreground">Note for next week</h2>
+            </header>
+            <div className="px-4 py-4">
               <div
                 className="text-sm prose prose-sm dark:prose-invert max-w-none"
                 dangerouslySetInnerHTML={{
                   __html: sanitizeRichTextHtml(data.existingCheckIn.nextWeekFocus),
                 }}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </section>
         )}
       </div>
     )
@@ -258,13 +235,13 @@ export function WeeklyCheckInForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <WeeklyPlanSummary projects={data.projects} weeklyPlan={data.weeklyPlan ?? null} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-display flex items-center gap-2">
+      <section className="border border-border">
+        <header className="border-b border-border px-4 py-3">
+          <h2 className="text-base font-display flex items-center gap-2">
             <Smile className="h-4 w-4 text-accent" /> How&apos;s your week?
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </h2>
+        </header>
+        <div className="px-4 py-4 space-y-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Overall mood</span>
@@ -292,19 +269,19 @@ export function WeeklyCheckInForm({
               className="bg-card"
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-display">
+      <section className="border border-border">
+        <header className="border-b border-border px-4 py-3 space-y-1">
+          <h2 className="text-base font-display">
             Project progress
-          </CardTitle>
-          <p className="text-sm text-muted-foreground font-normal">
+          </h2>
+          <p className="text-sm text-muted-foreground">
             Rate each project from 1 (stalled) to 5 (crushing it)
           </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
+        </header>
+        <div className="px-4 py-4 space-y-6">
           {data.projects.map((project) => {
             const catInfo = LIFE_CATEGORIES.find((c) => c.id === project.category)
             return (
@@ -367,20 +344,20 @@ export function WeeklyCheckInForm({
               </div>
             )
           })}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-display">
+      <section className="border border-border">
+        <header className="border-b border-border px-4 py-3 space-y-1">
+          <h2 className="text-base font-display">
             Looking ahead (optional)
-          </CardTitle>
-          <p className="text-sm text-muted-foreground font-normal">
+          </h2>
+          <p className="text-sm text-muted-foreground">
             One note you&apos;ll see when you plan next week — top priority,
             a habit to protect, or something to carry over.
           </p>
-        </CardHeader>
-        <CardContent>
+        </header>
+        <div className="px-4 py-4">
           <RichTextEditor
             value={nextWeekFocus}
             onChange={(val) => setNextWeekFocus(val)}
@@ -388,8 +365,8 @@ export function WeeklyCheckInForm({
             rows={2}
             className="bg-card"
           />
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <div className="sticky bottom-0 z-10 -mx-1 flex gap-2 border-t border-border/80 bg-background/95 px-1 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:static sm:z-auto sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:pt-0 sm:pb-0 sm:backdrop-blur-none">
         {editing && (

@@ -59,12 +59,22 @@ const config: Config = {
         amber: {
           DEFAULT: "hsl(var(--amber))",
           foreground: "hsl(var(--amber-foreground))",
+          /* Amber opacity scale (design.md §3b). Replaces ad-hoc amber/[0.04] etc. */
+          wash: "hsl(var(--amber-wash) / var(--amber-wash-alpha))",
+          tint: "hsl(var(--amber-wash) / var(--amber-tint-alpha))",
+          emphasis: "hsl(var(--amber-wash) / var(--amber-emphasis-alpha))",
         },
         cyan: {
           DEFAULT: "hsl(var(--cyan))",
           foreground: "hsl(var(--cyan-foreground))",
         },
         gold: "hsl(var(--gold))",
+        /* Status tokens (design.md §3c). Use bg-status-positive, text-status-attention, etc. */
+        status: {
+          positive: "hsl(var(--color-status-positive))",
+          attention: "hsl(var(--color-status-attention))",
+          risk: "hsl(var(--color-status-risk))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -85,6 +95,32 @@ const config: Config = {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "Georgia", "serif"],
         mono: ["var(--font-mono)", "monospace"],
+      },
+      fontSize: {
+        /* Type scale anchor (design.md §4) */
+        display: ["var(--text-display)", { lineHeight: "1.05", letterSpacing: "-0.02em" }],
+      },
+      spacing: {
+        /* Named 4-pt scale (design.md §5). Parallel to Tailwind defaults — both are valid. */
+        "space-3xs": "var(--space-3xs)",
+        "space-2xs": "var(--space-2xs)",
+        "space-xs": "var(--space-xs)",
+        "space-sm": "var(--space-sm)",
+        "space-md": "var(--space-md)",
+        "space-lg": "var(--space-lg)",
+        "space-xl": "var(--space-xl)",
+        "space-2xl": "var(--space-2xl)",
+        "space-3xl": "var(--space-3xl)",
+      },
+      transitionTimingFunction: {
+        /* Motion easings (design.md §6) */
+        out: "var(--ease-out)",
+        "in-out": "var(--ease-in-out)",
+      },
+      transitionDuration: {
+        /* Motion durations (design.md §6) */
+        short: "var(--dur-short)",
+        base: "var(--dur-base)",
       },
       keyframes: {
         "accordion-down": {

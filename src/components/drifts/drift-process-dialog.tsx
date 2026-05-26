@@ -1,5 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Drift promotion dialog — silent success, plain field labels (Wave D4).
+ */
+
 import { useState } from "react"
 import { CheckSquare, Loader2, StickyNote, X } from "lucide-react"
 import { toast } from "sonner"
@@ -92,7 +96,6 @@ export function DriftProcessDialog({
         toast.error(body?.message || body?.error || "Could not process.")
         return
       }
-      toast.success(mode === "task" ? "Saved as task" : "Saved as note")
       onSuccess(drift)
     } catch (err) {
       console.error(err)
@@ -130,9 +133,7 @@ export function DriftProcessDialog({
 
           {mode === "task" ? (
             <div className="space-y-1">
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                Project
-              </label>
+              <label className="text-xs text-muted-foreground">Project</label>
               <select
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
@@ -151,9 +152,7 @@ export function DriftProcessDialog({
           ) : (
             <>
               <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Attach to
-                </label>
+                <label className="text-xs text-muted-foreground">Attach to</label>
                 <select
                   value={parentType}
                   onChange={(e) => {
@@ -172,7 +171,7 @@ export function DriftProcessDialog({
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                <label className="text-xs text-muted-foreground">
                   {parentType === ParentType.PROJECT ? "Project" : "Area"}
                 </label>
                 <select

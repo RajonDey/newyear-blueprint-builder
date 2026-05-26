@@ -1,6 +1,11 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { CtaBand } from "@/components/marketing/sections/cta-band"
 import { FaqAccordion } from "@/components/marketing/faq-accordion"
+
+/* Hallmark · design-system: design.md · designed-as-app
+ * FAQ — Letter lede + conversational Q&A (Wave E).
+ */
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -39,7 +44,7 @@ const FAQS = [
   },
   {
     q: "Refund policy?",
-    a: "Cancel any time. We don't issue partial refunds, but you'll keep Pro access through the end of your billing period and your data stays yours.",
+    a: "Cancel any time. We don't issue partial refunds, but you'll keep Pro access through the end of your billing period and your data stays yours. See our refund page for details.",
   },
   {
     q: "Can I use this with a team?",
@@ -54,16 +59,35 @@ const FAQS = [
 export default function FaqPage() {
   return (
     <>
-      <section className="container py-24 md:py-32 text-center">
-        <div className="text-[10px] font-semibold tracking-[0.28em] uppercase text-amber mb-4">
-          Questions
+      <section className="container pt-14 md:pt-20 pb-10 md:pb-14">
+        <div className="max-w-xl">
+          <p className="font-display italic text-lg md:text-xl text-muted-foreground">
+            Questions we hear often,
+          </p>
+          <h1 className="mt-6 font-display text-4xl md:text-5xl tracking-tight leading-[1.08] text-foreground">
+            The honest answers.
+          </h1>
+          <p className="mt-6 text-base md:text-lg text-muted-foreground leading-relaxed">
+            Still stuck?{" "}
+            <Link
+              href="/pricing"
+              className="text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors"
+            >
+              See pricing
+            </Link>{" "}
+            or read the{" "}
+            <Link
+              href="/refund"
+              className="text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors"
+            >
+              refund policy
+            </Link>
+            .
+          </p>
         </div>
-        <h1 className="font-display text-5xl md:text-6xl tracking-tight leading-[1.05] max-w-3xl mx-auto">
-          The honest answers.
-        </h1>
       </section>
 
-      <section className="container pb-12">
+      <section className="container pb-14 md:pb-20">
         <FaqAccordion items={FAQS} />
       </section>
 

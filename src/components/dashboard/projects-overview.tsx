@@ -1,3 +1,5 @@
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import Link from "next/link"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
 import { getStatusStyle } from "@/lib/constants/status"
@@ -5,7 +7,6 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Eyebrow } from "@/components/atmosphere/eyebrow"
 import { WeeklyPriorityBadge } from "@/components/shared/weekly-priority-badge"
 import { ArrowRight, Flame, Target } from "lucide-react"
 
@@ -31,15 +32,17 @@ export function ProjectsOverview({
   const prioritySet = new Set(priorityProjectIds)
   if (projects.length === 0) {
     return (
-      <section className="rounded-2xl border border-border bg-card p-6">
-        <header className="mb-4">
-          <Eyebrow className="mb-1.5">Projects</Eyebrow>
+      <section className="space-y-4">
+        <header>
           <h3 className="font-display text-xl md:text-2xl tracking-tight">
-            Nothing anchored yet
+            Projects
           </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Nothing anchored yet
+          </p>
         </header>
-        <div className="flex gap-3 rounded-xl border border-dashed border-border bg-muted/30 p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber/10 text-amber">
+        <div className="flex gap-3 border border-dashed border-border bg-muted/30 p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-tint text-amber">
             <Target className="h-5 w-5" />
           </div>
           <div className="min-w-0">
@@ -49,7 +52,7 @@ export function ProjectsOverview({
             </p>
           </div>
         </div>
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <Button asChild className="w-full sm:w-auto">
             <Link href="/projects">Add project</Link>
           </Button>
@@ -62,13 +65,15 @@ export function ProjectsOverview({
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6">
-      <header className="mb-4 flex items-end justify-between gap-3">
+    <section className="space-y-4">
+      <header className="flex items-end justify-between gap-3">
         <div>
-          <Eyebrow className="mb-1.5">Projects · {planYear}</Eyebrow>
           <h3 className="font-display text-xl md:text-2xl tracking-tight">
-            What you&apos;re moving on
+            Projects · {planYear}
           </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            What you&apos;re moving on
+          </p>
         </div>
         <Link
           href="/projects"

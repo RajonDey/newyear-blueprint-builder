@@ -1,5 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Quarterly recap wheel — chart theme tokens (Wave G).
+ */
+
 import {
   Radar,
   RadarChart,
@@ -9,6 +13,7 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import type { LifeCategory } from "@prisma/client"
+import { chartColors, axisDefaults, gridDefaults } from "@/lib/charts-theme"
 
 const LABELS: Record<LifeCategory, string> = {
   HEALTH: "Health",
@@ -41,16 +46,13 @@ export function WheelRadar({
     <div className="h-56 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart data={data} outerRadius="80%">
-          <PolarGrid stroke="hsl(var(--border))" />
-          <PolarAngleAxis
-            dataKey="category"
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-          />
+          <PolarGrid {...gridDefaults} />
+          <PolarAngleAxis dataKey="category" tick={axisDefaults.tick} />
           <PolarRadiusAxis domain={[0, 10]} tick={false} axisLine={false} />
           <Radar
             dataKey="Now"
-            stroke="hsl(var(--amber))"
-            fill="hsl(var(--amber))"
+            stroke={chartColors.amber}
+            fill={chartColors.amber}
             fillOpacity={0.25}
             strokeWidth={2}
           />

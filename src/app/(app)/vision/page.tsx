@@ -33,7 +33,6 @@ export default async function VisionPage() {
   return (
     <PageContainer>
       <PageHeader
-        eyebrow="Foundation · Life vision"
         title="The life you're walking toward"
         description="Not a yearly plan. A north-star you can return to across years — values you protect, milestones that matter, quotes you keep close."
       />

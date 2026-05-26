@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useEffect, useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -21,7 +23,6 @@ import {
 import { toast } from "sonner"
 import type { VisionItem, VisionItemKind } from "@prisma/client"
 import { cn } from "@/lib/utils"
-import { Eyebrow } from "@/components/atmosphere/eyebrow"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -47,9 +48,9 @@ const KIND_META: Record<
 > = {
   STATEMENT: { label: "Statement", icon: Sparkles, tone: "text-amber" },
   VALUE: { label: "Value", icon: Star, tone: "text-amber" },
-  MILESTONE: { label: "Milestone", icon: Trophy, tone: "text-emerald-600" },
-  IMAGE: { label: "Image", icon: ImageIcon, tone: "text-sky-600" },
-  QUOTE: { label: "Quote", icon: Quote, tone: "text-rose-600" },
+  MILESTONE: { label: "Milestone", icon: Trophy, tone: "text-status-positive" },
+  IMAGE: { label: "Image", icon: ImageIcon, tone: "text-foreground" },
+  QUOTE: { label: "Quote", icon: Quote, tone: "text-muted-foreground" },
 }
 
 const STARTER_PROMPTS: { kind: VisionItemKind; title: string; body: string }[] = [
@@ -142,8 +143,8 @@ function NorthStarBlock({ initial }: { initial: string | null }) {
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6 md:p-8">
-      <Eyebrow className="mb-2">North star</Eyebrow>
+    <section className="border border-border p-6 md:p-8">
+      <p className="text-xs text-muted-foreground mb-2">North star</p>
       <h2 className="font-display text-2xl md:text-3xl tracking-tight mb-3">
         Who are you becoming?
       </h2>
@@ -178,8 +179,8 @@ function EmptyState({
   onCreated: () => void
 }) {
   return (
-    <section className="rounded-2xl border border-border bg-card p-6 md:p-8">
-      <Eyebrow className="mb-2">Vision board</Eyebrow>
+    <section className="border border-border p-6 md:p-8">
+      <p className="text-xs text-muted-foreground mb-2">Vision board</p>
       <h2 className="font-display text-2xl md:text-3xl tracking-tight">
         Start with a few cards
       </h2>
@@ -221,9 +222,9 @@ function NewItemTrigger({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="text-left rounded-xl border border-dashed border-border bg-background/40 px-4 py-3 hover:bg-background hover:border-amber/40 transition-colors"
+        className="text-left border border-dashed border-border px-4 py-3 hover:bg-muted/30 hover:border-amber/40 transition-colors"
       >
-        <div className="text-[10px] uppercase tracking-widest text-amber mb-1">
+        <div className="text-[10px] text-amber mb-1">
           {KIND_META[preset.kind].label}
         </div>
         <div className="text-sm font-medium leading-snug">{label}</div>
@@ -275,7 +276,7 @@ function VisionItemsGrid({
     <section className="space-y-4">
       <div className="flex items-end justify-between">
         <div>
-          <Eyebrow className="mb-2">Vision board</Eyebrow>
+          <p className="text-xs text-muted-foreground mb-2">Vision board</p>
           <h2 className="font-display text-2xl tracking-tight">
             Cards on your board
           </h2>
@@ -287,7 +288,7 @@ function VisionItemsGrid({
           <button
             onClick={() => setCreating(true)}
             disabled={atCap}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center gap-1.5 border border-border px-3 py-1.5 text-sm hover:bg-muted/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Plus className="h-3.5 w-3.5" /> New card
             {atCap && !isPro && <Lock className="h-3 w-3 text-amber" />}
@@ -308,7 +309,7 @@ function VisionItemsGrid({
       </div>
 
       {atCap && !isPro && (
-        <div className="rounded-2xl border border-amber/40 bg-amber/[0.06] p-5 text-sm">
+        <div className="border border-amber/40 bg-amber-tint p-5 text-sm">
           <div className="font-medium">You&apos;re at the Free cap of {cap} cards.</div>
           <p className="text-muted-foreground mt-1">
             Pro lifts this to 50 cards plus images and Area anchors.
@@ -402,16 +403,16 @@ function VisionCard({
   return (
     <article
       className={cn(
-        "group rounded-2xl border border-border bg-card p-5 transition-colors hover:bg-card/80",
+        "group border border-border p-5 transition-colors hover:bg-muted/30",
         item.achievedAt && "opacity-80",
       )}
     >
       <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+        <div className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground">
           <Icon className={cn("h-3.5 w-3.5", meta.tone)} />
           {meta.label}
           {item.achievedAt && (
-            <span className="ml-2 inline-flex items-center gap-1 text-emerald-600 normal-case tracking-normal">
+            <span className="ml-2 inline-flex items-center gap-1 text-status-positive normal-case">
               <CheckCircle2 className="h-3 w-3" />
               Achieved
             </span>
@@ -482,7 +483,7 @@ function VisionCard({
 
       {linkedProjects.length > 0 && (
         <div className="mt-4 pt-3 border-t border-border/60">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+          <p className="text-[10px] font-medium text-muted-foreground mb-2">
             {linkedProjects.length === 1
               ? "1 active project"
               : `${linkedProjects.length} active projects`}
@@ -606,10 +607,10 @@ function ItemDialog({
       <form
         onSubmit={submit}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-xl space-y-4"
+        className="w-full max-w-lg border border-border bg-card p-6 shadow-xl space-y-4"
       >
         <div>
-          <Eyebrow>{mode === "create" ? "New card" : "Edit card"}</Eyebrow>
+          <p className="text-xs text-muted-foreground">{mode === "create" ? "New card" : "Edit card"}</p>
           <h3 className="font-display text-xl tracking-tight mt-1">
             Shape this card
           </h3>
@@ -617,7 +618,7 @@ function ItemDialog({
 
         <div className="space-y-3">
           <label className="block">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            <span className="text-[11px] font-medium text-muted-foreground">
               Kind
             </span>
             <select
@@ -634,7 +635,7 @@ function ItemDialog({
           </label>
 
           <label className="block">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            <span className="text-[11px] font-medium text-muted-foreground">
               Title
             </span>
             <input
@@ -648,7 +649,7 @@ function ItemDialog({
           </label>
 
           <label className="block">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            <span className="text-[11px] font-medium text-muted-foreground">
               Body (optional)
             </span>
             <textarea
@@ -663,7 +664,7 @@ function ItemDialog({
 
           {kind === "IMAGE" && (
             <label className="block">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <span className="text-[11px] font-medium text-muted-foreground">
                 Image URL
               </span>
               <input

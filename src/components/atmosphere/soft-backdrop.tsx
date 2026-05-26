@@ -7,15 +7,18 @@ interface SoftBackdropProps {
   className?: string
 }
 
-/**
- * Soft, non-interactive atmosphere layer.
+/* Hallmark · design-system: design.md · designed-as-app
  *
- * A faint warm wash + slowly drifting concentric orbits and a quiet
- * sacred-geometry "seed of life" — meant to be felt, not seen.
+ * Soft, non-interactive atmosphere layer — STATIC.
+ *
+ * A faint warm wash + concentric orbits and a quiet sacred-geometry
+ * "seed of life". The original perpetual rotations (240s rings + 360s seed +
+ * 6s breathing dot) were a motion tell — *"ambient perpetual motion is a
+ * 2022–2023 generative-design default"*. See design.md §6 (motion stance).
  *
  * Anchored to the nearest positioned ancestor — wrap the parent in `relative`.
  *
- * Respects `prefers-reduced-motion`. No JS, no client hydration — pure SVG + CSS.
+ * No JS, no client hydration, no motion — pure SVG.
  */
 export function SoftBackdrop({
   intensity = "soft",
@@ -49,9 +52,9 @@ export function SoftBackdrop({
         }}
       />
 
-      {/* Drifting orbits — long, slow rotation; barely perceptible */}
+      {/* Concentric orbits — static composition */}
       <svg
-        className="sb-rings absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2"
+        className="absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2"
         width="1200"
         height="1200"
         viewBox="-600 -600 1200 1200"
@@ -72,9 +75,9 @@ export function SoftBackdrop({
         ))}
       </svg>
 
-      {/* Seed of life — drifts in the opposite direction */}
+      {/* Seed of life — static */}
       <svg
-        className="sb-seed absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2"
+        className="absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2"
         width="520"
         height="520"
         viewBox="-260 -260 520 520"
@@ -94,9 +97,10 @@ export function SoftBackdrop({
         ))}
       </svg>
 
-      {/* A single tiny breathing seed at the center */}
+      {/* A single tiny seed at the center — static */}
       <span
-        className="sb-seed-dot absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        aria-hidden
+        className="absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{
           width: 5,
           height: 5,
@@ -105,21 +109,6 @@ export function SoftBackdrop({
           opacity: 0.55,
         }}
       />
-
-      <style>{`
-        @keyframes sb-rotate-cw  { to { transform: translate(-50%, -50%) rotate(360deg); } }
-        @keyframes sb-rotate-ccw { to { transform: translate(-50%, -50%) rotate(-360deg); } }
-        @keyframes sb-breathe {
-          0%, 100% { transform: translate(-50%, -50%) scale(1);   opacity: .45; }
-          50%      { transform: translate(-50%, -50%) scale(1.6); opacity: .7;  }
-        }
-        .sb-rings    { transform-origin: center; animation: sb-rotate-cw  240s linear infinite; }
-        .sb-seed     { transform-origin: center; animation: sb-rotate-ccw 360s linear infinite; }
-        .sb-seed-dot { animation: sb-breathe 6s ease-in-out infinite; }
-        @media (prefers-reduced-motion: reduce) {
-          .sb-rings, .sb-seed, .sb-seed-dot { animation: none; }
-        }
-      `}</style>
     </div>
   )
 }

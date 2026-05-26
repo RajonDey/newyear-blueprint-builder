@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import type { WeeklyConsistencyWeek } from "@/lib/queries/rhythm-stats"
@@ -23,11 +25,11 @@ export function WeeklyHistoryStrip({
   if (weeks.length === 0) return null
 
   return (
-    <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
-      <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground shrink-0">
+    <div className="flex flex-col gap-1.5 border-y border-border py-3 sm:flex-row sm:items-center sm:gap-3">
+      <span className="text-xs text-muted-foreground shrink-0">
         Last {weeks.length} weeks
       </span>
-      <div className="flex items-center gap-1 overflow-x-auto pb-0.5 -mx-1 px-1">
+      <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
         {weeks.map((week) => {
           const isCurrent =
             week.weekNumber === currentWeekNumber && week.year === currentYear
@@ -42,13 +44,15 @@ export function WeeklyHistoryStrip({
               }
               className={cn(
                 "flex shrink-0 flex-col items-center gap-0.5 rounded-md px-2 py-1.5 text-center transition-colors hover:bg-muted/60",
-                isCurrent && "bg-accent/10 ring-1 ring-accent/30",
+                isCurrent && "bg-amber-tint ring-1 ring-amber/30",
               )}
             >
               <span
                 className={cn(
                   "block h-2 w-2 rounded-full",
-                  week.reviewed ? "bg-emerald-500" : "bg-muted-foreground/25",
+                  week.reviewed
+                    ? "bg-status-positive"
+                    : "bg-muted-foreground/25",
                 )}
                 aria-hidden
               />

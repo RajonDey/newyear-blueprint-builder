@@ -1,6 +1,7 @@
 import { db } from "@/lib/db"
 import { getWeekNumber } from "@/lib/utils"
 import { ACHIEVEMENTS } from "@/lib/constants/achievements"
+import { getPlanTheme } from "@/lib/yearly-plan/reflections"
 
 const CATEGORY_LABELS: Record<string, string> = {
   HEALTH: "Health",
@@ -78,6 +79,7 @@ export async function getWrappedData(userId: string, year?: number) {
     plan: {
       id: plan.id,
       year: plan.year,
+      theme: getPlanTheme(plan.reflections),
       status: plan.status,
     },
     stats: {

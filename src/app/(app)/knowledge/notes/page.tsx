@@ -40,7 +40,6 @@ export default async function KnowledgeNotesPage({
   return (
     <PageContainer>
       <PageHeader
-        eyebrow="Knowledge · Notes"
         title="All notes"
         description="Browse-only index — notes still live on their parent. Edit inline here or open the parent to see full context."
         actions={

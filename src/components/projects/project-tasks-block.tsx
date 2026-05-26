@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { Check, Pencil, Plus, Trash2 } from "lucide-react"
@@ -8,6 +10,8 @@ import { toast } from "sonner"
 import type { GoalStatus } from "@prisma/client"
 import { patchProjectTask } from "@/lib/tasks/patch-task"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   TaskEditDialog,
   type TaskEditValues,
@@ -120,11 +124,14 @@ export function ProjectTasksBlock({
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6">
+    <section
+      id="tasks"
+      className="-mx-4 scroll-mt-24 border-y border-border bg-card px-6 py-6 sm:-mx-6 sm:px-8 sm:py-8"
+    >
       <div className="mb-4 flex items-baseline justify-between gap-3">
         <div>
-          <h2 className="font-display text-xl tracking-tight">Tasks</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <h2 className="font-display text-xl md:text-2xl tracking-tight">Tasks</h2>
+          <p className="text-sm text-muted-foreground mt-1">
             The discrete moves that make this project real.
           </p>
         </div>
@@ -193,7 +200,7 @@ export function ProjectTasksBlock({
                   type="button"
                   onClick={() => openEdit(t)}
                   aria-label="Edit task"
-                  className="rounded p-1 text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
+                  className="rounded p-1 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                 </button>
@@ -202,7 +209,7 @@ export function ProjectTasksBlock({
                   type="button"
                   onClick={() => remove(t)}
                   aria-label="Remove task"
-                  className="rounded p-1 text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
+                  className="rounded p-1 text-muted-foreground hover:text-status-risk transition-colors"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -212,23 +219,24 @@ export function ProjectTasksBlock({
         </ul>
       )}
 
-      <div className="mt-3 flex items-center gap-2">
-        <input
+      <div className="mt-4 flex items-center gap-2">
+        <Input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && add()}
           placeholder={atCap ? `At ${cap}-task cap` : "Next move on this project…"}
           disabled={atCap}
-          className="flex-1 rounded-md border border-dashed border-border/60 bg-transparent px-3 py-1.5 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-amber/40 disabled:opacity-50"
+          className="flex-1 border-dashed"
         />
-        <button
+        <Button
           type="button"
           onClick={add}
           disabled={!draft.trim() || submitting || atCap}
-          className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-3 py-1.5 text-sm hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          size="sm"
+          className="shrink-0 gap-1"
         >
           <Plus className="h-3.5 w-3.5" /> Add
-        </button>
+        </Button>
       </div>
 
       <TaskEditDialog

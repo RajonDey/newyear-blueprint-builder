@@ -5,6 +5,8 @@ import { WrappedSummary } from "@/components/wrapped/wrapped-summary"
 import { getWrappedData } from "@/lib/queries/wrapped"
 import { isYearWrappedPeakSeason } from "@/lib/wrapped-season"
 
+/* Hallmark · design-system: design.md · Special ceremony page (Wave G). */
+
 export const metadata: Metadata = { title: "Year Wrapped" }
 
 export default async function WrappedPage() {

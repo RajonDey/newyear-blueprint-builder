@@ -40,7 +40,6 @@ export default async function KnowledgeResourcesPage({
   return (
     <PageContainer>
       <PageHeader
-        eyebrow="Knowledge · Resources"
         title="All resources"
         description="Links and uploaded files attached to your work. Add new resources from area or project detail pages."
         actions={

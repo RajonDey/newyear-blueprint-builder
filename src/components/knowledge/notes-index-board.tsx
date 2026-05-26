@@ -1,5 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Knowledge notes index — divided list, status tokens (Wave D4).
+ */
+
 import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -175,13 +179,13 @@ export function NotesIndexBoard({
           </p>
         </div>
       ) : (
-        <ul className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border/70">
+        <ul className="divide-y divide-border border-y border-border">
           {items.map((note) => (
             <li
               key={note.id}
               className={cn(
-                "group px-4 py-4 transition-colors hover:bg-muted/20",
-                note.pinned && "bg-amber/[0.03]",
+                "group px-0 py-4 transition-colors hover:bg-muted/20",
+                note.pinned && "bg-amber-tint",
               )}
             >
               <div className="flex items-start justify-between gap-3">
@@ -237,7 +241,7 @@ export function NotesIndexBoard({
                         type="button"
                         onClick={() => void saveEdit(note)}
                         aria-label="Save note"
-                        className="rounded p-1 text-emerald-600 hover:bg-emerald-500/10"
+                        className="rounded p-1 text-status-positive hover:bg-status-positive/10"
                       >
                         <Check className="h-3.5 w-3.5" />
                       </button>
@@ -283,7 +287,7 @@ export function NotesIndexBoard({
                         type="button"
                         onClick={() => void remove(note)}
                         aria-label="Delete note"
-                        className="rounded p-1 text-muted-foreground hover:text-rose-500"
+                        className="rounded p-1 text-muted-foreground hover:text-status-risk"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>

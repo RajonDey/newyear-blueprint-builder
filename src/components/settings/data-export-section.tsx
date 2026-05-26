@@ -1,5 +1,9 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Data export — workbench panel, silent download (Wave D5).
+ */
+
 import { useState } from "react"
 import { Download, Loader2 } from "lucide-react"
 import { toast } from "sonner"
@@ -35,7 +39,6 @@ export function DataExportSection() {
       anchor.download = exportFilenameFromResponse(res)
       anchor.click()
       URL.revokeObjectURL(url)
-      toast.success("Export downloaded")
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "Export failed")
     } finally {
@@ -44,7 +47,7 @@ export function DataExportSection() {
   }
 
   return (
-    <div className="rounded-2xl border border-border/70 bg-card/40 p-5 space-y-4">
+    <div className="border border-border p-5 space-y-4">
       <p className="text-sm text-muted-foreground leading-relaxed">
         Download a JSON file with your plans, projects, reflections, notes,
         resources (metadata only — not uploaded files), and rhythm history.

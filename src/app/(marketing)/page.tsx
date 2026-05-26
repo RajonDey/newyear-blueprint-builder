@@ -10,6 +10,13 @@ import { EchoBlock } from "@/components/marketing/sections/echo-block"
 import { PricingTeaser } from "@/components/marketing/sections/pricing-teaser"
 import { CtaBand } from "@/components/marketing/sections/cta-band"
 
+/* Hallmark · design-system: design.md · designed-as-app
+ * Marketing homepage — editorial Letter voice with split layouts + Tier-A art.
+ *
+ * Composition: split hero → problem + visual → guide band → plan + diagram →
+ * ornament → three cadence panels → contrast diptych → echo split → pricing → cta.
+ */
+
 export const metadata: Metadata = {
   title: "YearInReview — End the year proud, with proof",
   description:
@@ -23,14 +30,12 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col items-center">
+    <div>
       <Hero />
-      <OrnamentDivider variant="asterisk" className="container max-w-2xl" />
       <Problem />
-      <OrnamentDivider variant="seed" className="container max-w-2xl" />
       <Guide />
       <Plan />
-      <OrnamentDivider variant="asterisk" className="container max-w-2xl" />
+      <OrnamentDivider variant="asterisk" className="container max-w-3xl mx-auto" />
       <FeaturesTeaser />
       <Contrast />
       <EchoBlock />

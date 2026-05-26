@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -127,7 +129,6 @@ export function SystemsManagement({
         toast.error(body?.message || body?.error || "Could not move system.")
         return
       }
-      toast.success("System moved")
       startTransition(() => router.refresh())
     } catch {
       toast.error("Network error.")
@@ -137,7 +138,7 @@ export function SystemsManagement({
   return (
     <>
       {(data.insights.driftingCount > 0 || data.insights.mostConsistent) && (
-        <section className="grid gap-3 sm:grid-cols-2">
+        <section className="grid gap-0 border border-border divide-y divide-border sm:grid-cols-2 sm:divide-y-0 sm:divide-x">
           {data.insights.driftingCount > 0 && (
             <Insight
               tone="warn"
@@ -217,7 +218,7 @@ export function SystemsManagement({
       )}
 
       {visible.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card/40 p-10 text-center">
+        <div className="border border-dashed border-border p-10 text-center">
           <p className="text-sm text-muted-foreground">
             {showArchived
               ? "No archived systems."
@@ -257,9 +258,9 @@ export function SystemsManagement({
 }
 
 function Insight({ tone, text }: { tone: "up" | "warn"; text: string }) {
-  const dot = tone === "up" ? "bg-emerald-500" : "bg-amber"
+  const dot = tone === "up" ? "bg-status-positive" : "bg-amber"
   return (
-    <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
+    <div className="flex items-start gap-3 p-4">
       <span className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0", dot)} />
       <span className="text-sm leading-relaxed">{text}</span>
     </div>
@@ -309,7 +310,7 @@ function ListView({
   onMoveToProject: (row: SystemRow, projectId: string) => void
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card overflow-hidden">
+    <div className="border border-border overflow-hidden">
       {rows.map((s, i) => {
         const Icon = areaIcon[s.project.category]
         return (
@@ -317,7 +318,7 @@ function ListView({
             key={s.id}
             className={cn(
               "grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-4 py-3",
-              i > 0 && "border-t border-border/70",
+              i > 0 && "border-t border-border",
               !s.isActive && "opacity-60",
             )}
             style={{
@@ -396,7 +397,7 @@ function GridView({
           <article
             key={s.id}
             className={cn(
-              "rounded-2xl border border-border bg-card p-5 transition-colors hover:bg-card/80",
+              "border border-border p-5 transition-colors hover:bg-muted/30",
               !s.isActive && "opacity-60",
             )}
             style={{
@@ -495,7 +496,7 @@ function RowActions({
                   Move to project…
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent className="max-h-80 overflow-y-auto">
-                  <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  <DropdownMenuLabel className="text-[10px] text-muted-foreground">
                     Move to
                   </DropdownMenuLabel>
                   {allProjects.map((p) => (
@@ -575,7 +576,7 @@ function AddSystemRow({
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="border border-border p-4">
       <div className="flex flex-wrap items-center gap-2">
         <input
           autoFocus

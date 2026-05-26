@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useCallback } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { CheckCircle2, Compass } from "lucide-react"
@@ -51,7 +53,7 @@ export function MonthlyMonthBar({
           aria-valuemax={12}
         >
           <div
-            className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+            className="h-full rounded-full bg-status-positive transition-all duration-500"
             style={{ width: `${(reviewedMonths.size / 12) * 100}%` }}
           />
         </div>
@@ -75,20 +77,20 @@ export function MonthlyMonthBar({
                   : "hover:bg-muted/50",
                 isReviewed &&
                   !isActive &&
-                  "border-emerald-500/40 bg-emerald-500/15 text-foreground",
+                  "border-status-positive/40 bg-status-positive/15 text-foreground",
                 isPlanned &&
                   !isActive &&
                   !isReviewed &&
-                  "border-sky-500/40 bg-sky-500/10 text-foreground",
+                  "border-amber/30 bg-amber-tint text-foreground",
                 isCurrent && !isActive && !isReviewed && !isPlanned && "border-accent/30",
               )}
             >
               {m.label}
               {isReviewed && (
-                <CheckCircle2 className="absolute top-1 right-1 h-3 w-3 text-emerald-500" />
+                <CheckCircle2 className="absolute top-1 right-1 h-3 w-3 text-status-positive" />
               )}
               {!isReviewed && isPlanned && (
-                <Compass className="absolute top-1 right-1 h-3 w-3 text-sky-500" />
+                <Compass className="absolute top-1 right-1 h-3 w-3 text-amber" />
               )}
             </button>
           )

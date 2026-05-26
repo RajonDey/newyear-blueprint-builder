@@ -24,7 +24,6 @@ export default async function SystemsPage() {
     return (
       <PageContainer>
         <PageHeader
-          eyebrow="Planning · Systems"
           title="Quiet things that compound"
           description="The small set of practices you check off. Edit here; they show up on Today and in your weekly grid."
         />
@@ -55,7 +54,6 @@ export default async function SystemsPage() {
   return (
     <PageContainer>
       <PageHeader
-        eyebrow="Planning · Systems"
         title="Quiet things that compound"
         description="The small set of practices you check off. Edit here; they show up on Today and in your weekly grid."
         actions={

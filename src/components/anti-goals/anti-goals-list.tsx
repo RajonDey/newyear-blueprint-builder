@@ -1,14 +1,15 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Ban, Check, Lock, Pencil, Plus, Trash2, X } from "lucide-react"
 import { toast } from "sonner"
 import type { AntiGoal, LifeCategory } from "@prisma/client"
-import { Eyebrow } from "@/components/atmosphere/eyebrow"
-import { PageHeader } from "@/components/shared/page-header"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 interface AntiGoalsListProps {
   initial: AntiGoal[]
@@ -150,14 +151,8 @@ export function AntiGoalsList({
   }
 
   return (
-    <div className="space-y-8">
-      <PageHeader
-        eyebrow="Foundation · Focus guardrails"
-        title="The quiet noes that protect the year"
-        description="Year-level guardrails — what you won't chase so the real yeses have room. Today shows one rotating pill; this page is where you manage them all."
-      />
-
-      <div className="rounded-2xl border border-border/70 bg-card/40 px-4 py-3.5 text-sm text-muted-foreground leading-relaxed">
+    <div className="space-y-6">
+      <div className="border border-border px-4 py-3.5 text-sm text-muted-foreground leading-relaxed">
         <p>
           <span className="font-medium text-foreground">Why both?</span> The{" "}
           <Link
@@ -183,7 +178,7 @@ export function AntiGoalsList({
       </div>
 
       {!hasActivePlan && (
-        <div className="rounded-2xl border border-dashed border-amber/40 bg-amber/[0.04] p-6">
+        <div className="border border-dashed border-amber/40 bg-amber-tint p-6">
           <p className="text-sm">
             You need an active yearly plan before adding anti-goals.{" "}
             <Link href="/onboarding" className="underline font-medium">
@@ -195,33 +190,33 @@ export function AntiGoalsList({
       )}
 
       {hasActivePlan && (
-        <section className="rounded-2xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
-              <Ban className="h-4 w-4 text-accent" />
-              <h2 className="font-display text-2xl">This year&apos;s noes</h2>
+        <section className="border border-border">
+          <header className="border-b border-border px-4 py-3">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="font-display text-xl tracking-tight flex items-center gap-2">
+                <Ban className="h-4 w-4 text-accent" />
+                This year&apos;s noes
+              </h2>
+              {!isPro && (
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {Math.min(items.length, cap)} / {cap} on Free
+                </span>
+              )}
             </div>
-            {!isPro && (
-              <span className="text-xs text-muted-foreground tabular-nums">
-                {Math.min(items.length, cap)} / {cap} on Free
-              </span>
-            )}
-          </div>
-          <p className="text-sm text-muted-foreground mb-5">
-            One rotates on Today each day. Review the full set during rhythm
-            check-ins — a no held is a yes earned.
-          </p>
-
-          {/* Compose row */}
+            <p className="text-sm text-muted-foreground mt-1">
+              One rotates on Today each day. Review the full set during rhythm
+              check-ins — a no held is a yes earned.
+            </p>
+          </header>
+          <div className="px-4 py-4">
           <div className="flex flex-col sm:flex-row gap-2 mb-5">
-            <input
+            <Input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") add()
               }}
               placeholder="e.g. Stop saying yes to projects that don't fit the year"
-              className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-amber/60"
               disabled={submitting || atCap}
             />
             <select
@@ -245,7 +240,7 @@ export function AntiGoalsList({
           </div>
 
           {items.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border bg-background/40 p-8 text-center text-sm text-muted-foreground">
+            <div className="border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               No anti-goals yet. Start with one thing you&apos;re choosing not to do this year.
             </div>
           ) : (
@@ -255,11 +250,11 @@ export function AntiGoalsList({
                 return (
                   <li
                     key={a.id}
-                    className="group rounded-xl border border-border bg-background/40 p-4 relative"
+                    className="group border border-border p-4 relative"
                   >
                     {isEditing ? (
                       <div className="space-y-2 pr-2">
-                        <input
+                        <Input
                           autoFocus
                           value={editDescription}
                           onChange={(e) => setEditDescription(e.target.value)}
@@ -267,7 +262,6 @@ export function AntiGoalsList({
                             if (e.key === "Enter") saveEdit(a)
                             if (e.key === "Escape") cancelEdit()
                           }}
-                          className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-sm outline-none focus:border-amber/60"
                         />
                         <select
                           value={editCategory}
@@ -298,7 +292,7 @@ export function AntiGoalsList({
                             type="button"
                             onClick={() => saveEdit(a)}
                             aria-label="Save"
-                            className="rounded-md p-1 text-emerald-600 hover:bg-emerald-500/10"
+                            className="rounded-md p-1 text-status-positive hover:bg-status-positive/10"
                           >
                             <Check className="h-3.5 w-3.5" />
                           </button>
@@ -310,7 +304,7 @@ export function AntiGoalsList({
                           {a.description}
                         </div>
                         {a.category && (
-                          <div className="mt-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                          <div className="mt-1 text-[10px] text-muted-foreground">
                             {a.category.toLowerCase()}
                           </div>
                         )}
@@ -341,9 +335,9 @@ export function AntiGoalsList({
                 <li>
                   <Link
                     href="/settings#billing"
-                    className="block h-full w-full rounded-xl border border-dashed border-amber/40 bg-amber/[0.04] p-4 text-left transition-colors hover:bg-amber/[0.08]"
+                    className="block h-full w-full border border-dashed border-amber/40 bg-amber-tint p-4 text-left transition-colors hover:bg-amber-wash"
                   >
-                    <div className="flex items-center gap-1.5 text-amber text-[11px] font-semibold tracking-widest uppercase mb-1">
+                    <div className="flex items-center gap-1.5 text-amber text-[11px] font-medium mb-1">
                       <Lock className="h-3 w-3" />
                       Pro
                     </div>
@@ -358,6 +352,7 @@ export function AntiGoalsList({
               )}
             </ul>
           )}
+          </div>
         </section>
       )}
     </div>

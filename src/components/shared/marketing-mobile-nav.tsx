@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { BrandMark } from "@/components/shared/brand-mark"
 
 const primaryNav = [
   { href: "/how-it-works", label: "How it works" },
@@ -45,8 +46,8 @@ export function MarketingMobileNav() {
           />
           <div className="absolute inset-y-0 right-0 w-72 border-l bg-background p-6 shadow-lg overflow-y-auto">
             <div className="mb-8 flex items-center justify-between">
-              <span className="inline-flex items-baseline gap-2 font-display text-lg tracking-tight">
-                <span aria-hidden className="text-amber leading-none">✦</span>
+              <span className="inline-flex items-center gap-2 font-display text-lg tracking-tight leading-none">
+                <BrandMark size="md" />
                 YearInReview
               </span>
               <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>

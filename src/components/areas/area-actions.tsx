@@ -1,5 +1,7 @@
 "use client"
 
+/* Hallmark · design-system: design.md · designed-as-app */
+
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
@@ -91,7 +93,6 @@ export function AreaActions({ area, orderedIds, isPro }: AreaActionsProps) {
         toast.error(body?.message || body?.error || "Could not save area.")
         return
       }
-      toast.success("Area updated")
       setEditing(false)
       refresh()
     } catch {
@@ -146,7 +147,6 @@ export function AreaActions({ area, orderedIds, isPro }: AreaActionsProps) {
         toast.error(body?.message || body?.error || "Could not delete.")
         return
       }
-      toast.success("Area deleted")
       refresh()
     } catch {
       toast.error("Network error.")
@@ -230,7 +230,7 @@ export function AreaActions({ area, orderedIds, isPro }: AreaActionsProps) {
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 block">
+              <label className="text-xs text-muted-foreground mb-1 block">
                 Name
               </label>
               <input
@@ -243,7 +243,7 @@ export function AreaActions({ area, orderedIds, isPro }: AreaActionsProps) {
               />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 block">
+              <label className="text-xs text-muted-foreground mb-1 block">
                 Description (optional)
               </label>
               <textarea
@@ -255,7 +255,7 @@ export function AreaActions({ area, orderedIds, isPro }: AreaActionsProps) {
               />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 block">
+              <label className="text-xs text-muted-foreground mb-1 block">
                 Visual family {!isPro && "· Pro only"}
               </label>
               <select

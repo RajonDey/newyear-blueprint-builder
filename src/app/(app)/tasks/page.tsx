@@ -46,7 +46,6 @@ export default async function TasksPage() {
     return (
       <PageContainer>
         <PageHeader
-          eyebrow="Planning · Tasks"
           title="Concrete moves"
           description="Pull from your projects into Today and This Week. Anything undated waits in the backlog until you're ready."
         />
@@ -68,7 +67,6 @@ export default async function TasksPage() {
   return (
     <PageContainer>
       <PageHeader
-        eyebrow="Planning · Tasks"
         title="Concrete moves"
         description="Pull from your projects into Today and This Week. Anything undated waits in the backlog until you're ready."
         actions={
