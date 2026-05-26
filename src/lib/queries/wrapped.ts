@@ -11,15 +11,17 @@ const CATEGORY_LABELS: Record<string, string> = {
   PASSION: "Passion",
 }
 
+export type WrappedData = Awaited<ReturnType<typeof getWrappedData>>
+
 export async function getWrappedData(userId: string, year?: number) {
   const targetYear = year ?? new Date().getFullYear()
 
   const plan = await db.yearlyPlan.findFirst({
     where: { userId, year: targetYear },
     include: {
-      goals: {
+      projects: {
         include: {
-          checkpointGoals: true,
+          checkpoints: true,
           motivation: true,
         },
         orderBy: { sortOrder: "asc" },
@@ -63,7 +65,7 @@ export async function getWrappedData(userId: string, year?: number) {
       ? moodEntries.reduce((s, m) => s + m.mood, 0) / moodEntries.length
       : null
 
-  const completedGoals = plan.goals.filter((g) => g.status === "COMPLETED")
+  const completedGoals = plan.projects.filter((g) => g.status === "COMPLETED")
   const totalCheckIns = plan.weeklyCheckIns.length
   const totalReviews = plan.quarterlyReviews.length
 
@@ -79,7 +81,7 @@ export async function getWrappedData(userId: string, year?: number) {
       status: plan.status,
     },
     stats: {
-      totalGoals: plan.goals.length,
+      totalGoals: plan.projects.length,
       completedGoals: completedGoals.length,
       totalCheckIns,
       avgMood,
@@ -87,7 +89,7 @@ export async function getWrappedData(userId: string, year?: number) {
       totalReviews,
       totalAntiGoals: plan.antiGoals.length,
     },
-    goals: plan.goals,
+    projects: plan.projects,
     completedGoals,
     wheelScores,
     achievements: achievementsWithMeta,

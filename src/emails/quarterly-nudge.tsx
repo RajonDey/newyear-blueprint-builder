@@ -9,6 +9,7 @@ import {
   Section,
   Text,
 } from "@react-email/components"
+import { EmailPreferencesFooter } from "@/emails/email-preferences-footer"
 
 interface QuarterlyNudgeEmailProps {
   userName?: string
@@ -21,7 +22,7 @@ export function QuarterlyNudgeEmail({
   quarter,
   appUrl,
 }: QuarterlyNudgeEmailProps) {
-  const reviewUrl = `${appUrl}/check-in/quarterly`
+  const reviewUrl = `${appUrl}/rhythm/quarterly?tab=review`
 
   return (
     <Html>
@@ -46,6 +47,7 @@ export function QuarterlyNudgeEmail({
           <Text style={footer}>
             You&apos;re receiving this as a Pro subscriber.
           </Text>
+          <EmailPreferencesFooter appUrl={appUrl} />
         </Container>
       </Body>
     </Html>

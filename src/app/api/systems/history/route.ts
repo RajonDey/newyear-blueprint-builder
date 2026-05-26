@@ -20,9 +20,9 @@ export async function GET() {
   const plan = await db.yearlyPlan.findFirst({
     where: { userId: session.user.id, status: "ACTIVE" },
     select: {
-      goals: {
+      projects: {
         select: {
-          dailySystems: {
+          systems: {
             where: { isActive: true },
             select: { id: true },
           },
@@ -32,7 +32,7 @@ export async function GET() {
   })
 
   const activeSystemIds =
-    plan?.goals.flatMap((g) => g.dailySystems.map((s) => s.id)) ?? []
+    plan?.projects.flatMap((g) => g.systems.map((s) => s.id)) ?? []
   const totalSystems = activeSystemIds.length
 
   if (totalSystems === 0) {

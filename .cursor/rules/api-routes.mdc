@@ -5,40 +5,65 @@ globs: ["src/app/api/**/*.ts"]
 
 # API Route Standards
 
+> Full production checklist: `docs/PRODUCTION_STANDARDS.md` §3. This file is the quick reference for route handlers.
+
+## Shared helpers (`@/lib/api-route`)
+- `requireApiSession()` — auth + typed session; use `isApiError()` to branch.
+- `parseJsonBody(req)`, `parsePagination(searchParams)`, `paginationMeta(total, page, limit)`.
+- `apiOk`, `apiCreated`, `apiList`, `apiInvalidInput`, `apiNotFound`, `apiPlanLimit`, `apiConflict`.
+- `handleApiRoute(async () => …)` — wraps handler; maps Prisma P2002 → 409.
+
 ## Authentication
-- Always check authentication with `auth()` from `@/lib/auth`.
+- Prefer `requireApiSession()` over raw `auth()` in new/refactored routes.
 - Return 401 if not authenticated.
 - For admin routes, verify `session.user.role === "ADMIN"`. Return 403 if not admin.
 
 ## Validation
-- Always validate request body with Zod before processing.
-- Return consistent JSON: `{ data: T }` for success, `{ error: string }` for errors.
+- Parse body safely: `const body = await req.json().catch(() => null)` then Zod `safeParse`.
+- Return consistent JSON: `{ data: T }` for success; errors per `docs/PRODUCTION_STANDARDS.md` §3.3.
+- Validation failures: 400 with `{ error: "Invalid input", details: parsed.error.flatten() }` when useful.
 
 ## HTTP Status Codes
 - 200: OK
 - 201: Created
 - 400: Bad Request (validation error)
 - 401: Unauthorized
-- 403: Forbidden
-- 404: Not Found
+- 402: Plan limit / upgrade required (use for quotas — not 403)
+- 403: Admin-only forbidden (role check)
+- 404: Not found **or** resource owned by another user (do not use 403 for IDOR)
+- 409: Conflict (duplicate unique constraint)
 - 500: Server Error
 
-## Pagination
-- List endpoints support: `?page=1&limit=20`
+## Pagination (required on new list GETs)
+- Query: `?page=1&limit=20` (default 20, max 100)
 - Return: `{ data: T[], pagination: { page, limit, total, totalPages } }`
+- Use minimal `select` — list endpoints must not return full nested graphs
 
 ## Cron Routes
 - Verify `CRON_SECRET` header for all cron endpoints.
 - Pattern: `if (req.headers.get("authorization") !== \`Bearer ${process.env.CRON_SECRET}\`) return 401`
 
+## Plan Tier Limits
+- Source of truth: `planLimits` in `@/lib/config` — use **`maxProjects`** (never `maxGoalsPerPlan` in new code).
+- Count existing records before insert; reject over-limit with HTTP **402** + `{ error: "THING_LIMIT", message, upgradeUrl: "/pricing" }`.
+- Reference: `src/app/api/areas/route.ts`, `src/app/api/notes/route.ts`.
+
+## Idempotency
+- Writes hitting `@@unique` must use `upsert` or catch Prisma P2002 → 409 — never unhandled 500 on duplicate submit.
+
+## PARA Naming
+- Use the new model names in code: `db.project`, `db.task`, `db.system`, `db.projectCheckIn`, `db.projectCheckpoint`, `db.area`, `db.vision`, `db.note`, `db.resource`, `db.drift`, `db.dailyState`.
+- URL paths still use legacy segments where the dynamic param exists (`[goalId]`); destructure into a new local name: `const { goalId: projectId } = await params`.
+
 ## Pattern Example
 ```ts
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { planLimits } from "@/lib/config"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
-const schema = z.object({ title: z.string().min(1) })
+const schema = z.object({ title: z.string().min(1), areaId: z.string().optional() })
 
 export async function POST(req: Request) {
   const session = await auth()
@@ -50,7 +75,24 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 })
   }
-  const result = await db.goal.create({ data: { ...parsed.data, userId: session.user.id } })
-  return NextResponse.json({ data: result }, { status: 201 })
+
+  const plan = await db.yearlyPlan.findFirst({
+    where: { userId: session.user.id, status: "ACTIVE" },
+    select: { id: true, _count: { select: { projects: true } } },
+  })
+  if (!plan) return NextResponse.json({ error: "No active plan" }, { status: 404 })
+
+  const tier = (session.user.planTier ?? "FREE") as keyof typeof planLimits
+  if (plan._count.projects >= planLimits[tier].maxProjects) {
+    return NextResponse.json(
+      { error: "Project limit reached", upgradeUrl: "/pricing" },
+      { status: 402 }
+    )
+  }
+
+  const project = await db.project.create({
+    data: { ...parsed.data, planId: plan.id },
+  })
+  return NextResponse.json({ data: project }, { status: 201 })
 }
 ```

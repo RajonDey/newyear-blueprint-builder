@@ -33,10 +33,12 @@ globs: ["**/*.ts", "**/*.tsx"]
 (Blank line between each group)
 
 ## Architecture
-- Next.js 15 App Router with route groups: (marketing), (auth), (app), admin
-- PostgreSQL via Neon + Prisma ORM
+- Next.js 16 App Router with route groups: (marketing), (auth), (app), admin
+- React 19 + Server Components by default
+- PostgreSQL via Neon + Prisma ORM (multi-file schema under `prisma/schema/`)
 - NextAuth v5 for authentication
 - Lemon Squeezy for subscriptions
 - Resend for transactional email
 - shadcn/ui + Tailwind CSS for UI
-- Zustand for wizard state, React Query for server state
+- **No global client store** — server state via RSC + `lib/queries/*`; local state via `useState` only (`src/components/providers.tsx`)
+- **Production standards:** read `docs/PRODUCTION_STANDARDS.md` before any new feature (also `.cursor/rules/production-standards.mdc`)

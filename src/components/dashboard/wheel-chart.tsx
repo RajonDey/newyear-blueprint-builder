@@ -8,7 +8,8 @@ import {
   Radar,
   ResponsiveContainer,
 } from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Eyebrow } from "@/components/atmosphere/eyebrow"
+import { chartColors, axisDefaults, gridDefaults } from "@/lib/charts-theme"
 
 const CATEGORY_LABELS: Record<string, string> = {
   HEALTH: "Health",
@@ -35,36 +36,48 @@ export function WheelChart({ scores }: WheelChartProps) {
   const avg = scores.reduce((sum, s) => sum + s.rating, 0) / scores.length
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-display">Wheel of Life</CardTitle>
-          <span className="text-sm text-muted-foreground">
-            Avg: <span className="font-semibold text-foreground">{avg.toFixed(1)}</span>
-          </span>
+    <section className="rounded-2xl border border-border bg-card p-6">
+      <header className="flex items-end justify-between gap-3 mb-4">
+        <div>
+          <Eyebrow className="mb-1.5">Wheel of life</Eyebrow>
+          <h3 className="font-display text-xl md:text-2xl tracking-tight">
+            The shape of your year
+          </h3>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[280px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart data={data} cx="50%" cy="50%">
-              <PolarGrid stroke="hsl(var(--border))" />
-              <PolarAngleAxis
-                dataKey="category"
-                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-              />
-              <PolarRadiusAxis angle={90} domain={[0, 10]} tick={false} />
-              <Radar
-                dataKey="score"
-                stroke="hsl(var(--accent))"
-                fill="hsl(var(--accent))"
-                fillOpacity={0.2}
-                strokeWidth={2}
-              />
-            </RadarChart>
-          </ResponsiveContainer>
+        <div className="text-right">
+          <div className="font-display text-2xl tabular-nums leading-none">
+            {avg.toFixed(1)}
+          </div>
+          <div className="text-[10px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mt-1">
+            Average
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </header>
+      <div className="h-[280px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <RadarChart data={data} cx="50%" cy="50%" outerRadius="78%">
+            <PolarGrid {...gridDefaults} />
+            <PolarAngleAxis
+              dataKey="category"
+              tick={axisDefaults.tick}
+              tickLine={false}
+            />
+            <PolarRadiusAxis
+              angle={90}
+              domain={[0, 10]}
+              tick={false}
+              axisLine={false}
+            />
+            <Radar
+              dataKey="score"
+              stroke={chartColors.amber}
+              fill={chartColors.amber}
+              fillOpacity={0.22}
+              strokeWidth={2}
+            />
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+    </section>
   )
 }

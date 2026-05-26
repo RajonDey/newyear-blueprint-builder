@@ -1,0 +1,43 @@
+---
+description: Mandatory production standards for all new features — full spec in docs/PRODUCTION_STANDARDS.md
+globs: ["**/*.ts", "**/*.tsx"]
+---
+
+# Production Standards (mandatory)
+
+**Read first:** `docs/PRODUCTION_STANDARDS.md` — canonical checklist, anti-patterns, and examples.
+
+## Non-negotiables for new code
+
+### Data flow
+- **Pages:** RSC + `requireAuth()` + `lib/queries/*` — no client `fetch` for primary page data.
+- **Mutations:** API route with `auth()` + Zod + tenant check — or Server Action with same guards.
+- **No** React Query / Zustand (see `src/components/providers.tsx`).
+
+### API routes (`src/app/api/**`)
+- `await req.json().catch(() => null)` before Zod.
+- Success: `{ data }`. Errors: consistent shape; validation includes `details` when useful.
+- Plan limits: `planLimits[tier].maxProjects` (not `maxGoalsPerPlan`); over limit → **402** + `upgradeUrl`.
+- Wrong user's resource → **404**, not 403.
+- List `GET`s: pagination `?page=&limit=` + minimal `select` — no full nested graphs.
+- Unique constraints: `upsert` or catch P2002 → **409**, never unhandled 500.
+- Polymorphic writes: `assertParentBelongsToUser` before create.
+- Notes: `POST /api/notes` with `parentType` + `parentId` — never legacy goal-notes routes.
+
+### Components
+- Default Server Component; `"use client"` only when needed.
+- Target **≤ 300 lines** per client file; split sections instead of god components.
+- Mutations: check `res.ok`, toast on error, `router.refresh()` on success — never silent catch.
+- New app pages: `<PageContainer>` + `<PageHeader>`.
+
+### Database
+- Schema change → migration in `prisma/migrations/`.
+- Add `@@index` on FK columns used in `where` (`planId`, `projectId`, `userId`).
+
+### Before finishing
+- Grep that API paths exist before adding `fetch`.
+- No `any` / `as never` without comment.
+- Do not copy anti-patterns listed in `docs/PRODUCTION_STANDARDS.md` §9.
+
+### Reference implementations
+- `src/app/api/notes/route.ts`, `src/app/api/areas/route.ts`, `src/app/(app)/projects/page.tsx`, `src/lib/parent-guard.ts`

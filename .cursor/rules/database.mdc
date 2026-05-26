@@ -11,20 +11,46 @@ globs: ["src/**/*.ts", "prisma/**"]
 - For list queries, always paginate. Default: 20 items per page.
 - Use transactions (`db.$transaction`) for multi-table operations.
 
+## Multi-file Schema (Prisma 6.4+)
+- Schema lives under `prisma/schema/` (not a single file). Domain-aligned:
+  - `00-base.prisma`     — generator, datasource, enums
+  - `10-identity.prisma` — User, Account, Session, Subscription
+  - `20-foundation.prisma` — YearlyPlan, WheelOfLifeEntry, AntiGoal, **Area**, **Vision**, **VisionItem**
+  - `30-projects.prisma` — **Project** (was Goal), Checkpoint, KeyResult, Motivation
+  - `40-execution.prisma` — **Task** (was Action), **System** (was DailySystem), SystemCompletion
+  - `50-rhythm.prisma`   — WeeklyPlan, WeeklyCheckIn, **ProjectCheckIn**, MonthlyReview, QuarterlyReview
+  - `60-knowledge.prisma` — **Note**, **Resource** (polymorphic via `parentType + parentId`)
+  - `70-system.prisma`   — Streak, Achievement, **Drift** (quick-capture inbox), **DailyState**
+- Config lives in `prisma.config.ts` (not `package.json`). It points Prisma at the schema folder and seed script.
+
+## PARA Model Terminology (Phase 2+)
+- `Area` (life domain) → `Project` (concrete outcome) → `Task` (work unit). `Resource` and `Note` attach to any PARA entity via polymorphic `(parentType, parentId)`.
+- Code uses new names: `db.project`, `db.task`, `db.system`, `db.projectCheckIn`, `db.projectCheckpoint`.
+- Underlying tables keep legacy names via `@@map` until Phase 7 cleanup (`goals`, `actions`, `daily_systems`, etc.). Do not rename DB columns/tables casually.
+- Polymorphic parents on `Note` / `Resource` use the `ParentType` enum: `AREA | PROJECT | TASK | SYSTEM | VISION | VISION_ITEM`.
+
 ## Plan Tier Limits (enforce in API routes)
-- FREE: max 1 yearly plan, 3 goals per plan, 3 daily systems per goal
-- PRO: unlimited plans, unlimited goals, unlimited systems
-- Check limits from `@/lib/config` (`planLimits`) before creating records.
+- Source of truth: `planLimits` in `@/lib/config`.
+- FREE: 1 yearly plan, 3 projects/plan, 3 tasks/project, 3 systems/project, 6 default Areas (no custom), 12 vision items, 50 notes, 10 link-only resources, no file uploads, lite Wrapped.
+- PRO: unlimited plans/projects/tasks/systems, custom Areas, unlimited vision items/notes, 200 resources (link or file), 25 MB/file, 2 GB total, full Wrapped.
+- Check limits **before** creating records. Reject with 402 + upgrade message.
 
 ## Schema Conventions
-- Table names: snake_case plural (@@map)
+- Table names: snake_case plural (`@@map`)
 - Column names: camelCase (Prisma convention)
-- Always include createdAt/updatedAt on mutable models
+- Always include `createdAt` / `updatedAt` on mutable models
 - Use `@default(cuid())` for IDs
 - Use enums for fixed-value columns
+- Polymorphic relations: pair `parentType` (enum) + `parentId` (String) + a composite index
+
+## Migrations
+- Use `prisma migrate dev --create-only` then commit + `prisma migrate deploy`. Never use `db push` against `main`/production.
+- Data-seed inserts (e.g. default Areas, Vision row, legacy data copies) live at the end of the same migration file under a clearly-commented section.
+- Migration history started fresh in Phase 2 (`00000000000000_baseline` + `20260514000000_para_foundation`); older standalone migrations were folded into baseline.
 
 ## Query Patterns
 - Use `findUnique` when you have a unique identifier.
 - Use `findFirst` with a `where` clause for filtered queries.
 - Use `findMany` with `take` and `skip` for paginated lists.
 - Always order results explicitly.
+- Prefer the helpers in `src/lib/queries/*` over ad-hoc `db.*` calls in pages/components.

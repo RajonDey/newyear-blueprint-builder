@@ -25,10 +25,10 @@ export async function POST(req: Request) {
   const { systemId, date, completed } = parsed.data
   const dateObj = new Date(date + "T00:00:00.000Z")
 
-  const system = await db.dailySystem.findFirst({
+  const system = await db.system.findFirst({
     where: {
       id: systemId,
-      goal: { plan: { userId: session.user.id } },
+      project: { plan: { userId: session.user.id } },
     },
   })
 

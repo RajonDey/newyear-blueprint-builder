@@ -1,0 +1,170 @@
+---
+description: Conventions for the dashboard improvisation rollout — applies to all authenticated `(app)` surfaces and their component folders.
+globs: ["src/app/(app)/**/*.tsx", "src/components/{dashboard,projects,goals,areas,notes,resources,anti-goals,systems,today,rhythm,recap,analytics,wrapped,settings,upgrade,atmosphere}/**/*.tsx"]
+---
+
+# Dashboard improvisation conventions
+
+This rule encodes the standards adopted during the PARA dashboard rebuild.
+See `docs/VISION.md` for product IA and `docs/PARA.md` for the entity model.
+
+The marketing surfaces already follow this aesthetic — every dashboard page
+we touch should match it.
+
+---
+
+## 1. Page layout
+
+Every authenticated page composes the same way:
+
+```tsx
+import { PageContainer } from "@/components/shared/page-container"
+import { PageHeader } from "@/components/shared/page-header"
+
+export default async function MySurfacePage() {
+  // server-side data fetch here
+  return (
+    <PageContainer width="wide" spacing="default">
+      <PageHeader
+        eyebrow="Today · Week 12"
+        title="Welcome back, Rajon"
+        description="A calm look at the week."
+        actions={<Button>…</Button>}
+      />
+
+      {/* one or more <section> blocks, optionally introduced by <SectionHeader> */}
+    </PageContainer>
+  )
+}
+```
+
+- **`<PageContainer>`** owns max-width AND vertical rhythm. Don't manually
+  add `space-y-*` on the page root — pass `spacing="compact" | "default" | "generous"`.
+- **`<PageHeader>`** is the only allowed page-level title. New code passes
+  actions via the `actions` prop; legacy `children` continues to work.
+- **`<SectionHeader>`** for in-page section titles (h2). Eyebrow + h2 + optional description + optional actions.
+- Width: `wide` (max-w-6xl) for dashboards/lists; `narrow` (max-w-2xl) for forms and detail pages.
+
+---
+
+## 2. Visual primitives — where to import from
+
+| Need | Import |
+|---|---|
+| Page wrapper (max-width + spacing) | `@/components/shared/page-container` → `<PageContainer>` |
+| Page title | `@/components/shared/page-header` → `<PageHeader>` |
+| Section title | `@/components/shared/section-header` → `<SectionHeader>` |
+| Amber kicker text | `@/components/atmosphere/eyebrow` → `<Eyebrow>` |
+| Pro badge glyph | `@/components/atmosphere/pro-mark` → `<ProMark>` |
+| Soft animated background (hero areas) | `@/components/atmosphere/soft-backdrop` → `<SoftBackdrop>` |
+| Asterisk / seed / enso divider | `@/components/shared/ornament-divider` → `<OrnamentDivider>` |
+| Empty state | `@/components/shared/empty-state` → `<EmptyState>` |
+| Loading card | `@/components/shared/skeleton-card` → `<SkeletonCard>` |
+| Pro gating wrapper | `@/components/upgrade/pro-gate` → `<ProGate>` |
+| Standalone Pro upsell card | `@/components/upgrade/pro-upsell-card` → `<ProUpsellCard>` |
+
+Don't re-implement these inline. If a primitive feels wrong for the use case,
+**extend the primitive** instead of branching to ad-hoc markup.
+
+---
+
+## 3. Pro / Free gating
+
+- **Source of truth:** `src/lib/config.ts` `planLimits` and `src/lib/plan-access.ts` `hasProProductAccess`.
+- **Feature-level helpers:** `src/lib/feature-flags.ts` (`canSeeFullWrapped`, `canSeeAdvancedAnalytics`, `canRunQuarterlyReview`, …). Prefer these over calling `hasProProductAccess` directly so future per-feature divergence is a one-liner.
+- **UI gating:** wrap Pro-only content in `<ProGate planTier={…} role={…} feature="…">`. Its default fallback is `<ProUpsellCard>`.
+- **Free-at-cap upsell** (e.g. `/anti-goals` Free user at 3/3): render an inline `<ProUpsellCard>` beneath the list. Don't block creation — just nudge.
+
+---
+
+## 4. Data fetching
+
+- Server components by default (`app/(app)/**/page.tsx`).
+- Co-locate query helpers under `src/lib/queries/<surface>.ts`. One file per top-level surface (dashboard, goals, daily-habits, analytics, wrapped, …). Each exports a typed function returning **everything that page needs in one call** so we don't N+1 across components.
+- Never call `prisma` directly from a component file. Always go through a `lib/queries/*` helper.
+- Client components get data via props from their server parent. Never refetch on mount.
+
+---
+
+## 5. Charts (recharts)
+
+Always import from `@/lib/charts-theme`:
+
+```tsx
+import {
+  chartColors,
+  chartSeries,
+  axisDefaults,
+  gridDefaults,
+  tooltipDefaults,
+} from "@/lib/charts-theme"
+```
+
+- Use `chartColors.amber` for the primary series, `chartColors.ink` for comparison.
+- Use `axisDefaults.tick`, `gridDefaults`, `tooltipDefaults` for axes/grids/tooltips.
+- Never hardcode HSL values or hex colors in chart configs. The CSS-variable
+  references ensure charts re-theme correctly under dark mode.
+
+---
+
+## 6. Motion (framer-motion)
+
+Always import from `@/lib/motion`:
+
+```tsx
+import { fadeUp, calmTransition, staggerParent, staggerChild } from "@/lib/motion"
+```
+
+- Use `fadeUp` for card / list-item entrances.
+- Use `staggerParent` + `staggerChild` for staggered lists.
+- Use `easings.calm` (the default in `calmTransition`) for any custom transition.
+- Avoid bouncy/elastic/spring easings — they fight the editorial tone.
+
+---
+
+## 7. PARA model — terminology
+
+NBB follows **PARA / Second Brain** (see `docs/PARA.md`):
+
+```
+Area  →  Project  →  Task              + Notes & Resources (transversal)
+```
+
+Critical naming after Phase 2:
+
+- ❌ **Never** call a `Project` a "Goal" in new code or copy. The Prisma model is `Project`. The URL is `/projects`. The component dir is `src/components/projects/`. The user-facing label is "Project."
+- The `Goal` model and `/goals` URL are **deprecated** post-Phase 2 — Prisma keeps DB tables at `goals` via `@@map`, but TypeScript types and code identifiers all read `Project`.
+- `LifeCategory` enum stays as-is; it's used as a category *hint* on `Area` (the new entity), not as the area itself.
+- The four "task-like" models (`DailySystem`, `KeyResult`, `CheckpointGoal`, `Action`) stay split by intent. UI surfaces them together under "Tasks" in a Project detail.
+
+## 8. What we don't pull in from YIR
+
+- **Echo AI coach** — explicitly out of scope for v1. No `/echo` route, no "coming soon" tease. Revisit post-launch (see `docs/plan/DECISIONS.md` → 2026-05-15 "Skip Echo AI for v1").
+- **YIR's localStorage state stores** (`useDrifts`, `useSpine`) — NBB is Prisma + server components. The Quick Capture draft is the only localStorage exception (and it's just a 30-second autosave, not source of truth).
+- **YIR's mock data** (`app-mock.ts`, `today-mock.ts`, `wrapped`, etc.) — visual structure only; everything is populated from real Prisma queries via `lib/queries/*`.
+
+> Drift / Quick Capture *did* ship — it's a hybrid textarea + `cmdk` palette. See `docs/plan/DECISIONS.md` → 2026-05-15 "Quick Capture is a hybrid".
+
+If you find yourself wanting to ship a YIR-only mock feature, **stop and add a
+note to `PROGRESS.md`'s "Cross-phase follow-ups" section** instead. Do not
+ship.
+
+---
+
+## 9. Hard guardrails
+
+- ❌ **No destructive Prisma migrations *outside the planned migration phases*.** New columns must be nullable. New tables fine. The Goal → Project rename (Phase 2) uses `@@map`/`@map` to keep DB tables/columns intact.
+- ❌ **No env var or `middleware.ts` changes** unless explicitly approved per-phase. (Phase 5 will add `BLOB_READ_WRITE_TOKEN`.)
+- ❌ **No `useSession` on the client to re-derive Pro state** — pass it as a prop from the server parent.
+- ❌ **No inline color hex values, no inline HSL.** Always use CSS variables via Tailwind utilities (`text-amber`, `bg-card`, …) or `chartColors`.
+- ✅ **`next build` must pass cleanly** at the end of every phase.
+- ✅ **One phase = one shippable state.** No half-broken intermediates.
+
+---
+
+## 10. When in doubt
+
+1. Re-read `docs/VISION.md` for IA constraints.
+2. Check `docs/PARA.md` for the entity model.
+3. Check the YIR (Lovable) reference in `/Users/rajondey/Developer/Personal/yearinreview/` for the visual pattern — UI/UX comes from there.
+4. Note ambiguities in `PROGRESS.md` "Plan deltas" rather than guessing.

@@ -4,33 +4,35 @@
 
 @layer base {
   :root {
-    /* ── Spiritual Warm Palette ──
-     * Inspired by: Isha Foundation, Bhagavad Gita aesthetics
-     * Ivory backgrounds, deep indigo text, saffron accents
+    /* ── Calm Premium Palette ──
+     * Warm ivory backgrounds, deep ink text, amber as the brand accent.
+     * "Editorial, calm, intentional."
      */
 
-    --background: 40 33% 98%;
-    --foreground: 222 35% 19%;
-    --card: 40 30% 99%;
-    --card-foreground: 222 35% 19%;
-    --popover: 40 30% 99%;
-    --popover-foreground: 222 35% 19%;
+    --background: 38 30% 96%;        /* ivory */
+    --foreground: 222 32% 16%;       /* ink */
 
-    /* Primary — Deep Indigo (sacred, wise) */
-    --primary: 242 40% 30%;
-    --primary-foreground: 40 33% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 32% 16%;
 
-    /* Secondary — Warm Sand */
-    --secondary: 33 20% 93%;
-    --secondary-foreground: 222 35% 19%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 32% 16%;
 
-    /* Muted — Light Parchment */
-    --muted: 35 18% 93%;
-    --muted-foreground: 222 12% 48%;
+    /* Primary — Ink (used for body, primary buttons) */
+    --primary: 222 32% 16%;
+    --primary-foreground: 38 30% 96%;
 
-    /* Accent — Saffron (spiritual warmth, action) */
-    --accent: 28 65% 48%;
-    --accent-foreground: 40 33% 98%;
+    /* Secondary — Soft warm sand */
+    --secondary: 36 24% 92%;
+    --secondary-foreground: 222 32% 16%;
+
+    /* Muted — Light parchment */
+    --muted: 36 20% 93%;
+    --muted-foreground: 222 12% 42%;
+
+    /* Accent — Warm amber (the brand kicker) */
+    --accent: 24 75% 55%;
+    --accent-foreground: 0 0% 100%;
 
     /* Semantic */
     --destructive: 0 65% 48%;
@@ -41,42 +43,51 @@
     --warning-foreground: 0 0% 100%;
 
     /* Chrome */
-    --border: 33 15% 88%;
-    --input: 33 15% 88%;
-    --ring: 242 40% 30%;
+    --border: 36 18% 88%;
+    --input: 36 18% 88%;
+    --ring: 24 75% 55%;
 
-    /* Sidebar — Warm Ivory */
-    --sidebar-background: 38 25% 96%;
-    --sidebar-foreground: 222 35% 22%;
-    --sidebar-primary: 242 40% 30%;
-    --sidebar-primary-foreground: 40 33% 98%;
-    --sidebar-accent: 33 20% 92%;
-    --sidebar-accent-foreground: 222 35% 22%;
-    --sidebar-border: 33 15% 88%;
-    --sidebar-ring: 242 40% 30%;
+    /* Brand tokens (used by amber/cyan/gold Tailwind utilities) */
+    --amber: 24 75% 55%;             /* #E58A3C warm amber */
+    --amber-foreground: 0 0% 100%;
+    --cyan: 187 70% 42%;
+    --cyan-foreground: 0 0% 100%;
+    --gold: 38 80% 55%;
+
+    /* Sidebar — Warm Ivory, slightly cooler than canvas */
+    --sidebar-background: 38 26% 94%;
+    --sidebar-foreground: 222 18% 28%;
+    --sidebar-primary: 24 75% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 36 22% 89%;
+    --sidebar-accent-foreground: 222 32% 16%;
+    --sidebar-border: 36 18% 86%;
+    --sidebar-ring: 24 75% 55%;
 
     --radius: 0.625rem;
   }
 
   .dark {
-    --background: 225 20% 7%;
-    --foreground: 35 20% 90%;
-    --card: 225 18% 10%;
-    --card-foreground: 35 20% 90%;
-    --popover: 225 18% 10%;
-    --popover-foreground: 35 20% 90%;
+    --background: 222 32% 8%;          /* deep ink */
+    --foreground: 38 30% 94%;          /* warm ivory text */
 
-    --primary: 35 55% 55%;
-    --primary-foreground: 225 20% 7%;
+    --card: 222 28% 11%;
+    --card-foreground: 38 30% 94%;
 
-    --secondary: 225 14% 15%;
-    --secondary-foreground: 35 20% 90%;
+    --popover: 222 28% 11%;
+    --popover-foreground: 38 30% 94%;
 
-    --muted: 225 14% 15%;
-    --muted-foreground: 35 12% 55%;
+    --primary: 38 30% 94%;
+    --primary-foreground: 222 32% 12%;
 
-    --accent: 28 60% 52%;
-    --accent-foreground: 225 20% 7%;
+    --secondary: 222 20% 16%;
+    --secondary-foreground: 38 30% 94%;
+
+    --muted: 222 18% 15%;
+    --muted-foreground: 38 12% 70%;
+
+    --accent: 24 80% 60%;
+    --accent-foreground: 222 32% 10%;
 
     --destructive: 0 55% 45%;
     --destructive-foreground: 35 20% 90%;
@@ -85,18 +96,24 @@
     --warning: 38 80% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 225 12% 18%;
-    --input: 225 12% 18%;
-    --ring: 35 55% 55%;
+    --border: 222 16% 20%;
+    --input: 222 16% 20%;
+    --ring: 24 80% 60%;
 
-    --sidebar-background: 225 20% 8%;
-    --sidebar-foreground: 35 16% 82%;
-    --sidebar-primary: 35 55% 55%;
-    --sidebar-primary-foreground: 225 20% 7%;
-    --sidebar-accent: 225 14% 14%;
-    --sidebar-accent-foreground: 35 16% 82%;
-    --sidebar-border: 225 12% 16%;
-    --sidebar-ring: 35 55% 55%;
+    --amber: 24 80% 60%;
+    --amber-foreground: 222 32% 10%;
+    --cyan: 187 70% 50%;
+    --cyan-foreground: 222 32% 10%;
+    --gold: 38 80% 60%;
+
+    --sidebar-background: 222 30% 9%;
+    --sidebar-foreground: 38 20% 82%;
+    --sidebar-primary: 24 80% 60%;
+    --sidebar-primary-foreground: 222 32% 10%;
+    --sidebar-accent: 222 22% 14%;
+    --sidebar-accent-foreground: 38 30% 94%;
+    --sidebar-border: 222 16% 18%;
+    --sidebar-ring: 24 80% 60%;
   }
 }
 
@@ -106,8 +123,12 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1, "kern" 1, "cv11", "ss01";
+  }
+
+  h1, h2, h3, h4 {
+    letter-spacing: -0.02em;
   }
 
   /* Elegant selection color */
@@ -120,11 +141,18 @@
 @layer utilities {
   .text-gradient-brand {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(242 40% 30%), hsl(28 65% 48%));
+    background-image: linear-gradient(135deg, hsl(222 32% 16%), hsl(24 75% 55%));
   }
 
   .dark .text-gradient-brand {
-    background-image: linear-gradient(135deg, hsl(35 55% 55%), hsl(28 60% 52%));
+    background-image: linear-gradient(135deg, hsl(38 30% 94%), hsl(24 80% 60%));
+  }
+
+  /* Soft amber wash for subtle highlights */
+  .glow-amber {
+    background:
+      radial-gradient(60% 80% at 85% 50%, hsl(var(--amber) / 0.10) 0%, transparent 60%),
+      hsl(var(--card));
   }
 
   /* Organic divider line */

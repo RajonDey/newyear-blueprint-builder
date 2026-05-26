@@ -9,6 +9,7 @@ import {
   Section,
   Text,
 } from "@react-email/components"
+import { EmailPreferencesFooter } from "@/emails/email-preferences-footer"
 
 interface WeeklyReminderEmailProps {
   userName?: string
@@ -40,6 +41,7 @@ export function WeeklyReminderEmail({ userName, appUrl }: WeeklyReminderEmailPro
           <Text style={footer}>
             You&apos;re receiving this because you have an active yearly plan.
           </Text>
+          <EmailPreferencesFooter appUrl={appUrl} />
         </Container>
       </Body>
     </Html>

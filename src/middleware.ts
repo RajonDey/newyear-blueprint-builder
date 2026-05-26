@@ -13,6 +13,9 @@ const publicRoutes = [
   "/signup",
   "/pricing",
   "/features",
+  "/how-it-works",
+  "/about",
+  "/faq",
   "/blog",
   "/terms",
   "/privacy",
@@ -30,9 +33,18 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
+  const isPublicRoute = publicRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  )
+
   const secret = process.env.NEXTAUTH_SECRET
   if (!secret) {
-    console.error("[middleware] NEXTAUTH_SECRET is not set")
+    console.error("[middleware] NEXTAUTH_SECRET is not set — blocking protected routes")
+    if (!isPublicRoute) {
+      const loginUrl = new URL("/login", req.nextUrl.origin)
+      loginUrl.searchParams.set("callbackUrl", pathname)
+      return NextResponse.redirect(loginUrl)
+    }
     return NextResponse.next()
   }
 
@@ -47,10 +59,6 @@ export default async function middleware(req: NextRequest) {
     (typeof token?.sub === "string" && token.sub.length > 0 ? token.sub : null)
   const accountActive = token?.accountActive !== false
   const isLoggedIn = Boolean(uid && accountActive)
-
-  const isPublicRoute = publicRoutes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  )
 
   if (!isLoggedIn && !isPublicRoute) {
     const loginUrl = new URL("/login", req.nextUrl.origin)

@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/weekly-reminder",
-      "schedule": "0 18 * * 0"
+      "schedule": "0 18 * * 5"
     },
     {
       "path": "/api/cron/daily-nudge",
@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/streak-calculator",
       "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/monthly-nudge",
+      "schedule": "0 9 1 * *"
     },
     {
       "path": "/api/cron/quarterly-nudge",

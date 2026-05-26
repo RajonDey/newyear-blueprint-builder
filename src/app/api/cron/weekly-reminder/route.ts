@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { getIsoWeekContext } from "@/lib/utils"
+import { shouldSendEmail } from "@/lib/cron/email-eligibility"
 import { sendWeeklyReminder } from "@/lib/email"
+import { getIsoWeekContext } from "@/lib/utils"
 
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization")
@@ -15,7 +16,9 @@ export async function GET(req: Request) {
   const activePlans = await db.yearlyPlan.findMany({
     where: { status: "ACTIVE" },
     include: {
-      user: { select: { id: true, email: true, name: true } },
+      user: {
+        select: { id: true, email: true, name: true, preferences: true },
+      },
       weeklyCheckIns: {
         where: { weekNumber, year },
         take: 1,
@@ -25,9 +28,15 @@ export async function GET(req: Request) {
 
   const toNotify = activePlans.filter((p) => p.weeklyCheckIns.length === 0)
   const sent: string[] = []
+  const skipped: string[] = []
   const errors: { email: string; error: string }[] = []
 
   for (const plan of toNotify) {
+    if (!shouldSendEmail(plan.user.preferences, "weeklyReviewReminder")) {
+      skipped.push(plan.user.email)
+      continue
+    }
+
     try {
       await sendWeeklyReminder(plan.user.email, plan.user.name ?? undefined)
       sent.push(plan.user.email)
@@ -42,7 +51,9 @@ export async function GET(req: Request) {
   return NextResponse.json({
     data: {
       usersNotified: sent.length,
+      usersSkipped: skipped.length,
       sent,
+      skipped: skipped.length > 0 ? skipped : undefined,
       errors: errors.length > 0 ? errors : undefined,
     },
   })

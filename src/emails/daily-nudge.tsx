@@ -9,6 +9,7 @@ import {
   Section,
   Text,
 } from "@react-email/components"
+import { EmailPreferencesFooter } from "@/emails/email-preferences-footer"
 
 interface DailyNudgeEmailProps {
   userName?: string
@@ -29,7 +30,7 @@ export function DailyNudgeEmail({ userName, appUrl }: DailyNudgeEmailProps) {
             {userName ? `Hi ${userName},` : "Hi,"}
           </Text>
           <Text style={paragraph}>
-            It's been a couple of days since your last check-in. Don't worry — perfection is the enemy of progress. All it takes is ticking off a single, tiny daily habit today to get your momentum back!
+            It&apos;s been a couple of days since your last check-in. Don&apos;t worry — perfection is the enemy of progress. All it takes is ticking off a single, tiny daily habit today to get your momentum back!
           </Text>
           <Section style={buttonContainer}>
             <Button style={button} href={dashboardUrl}>
@@ -37,8 +38,9 @@ export function DailyNudgeEmail({ userName, appUrl }: DailyNudgeEmailProps) {
             </Button>
           </Section>
           <Text style={footer}>
-            You're receiving this because you have an active Yearly Plan. We only send this reminder once when you slip up to help you stay accountable.
+            You&apos;re receiving this because you have an active yearly plan. We only send this reminder once when you slip up to help you stay accountable.
           </Text>
+          <EmailPreferencesFooter appUrl={appUrl} />
         </Container>
       </Body>
     </Html>

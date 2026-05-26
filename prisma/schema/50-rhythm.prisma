@@ -1,0 +1,148 @@
+// ─────────────────────────────────────────────────────────────
+// Rhythm — the recurring cadence of plan / check-in / review.
+// WeeklyPlan (forward) + WeeklyCheckIn (reflection) +
+// ProjectCheckIn (was GoalCheckIn) + MonthlyReview + QuarterlyReview.
+// ─────────────────────────────────────────────────────────────
+
+// Forward-looking weekly intent (Plan beat); pairs with WeeklyCheckIn (Review beat).
+model WeeklyPlan {
+  id                 String        @id @default(cuid())
+  planId             String
+  weekNumber         Int
+  year               Int
+  priorityProjectIds String[]      @default([]) @map("priorityGoalIds")
+  protectCategory    LifeCategory?
+  commitments        Json?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  plan YearlyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, weekNumber, year])
+  @@map("weekly_plans")
+}
+
+model WeeklyCheckIn {
+  id            String   @id @default(cuid())
+  planId        String
+  weekNumber    Int
+  year          Int
+  overallMood   Int?
+  notes         String?  @db.Text
+  nextWeekFocus String?  @db.Text
+  completedAt   DateTime @default(now())
+
+  plan            YearlyPlan       @relation(fields: [planId], references: [id], onDelete: Cascade)
+  projectCheckIns ProjectCheckIn[]
+
+  @@unique([planId, weekNumber, year])
+  @@map("weekly_check_ins")
+}
+
+model ProjectCheckIn {
+  id              String  @id @default(cuid())
+  weeklyCheckInId String
+  projectId       String  @map("goalId")
+  progressRating  Int
+  notes           String? @db.Text
+  blockers        String? @db.Text
+
+  weeklyCheckIn WeeklyCheckIn @relation(fields: [weeklyCheckInId], references: [id], onDelete: Cascade)
+  project       Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([weeklyCheckInId, projectId], map: "goal_check_ins_weeklyCheckInId_goalId_key")
+  @@map("goal_check_ins")
+}
+
+model MonthlyReview {
+  id             String   @id @default(cuid())
+  planId         String
+  month          Int // 1-12
+  year           Int
+  summary        String?  @db.Text
+  winsText       String?  @db.Text
+  challengesText String?  @db.Text
+  adjustments    String?  @db.Text
+  /// Explicit carry-forward for weekly planning in the following month.
+  nextMonthFocus String?  @db.Text
+  /// Rich answers keyed by `ReviewTemplate.fields[].key` (plus legacy sync for the four columns above).
+  responses      Json?
+  completedAt    DateTime @default(now())
+
+  plan YearlyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, month, year])
+  @@map("monthly_reviews")
+}
+
+/// Forward-looking monthly intent — pairs with MonthlyReview (reflection beat).
+model MonthlyPlan {
+  id                String   @id @default(cuid())
+  planId            String
+  month             Int // 1-12
+  year              Int
+  monthFocus        String?  @db.Text
+  /// Per-project one-line intentions keyed by project id.
+  projectIntentions Json?
+  /// Up to three priority intentions for the month.
+  topIntentions     Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  plan YearlyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, month, year])
+  @@map("monthly_plans")
+}
+
+model QuarterlyReview {
+  id                  String   @id @default(cuid())
+  planId              String
+  quarter             Quarter
+  summary             String?  @db.Text
+  winsText            String?  @db.Text
+  challengesText      String?  @db.Text
+  adjustments         String?  @db.Text
+  responses           Json?
+  wheelOfLifeSnapshot Json?
+  completedAt         DateTime @default(now())
+
+  plan YearlyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, quarter])
+  @@map("quarterly_reviews")
+}
+
+/// Forward-looking quarterly intent — pairs with QuarterlyReview (reflection beat).
+model QuarterlyPlan {
+  id                String   @id @default(cuid())
+  planId            String
+  quarter           Quarter
+  year              Int
+  quarterFocus      String?  @db.Text
+  projectIntentions Json?
+  topIntentions     Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  plan YearlyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, quarter])
+  @@map("quarterly_plans")
+}
+
+/// User-defined fields for Monthly / Quarterly review forms (labels + placeholders).
+/// Keys are stable slugs; answers live on `MonthlyReview.responses` / `QuarterlyReview.responses`.
+model ReviewTemplate {
+  id        String        @id @default(cuid())
+  userId    String
+  cadence   ReviewCadence
+  fields    Json
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cadence])
+  @@map("review_templates")
+}

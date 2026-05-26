@@ -1,18 +1,23 @@
-import { RhythmTabs } from "@/components/rhythm/rhythm-tabs"
+import { RhythmHeader } from "@/components/rhythm/rhythm-header"
+import { requireAuth } from "@/lib/auth-guard"
+import { getRhythmStats } from "@/lib/queries/rhythm-stats"
 
-export default function RhythmLayout({
+/**
+ * Rhythm section layout — shared cadence nav only.
+ * Each sub-route owns its own `<PageContainer width="wide">` and `<PageHeader />`.
+ */
+export default async function RhythmLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await requireAuth()
+  const stats = await getRhythmStats(session.user.id)
+
   return (
-    <div className="-m-4 sm:-m-6 flex flex-col min-h-[calc(100vh-4rem)]">
-      <RhythmTabs />
-      <div className="flex-1 bg-muted/20 px-4 sm:px-6 pt-8 pb-6">
-        <div className="mx-auto max-w-3xl w-full">
-          {children}
-        </div>
-      </div>
+    <div className="space-y-6">
+      <RhythmHeader stats={stats} />
+      {children}
     </div>
   )
 }

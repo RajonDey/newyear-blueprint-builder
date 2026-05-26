@@ -1,6 +1,4 @@
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import {
   CalendarCheck,
   Target,
@@ -9,6 +7,9 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Eyebrow } from "@/components/atmosphere/eyebrow"
+import { DAILY_HOME_HREF } from "@/lib/app-routes"
 
 interface ActionItem {
   label: string
@@ -26,19 +27,19 @@ const secondaryActions: ActionItem[] = [
     label: "Weekly Planner",
     href: "/rhythm/weekly",
     icon: CalendarCheck,
-    description: "Plan your week and review it",
+    description: "Plan and review your week",
   },
   {
-    label: "Daily Habits",
-    href: "/rhythm/daily",
+    label: "Today",
+    href: DAILY_HOME_HREF,
     icon: CalendarRange,
-    description: "Track today's repeatable actions",
+    description: "Complete today's systems on the Dashboard",
   },
   {
-    label: "Goals",
-    href: "/goals",
+    label: "Projects",
+    href: "/projects",
     icon: Target,
-    description: "Update goals and checkpoints",
+    description: "Update projects and checkpoints",
   },
   {
     label: "Analytics",
@@ -50,57 +51,63 @@ const secondaryActions: ActionItem[] = [
 
 export function QuickActions({ primaryAction }: QuickActionsProps) {
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-display">Next Step</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <Link
-          href={primaryAction.href}
-          className="block rounded-lg border border-accent/30 bg-accent/5 p-4 transition-colors hover:bg-accent/10"
-        >
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/20 shrink-0">
-              <primaryAction.icon className="h-4 w-4 text-accent" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs uppercase tracking-wider text-accent font-semibold">
-                Recommended now
-              </p>
-              <p className="text-sm font-semibold mt-0.5">{primaryAction.label}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {primaryAction.description}
-              </p>
-            </div>
-            <ArrowRight className="h-4 w-4 text-accent shrink-0 mt-1" />
-          </div>
-        </Link>
+    <section className="rounded-2xl border border-border bg-card p-6">
+      <header className="mb-4">
+        <Eyebrow className="mb-1.5">Next step</Eyebrow>
+        <h3 className="font-display text-xl md:text-2xl tracking-tight">
+          One small move today
+        </h3>
+      </header>
 
-        <div className="grid gap-2 sm:grid-cols-2">
-          {secondaryActions
-            .filter((action) => action.href !== primaryAction.href)
-            .map((action) => (
+      <Link
+        href={primaryAction.href}
+        className="group block rounded-xl border border-amber/30 bg-amber/[0.06] p-4 transition-colors hover:bg-amber/[0.10]"
+      >
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber/15 text-amber">
+            <primaryAction.icon className="h-4 w-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-semibold tracking-[0.18em] uppercase text-amber">
+              Recommended now
+            </div>
+            <p className="mt-1 text-sm font-medium">{primaryAction.label}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
+              {primaryAction.description}
+            </p>
+          </div>
+          <ArrowRight className="h-4 w-4 shrink-0 text-amber transition-transform group-hover:translate-x-0.5" />
+        </div>
+      </Link>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        {secondaryActions
+          .filter((a) => a.href !== primaryAction.href)
+          .map((a) => (
             <Link
-              key={action.href}
-              href={action.href}
-              className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors"
+              key={a.href}
+              href={a.href}
+              className="flex items-center gap-3 rounded-xl border border-border bg-background/50 p-3 transition-colors hover:bg-muted/40"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 shrink-0">
-                <action.icon className="h-4 w-4 text-accent" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <a.icon className="h-4 w-4" />
               </div>
-              <div>
-                <p className="text-sm font-medium">{action.label}</p>
-                <p className="text-xs text-muted-foreground">{action.description}</p>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">{a.label}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {a.description}
+                </p>
               </div>
             </Link>
-            ))}
-        </div>
-        <Button variant="ghost" asChild className="w-full justify-center gap-1">
-          <Link href="/plan/new">
-            Refine your yearly plan <Sparkles className="h-4 w-4" />
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
+          ))}
+      </div>
+
+      <Button variant="ghost" asChild className="mt-3 w-full justify-center gap-1.5">
+        <Link href="/projects">
+          Manage projects
+          <Sparkles className="h-4 w-4" />
+        </Link>
+      </Button>
+    </section>
   )
 }

@@ -17,9 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Compass, Loader2, Plus, Target, Trash2, Sparkles, CalendarCheck } from "lucide-react"
+import { Compass, Loader2, Plus, Target, Trash2, Sparkles, CalendarCheck, CalendarDays } from "lucide-react"
 import { toast } from "sonner"
 import type { WeeklyCommitment } from "@/types/weekly"
+import type { MonthlyFocusContext } from "@/lib/queries/rhythm-context"
+import {
+  CadenceContextBanner,
+  CadenceContextRichText,
+} from "@/components/check-in/cadence-context-banner"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
@@ -37,30 +42,32 @@ const PROTECT_SELECT_VALUES = new Set<string>([
 interface WeeklyPlanFormProps {
   planId: string
   planYear: number
-  goals: Goal[]
+  projects: Goal[]
   weekNumber: number
   year: number
   initialPlan: {
-    priorityGoalIds: string[]
+    priorityProjectIds: string[]
     protectCategory: string | null
     commitments: WeeklyCommitment[]
   } | null
   suggestionFromLastWeek: string | null
+  monthlyFocus?: MonthlyFocusContext | null
 }
 
 export function WeeklyPlanForm({
   planId,
   planYear,
-  goals,
+  projects,
   weekNumber,
   year,
   initialPlan,
   suggestionFromLastWeek,
+  monthlyFocus,
 }: WeeklyPlanFormProps) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [priorityIds, setPriorityIds] = useState<string[]>(
-    initialPlan?.priorityGoalIds ?? []
+    initialPlan?.priorityProjectIds ?? []
   )
   const [protect, setProtect] = useState<string>(() => {
     const c = initialPlan?.protectCategory
@@ -104,7 +111,7 @@ export function WeeklyPlanForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           planId,
-          priorityGoalIds: priorityIds,
+          priorityProjectIds: priorityIds,
           protectCategory: protect === "NONE" ? null : protect,
           commitments: filled.length ? filled : [],
         }),
@@ -120,16 +127,16 @@ export function WeeklyPlanForm({
     }
   }
 
-  if (goals.length === 0) {
+  if (projects.length === 0) {
     return (
       <EmptyState
         icon={CalendarCheck}
-        title="Add goals to plan your week"
-        description="Your weekly plan is based on your yearly goals. Create goals first, then come back to set weekly priorities."
+        title="Add projects to plan your week"
+        description="Your weekly plan is based on your yearly projects. Create a project first, then come back to set weekly priorities."
         action={
           <Button asChild>
-            <Link href="/goals">
-              <Sparkles className="mr-2 h-4 w-4" /> Go to goals
+            <Link href="/projects">
+              <Sparkles className="mr-2 h-4 w-4" /> Go to projects
             </Link>
           </Button>
         }
@@ -139,6 +146,39 @@ export function WeeklyPlanForm({
 
   return (
     <div className="space-y-6">
+      {monthlyFocus?.focusText?.trim() && (
+        <CadenceContextBanner
+          icon={<CalendarDays className="h-4 w-4" />}
+          title={
+            monthlyFocus.source === "plan"
+              ? `${monthlyFocus.monthLabel} plan focus`
+              : monthlyFocus.source === "current"
+                ? `This month's focus (${monthlyFocus.monthLabel} review)`
+                : `Carried from ${monthlyFocus.monthLabel} — next month focus`
+          }
+        >
+          <CadenceContextRichText html={monthlyFocus.focusText} />
+        </CadenceContextBanner>
+      )}
+
+      {monthlyFocus?.topIntentions && monthlyFocus.topIntentions.length > 0 && (
+        <div className="rounded-lg border border-border bg-card px-4 py-3 space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {monthlyFocus.monthLabel} plan — top intentions
+          </p>
+          <ul className="space-y-1.5 text-sm">
+            {monthlyFocus.topIntentions.map((line, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="text-accent font-medium tabular-nums shrink-0">
+                  {i + 1}.
+                </span>
+                <span>{line}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {suggestionFromLastWeek && (
         <div className="flex items-start gap-3 rounded-lg border border-accent/20 bg-accent/5 p-3 text-sm">
           <Compass className="h-4 w-4 text-accent mt-0.5 shrink-0" />
@@ -156,14 +196,14 @@ export function WeeklyPlanForm({
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-display flex items-center gap-2">
             <Target className="h-4 w-4 text-accent" />
-            Priority goals (up to 3)
+            Priority projects (up to 3)
           </CardTitle>
           <p className="text-sm text-muted-foreground font-normal">
-            These stay top-of-mind on your Daily Habits page.
+            These stay top-of-mind on your Dashboard Today card.
           </p>
         </CardHeader>
         <CardContent className="space-y-2">
-          {goals.map((g) => {
+          {projects.map((g) => {
             const cat = LIFE_CATEGORIES.find((c) => c.id === g.category)
             const checked = priorityIds.includes(g.id)
             return (
@@ -181,7 +221,7 @@ export function WeeklyPlanForm({
                       setPriorityIds((prev) => {
                         if (prev.includes(g.id)) return prev
                         if (prev.length >= 3) {
-                          toast.info("Choose up to three priority goals for the week.")
+                          toast.info("Choose up to three priority projects for the week.")
                           return prev
                         }
                         return [...prev, g.id]
@@ -235,7 +275,7 @@ export function WeeklyPlanForm({
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-display">Commitments</CardTitle>
           <p className="text-sm text-muted-foreground font-normal">
-            Core = tied to yearly goals. Follow-up = admin, errands, small wins.
+            Core = tied to yearly projects. Follow-up = admin, errands, small wins.
           </p>
         </CardHeader>
         <CardContent className="space-y-3">

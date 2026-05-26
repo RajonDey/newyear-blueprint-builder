@@ -37,7 +37,7 @@ export function SignupCta() {
           <Link href="/signup">Begin free</Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/features">See features</Link>
+          <Link href="/how-it-works">See how it works</Link>
         </Button>
       </div>
     </div>

@@ -21,7 +21,7 @@ export async function PUT(
 
   const { keyResultId } = await params
   const existing = await db.keyResult.findFirst({
-    where: { id: keyResultId, goal: { plan: { userId: session.user.id } } },
+    where: { id: keyResultId, project: { plan: { userId: session.user.id } } },
   })
   if (!existing) {
     return NextResponse.json({ error: "Key result not found" }, { status: 404 })
@@ -57,7 +57,7 @@ export async function DELETE(
 
   const { keyResultId } = await params
   const existing = await db.keyResult.findFirst({
-    where: { id: keyResultId, goal: { plan: { userId: session.user.id } } },
+    where: { id: keyResultId, project: { plan: { userId: session.user.id } } },
   })
   if (!existing) {
     return NextResponse.json({ error: "Key result not found" }, { status: 404 })

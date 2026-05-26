@@ -1,7 +1,85 @@
 import { db } from "@/lib/db"
 import { getCheckInFormData } from "@/lib/queries/check-in"
+import {
+  MONTH_SHORT_LABELS,
+  resolveMonthlyFocusContext,
+  getCurrentQuarter,
+} from "@/lib/queries/rhythm-context"
 import { getIsoWeekContextInTimeZone, getPreviousIsoWeekContext } from "@/lib/utils"
+import { getWeeklyPriorityProjects } from "@/lib/queries/weekly-priorities"
+import { parseTopIntentions } from "@/types/monthly"
 import type { WeeklyCommitment } from "@/types/weekly"
+
+const monthlyReviewSelect = {
+  summary: true,
+  winsText: true,
+  challengesText: true,
+  adjustments: true,
+  nextMonthFocus: true,
+  responses: true,
+} as const
+
+async function getMonthlyFocusForWeeklyPlan(planId: string, planYear: number) {
+  const currentMonth = new Date().getMonth() + 1
+  const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1
+
+  const [currentPlan, currentReview, previousReview, quarterPlan] =
+    await Promise.all([
+    db.monthlyPlan.findUnique({
+      where: {
+        planId_month_year: { planId, month: currentMonth, year: planYear },
+      },
+      select: { monthFocus: true, topIntentions: true },
+    }),
+    db.monthlyReview.findUnique({
+      where: {
+        planId_month_year: { planId, month: currentMonth, year: planYear },
+      },
+      select: monthlyReviewSelect,
+    }),
+    db.monthlyReview.findUnique({
+      where: {
+        planId_month_year: { planId, month: previousMonth, year: planYear },
+      },
+      select: monthlyReviewSelect,
+    }),
+    db.quarterlyPlan.findUnique({
+      where: {
+        planId_quarter: { planId, quarter: getCurrentQuarter() },
+      },
+      select: { topIntentions: true },
+    }),
+  ])
+
+  let topIntentions = parseTopIntentions(currentPlan?.topIntentions)
+  if (topIntentions.length === 0) {
+    topIntentions = parseTopIntentions(quarterPlan?.topIntentions)
+  }
+  const focus = resolveMonthlyFocusContext(
+    currentPlan,
+    currentReview,
+    previousReview,
+    currentMonth,
+    previousMonth,
+  )
+
+  if (!focus && topIntentions.length === 0) return null
+
+  if (focus) {
+    return {
+      ...focus,
+      ...(topIntentions.length > 0 && { topIntentions }),
+    }
+  }
+
+  return {
+    month: currentMonth,
+    monthLabel: MONTH_SHORT_LABELS[currentMonth - 1] ?? `Month ${currentMonth}`,
+    focusText: "",
+    source: "plan" as const,
+    ...(topIntentions.length > 0 && { topIntentions }),
+  }
+}
 
 function parseCommitments(raw: unknown): WeeklyCommitment[] {
   if (!Array.isArray(raw)) return []
@@ -42,28 +120,32 @@ export async function getWeeklyWorkspaceData(userId: string) {
 
   const prev = getPreviousIsoWeekContext(base.weekNumber, base.year)
 
-  const prevCheckIn = await db.weeklyCheckIn.findUnique({
-    where: {
-      planId_weekNumber_year: {
-        planId: base.plan.id,
-        weekNumber: prev.weekNumber,
-        year: prev.year,
+  const [prevCheckIn, monthlyFocus] = await Promise.all([
+    db.weeklyCheckIn.findUnique({
+      where: {
+        planId_weekNumber_year: {
+          planId: base.plan.id,
+          weekNumber: prev.weekNumber,
+          year: prev.year,
+        },
       },
-    },
-    select: { nextWeekFocus: true },
-  })
+      select: { nextWeekFocus: true },
+    }),
+    getMonthlyFocusForWeeklyPlan(base.plan.id, base.plan.year),
+  ])
 
   return {
     ...base,
     isCurrentWeek: true,
     weeklyPlan: weeklyPlan
       ? {
-          priorityGoalIds: [...weeklyPlan.priorityGoalIds],
+          priorityProjectIds: [...weeklyPlan.priorityProjectIds],
           protectCategory: weeklyPlan.protectCategory,
           commitments: parseCommitments(weeklyPlan.commitments),
         }
       : null,
     suggestionFromLastWeek: prevCheckIn?.nextWeekFocus ?? null,
+    monthlyFocus,
   }
 }
 
@@ -87,7 +169,7 @@ export async function getWeeklyWorkspaceDataForWeek(
   const plan = await db.yearlyPlan.findFirst({
     where: { userId, status: "ACTIVE" },
     include: {
-      goals: {
+      projects: {
         select: { id: true, title: true, category: true },
         orderBy: [{ type: "asc" }, { sortOrder: "asc" }],
       },
@@ -106,81 +188,40 @@ export async function getWeeklyWorkspaceDataForWeek(
       where: {
         planId_weekNumber_year: { planId: plan.id, weekNumber, year },
       },
-      include: { goalCheckIns: true },
+      include: { projectCheckIns: true },
     }),
   ])
 
   return {
     plan: { id: plan.id, year: plan.year },
-    goals: plan.goals,
+    projects: plan.projects,
     weekNumber,
     year,
     isCurrentWeek: false,
     existingCheckIn,
     weeklyPlan: weeklyPlan
       ? {
-          priorityGoalIds: [...weeklyPlan.priorityGoalIds],
+          priorityProjectIds: [...weeklyPlan.priorityProjectIds],
           protectCategory: weeklyPlan.protectCategory,
           commitments: parseCommitments(weeklyPlan.commitments),
         }
       : null,
     suggestionFromLastWeek: null,
+    monthlyFocus: null,
   }
 }
 
-/** Ordered priority goals for the current calendar week (for Daily Habits banner). */
+/** Ordered priority projects for the current calendar week (for Daily Habits banner). */
 export async function getWeeklyFocusGoals(userId: string) {
-  const [user, plan] = await Promise.all([
-    db.user.findUnique({
-      where: { id: userId },
-      select: { timezone: true },
-    }),
-    db.yearlyPlan.findFirst({
-      where: { userId, status: "ACTIVE" },
-      select: { id: true },
-    }),
-  ])
-  if (!plan) {
+  const snapshot = await getWeeklyPriorityProjects(userId)
+  if (!snapshot) {
     return {
-      goals: [] as { id: string; title: string }[],
+      projects: [] as { id: string; title: string }[],
       protectCategory: null as string | null,
     }
   }
-
-  const now = new Date()
-  const { weekNumber, year } = getIsoWeekContextInTimeZone(
-    now,
-    user?.timezone || "UTC"
-  )
-
-  const wp = await db.weeklyPlan.findUnique({
-    where: {
-      planId_weekNumber_year: {
-        planId: plan.id,
-        weekNumber,
-        year,
-      },
-    },
-  })
-  if (!wp) {
-    return { goals: [] as { id: string; title: string }[], protectCategory: null }
+  return {
+    projects: snapshot.projects,
+    protectCategory: snapshot.protectCategory,
   }
-
-  if (!wp.priorityGoalIds.length) {
-    return {
-      goals: [] as { id: string; title: string }[],
-      protectCategory: wp.protectCategory,
-    }
-  }
-
-  const found = await db.goal.findMany({
-    where: { id: { in: wp.priorityGoalIds }, planId: plan.id },
-    select: { id: true, title: true },
-  })
-  const byId = new Map(found.map((g) => [g.id, g]))
-  const goals = wp.priorityGoalIds
-    .map((id) => byId.get(id))
-    .filter((g): g is { id: string; title: string } => g != null)
-
-  return { goals, protectCategory: wp.protectCategory ?? null }
 }

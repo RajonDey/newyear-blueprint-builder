@@ -2,12 +2,18 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { hasProProductAccess } from "@/lib/plan-access"
-import { sanitizeRichTextHtml } from "@/lib/sanitize"
 import { z } from "zod"
+
+import {
+  getReviewTemplateFields,
+  legacyFromResponses,
+  mergeIncomingReviewResponses,
+} from "@/lib/review-templates"
 
 const createSchema = z.object({
   planId: z.string().min(1),
   quarter: z.enum(["Q1", "Q2", "Q3", "Q4"]),
+  responses: z.record(z.string(), z.string()).optional(),
   summary: z.string().max(5000).optional(),
   winsText: z.string().max(5000).optional(),
   challengesText: z.string().max(5000).optional(),
@@ -61,10 +67,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Plan not found" }, { status: 404 })
   }
 
-  const safeSummary = sanitizeRichTextHtml(parsed.data.summary) || null
-  const safeWins = sanitizeRichTextHtml(parsed.data.winsText) || null
-  const safeChallenges = sanitizeRichTextHtml(parsed.data.challengesText) || null
-  const safeAdjustments = sanitizeRichTextHtml(parsed.data.adjustments) || null
+  const fields = await getReviewTemplateFields(session.user.id, "QUARTERLY")
+  const responsesSanitized = mergeIncomingReviewResponses(fields, parsed.data)
+  const legacy = legacyFromResponses(responsesSanitized)
 
   const review = await db.quarterlyReview.upsert({
     where: {
@@ -76,18 +81,22 @@ export async function POST(req: Request) {
     create: {
       planId: parsed.data.planId,
       quarter: parsed.data.quarter as "Q1" | "Q2" | "Q3" | "Q4",
-      summary: safeSummary,
-      winsText: safeWins,
-      challengesText: safeChallenges,
-      adjustments: safeAdjustments,
+      summary: legacy.summary,
+      winsText: legacy.winsText,
+      challengesText: legacy.challengesText,
+      adjustments: legacy.adjustments,
+      responses: responsesSanitized,
       wheelOfLifeSnapshot: parsed.data.wheelOfLifeSnapshot ?? undefined,
     },
     update: {
-      summary: safeSummary,
-      winsText: safeWins,
-      challengesText: safeChallenges,
-      adjustments: safeAdjustments,
-      wheelOfLifeSnapshot: parsed.data.wheelOfLifeSnapshot ?? undefined,
+      summary: legacy.summary,
+      winsText: legacy.winsText,
+      challengesText: legacy.challengesText,
+      adjustments: legacy.adjustments,
+      responses: responsesSanitized,
+      ...(parsed.data.wheelOfLifeSnapshot !== undefined
+        ? { wheelOfLifeSnapshot: parsed.data.wheelOfLifeSnapshot }
+        : {}),
     },
   })
 

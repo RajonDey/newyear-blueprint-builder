@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { shouldSendEmail } from "@/lib/cron/email-eligibility"
 import { sendQuarterlyNudge } from "@/lib/email"
 
 const QUARTERS = ["Q1", "Q2", "Q3", "Q4"] as const
@@ -19,21 +20,42 @@ export async function GET(req: Request) {
   }
 
   const quarter = getCurrentQuarter()
-  const proUsers = await db.user.findMany({
-    where: { planTier: "PRO" },
-    select: { email: true, name: true },
+  const year = new Date().getFullYear()
+
+  const activePlans = await db.yearlyPlan.findMany({
+    where: {
+      status: "ACTIVE",
+      year,
+      user: { planTier: "PRO" },
+    },
+    include: {
+      user: {
+        select: { email: true, name: true, preferences: true },
+      },
+      quarterlyReviews: {
+        where: { quarter },
+        take: 1,
+      },
+    },
   })
 
+  const toNotify = activePlans.filter((plan) => plan.quarterlyReviews.length === 0)
   const sent: string[] = []
+  const skipped: string[] = []
   const errors: { email: string; error: string }[] = []
 
-  for (const user of proUsers) {
+  for (const plan of toNotify) {
+    if (!shouldSendEmail(plan.user.preferences, "quarterlyNudge")) {
+      skipped.push(plan.user.email)
+      continue
+    }
+
     try {
-      await sendQuarterlyNudge(user.email, quarter, user.name ?? undefined)
-      sent.push(user.email)
+      await sendQuarterlyNudge(plan.user.email, quarter, plan.user.name ?? undefined)
+      sent.push(plan.user.email)
     } catch (e) {
       errors.push({
-        email: user.email,
+        email: plan.user.email,
         error: e instanceof Error ? e.message : "Unknown error",
       })
     }
@@ -42,8 +64,11 @@ export async function GET(req: Request) {
   return NextResponse.json({
     data: {
       quarter,
+      year,
       usersNotified: sent.length,
+      usersSkipped: skipped.length,
       sent,
+      skipped: skipped.length > 0 ? skipped : undefined,
       errors: errors.length > 0 ? errors : undefined,
     },
   })

@@ -3,8 +3,23 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { signOut } from "next-auth/react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import {
+  ArrowRight,
+  Bell,
+  BookOpen,
+  Calendar,
+  Check,
+  ExternalLink,
+  Globe,
+  Loader2,
+  LogOut,
+  ShieldAlert,
+  Sparkles,
+  Trash2,
+  User,
+  Download,
+} from "lucide-react"
+import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -22,11 +37,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { MandalaWatermark } from "@/components/shared/mandala-watermark"
-import { OrnamentDivider } from "@/components/shared/ornament-divider"
-import { Loader2, User, LogOut, Sparkles, Check, Trash2 } from "lucide-react"
-import { toast } from "sonner"
+import { PageHeader } from "@/components/shared/page-header"
+import { EmailNotificationsSection } from "@/components/settings/email-notifications-section"
+import { DataExportSection } from "@/components/settings/data-export-section"
+import { YearSettingsSection } from "@/components/settings/year-settings-section"
+import type { YearlyPlanSettingsData } from "@/lib/queries/yearly-plan"
+import type { ResolvedEmailPreferences } from "@/lib/user-preferences"
 import { SITE_LEGAL_NAME, getSupportEmail } from "@/lib/legal"
+import { marketingPlanCopy } from "@/lib/marketing-plan-copy"
 
 const COMMON_TIMEZONES = [
   "UTC",
@@ -43,18 +61,34 @@ const COMMON_TIMEZONES = [
   "Australia/Sydney",
 ]
 
-interface SettingsFormProps {
-  planTier: string
+type SettingsUser = {
+  id: string
+  name: string | null
+  email: string | null
+  image: string | null
+  timezone: string | null
 }
 
-export function SettingsForm({ planTier }: SettingsFormProps) {
-  const [loading, setLoading] = useState(true)
+interface SettingsFormProps {
+  planTier: string
+  initialUser?: SettingsUser
+  initialEmailPreferences: ResolvedEmailPreferences
+  yearlyPlan?: YearlyPlanSettingsData
+}
+
+export function SettingsForm({
+  planTier,
+  initialUser,
+  initialEmailPreferences,
+  yearlyPlan,
+}: SettingsFormProps) {
+  const [loading, setLoading] = useState(!initialUser)
   const [saving, setSaving] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const isPro = planTier === "PRO"
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [timezone, setTimezone] = useState("UTC")
+  const [name, setName] = useState(initialUser?.name ?? "")
+  const [email, setEmail] = useState(initialUser?.email ?? "")
+  const [timezone, setTimezone] = useState(initialUser?.timezone ?? "UTC")
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState("")
   const [deleting, setDeleting] = useState(false)
@@ -63,6 +97,7 @@ export function SettingsForm({ planTier }: SettingsFormProps) {
   const deletePhrase = "DELETE MY ACCOUNT"
 
   useEffect(() => {
+    if (initialUser) return
     fetch("/api/user/me")
       .then((res) => res.json())
       .then((json) => {
@@ -74,7 +109,7 @@ export function SettingsForm({ planTier }: SettingsFormProps) {
       })
       .catch(() => toast.error("Failed to load profile"))
       .finally(() => setLoading(false))
-  }, [])
+  }, [initialUser])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -97,95 +132,107 @@ export function SettingsForm({ planTier }: SettingsFormProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+        <Loader2 className="h-8 w-8 animate-spin text-amber" />
       </div>
     )
   }
 
   return (
-    <div className="relative w-full space-y-8">
-      <MandalaWatermark position="top-right" size="sm" />
+    <div className="space-y-10">
+      <PageHeader
+        eyebrow="Account"
+        title="Settings"
+        description="Your profile, plan, and the quieter details that make the app feel yours."
+      />
 
-      <div>
-        <h1 className="font-display text-3xl font-semibold">Settings</h1>
-        <p className="text-muted-foreground mt-1">
-          Manage your account and preferences.
-        </p>
-      </div>
+      <Section
+        id="billing"
+        icon={<Sparkles className="h-3.5 w-3.5 text-amber" />}
+        eyebrow="Plan"
+        title="Membership"
+        description="What you have access to today, and how to change it."
+      >
+        {isPro ? (
+          <ProActiveCard />
+        ) : (
+          <ProUpsellCardInline
+            onCheckout={async () => {
+              setCheckoutLoading(true)
+              try {
+                const res = await fetch("/api/checkout", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ plan: "yearly" }),
+                })
+                const json = await res.json()
+                if (!res.ok) throw new Error(json.error || "Failed")
+                if (json.data?.url) {
+                  window.location.href = json.data.url
+                } else {
+                  throw new Error("No checkout URL")
+                }
+              } catch (err: unknown) {
+                toast.error(
+                  err instanceof Error ? err.message : "Failed to start checkout",
+                )
+              } finally {
+                setCheckoutLoading(false)
+              }
+            }}
+            checkoutLoading={checkoutLoading}
+          />
+        )}
+      </Section>
 
-      <OrnamentDivider variant="lotus" />
+      {yearlyPlan && (
+        <Section
+          id="your-year"
+          icon={<Calendar className="h-3.5 w-3.5 text-amber" />}
+          eyebrow="Year"
+          title="Your year"
+          description="Edit your theme word, archive a finished year, or start the next one — no re-onboarding."
+        >
+          <YearSettingsSection data={yearlyPlan} />
+        </Section>
+      )}
 
-      <Card id="billing">
-        <CardHeader>
-          <CardTitle className="text-lg font-display flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-accent" /> Plan
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isPro ? (
-            <div className="flex items-center gap-3 rounded-lg border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/20 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
-                <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <p className="font-medium">You&apos;re on Pro</p>
-                <p className="text-sm text-muted-foreground">
-                  Full access to analytics, quarterly reviews, and more.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Upgrade to Pro for unlimited goals, monthly &amp; quarterly reviews,
-                and advanced analytics.
-              </p>
-              <Button
-                onClick={async () => {
-                  setCheckoutLoading(true)
-                  try {
-                    const res = await fetch("/api/checkout", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ plan: "yearly" }),
-                    })
-                    const json = await res.json()
-                    if (!res.ok) throw new Error(json.error || "Failed")
-                    if (json.data?.url) {
-                      window.location.href = json.data.url
-                    } else {
-                      throw new Error("No checkout URL")
-                    }
-                  } catch (err: unknown) {
-                    toast.error(err instanceof Error ? err.message : "Failed to start checkout")
-                  } finally {
-                    setCheckoutLoading(false)
-                  }
-                }}
-                disabled={checkoutLoading}
-              >
-                {checkoutLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Sparkles className="mr-2 h-4 w-4" />
-                )}
-                Upgrade to Pro — $49/year
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <Section
+        id="knowledge"
+        icon={<BookOpen className="h-3.5 w-3.5 text-amber" />}
+        eyebrow="Knowledge"
+        title="Notes & resources"
+        description="Browse everything you've captured across areas and projects. Add new items from detail pages — these indexes are read-first."
+      >
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Link
+            href="/knowledge/notes"
+            className="inline-flex items-center justify-between gap-2 rounded-xl border border-border bg-card/60 px-4 py-3 text-sm hover:bg-accent/40 transition-colors"
+          >
+            <span>All notes</span>
+            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+          </Link>
+          <Link
+            href="/knowledge/resources"
+            className="inline-flex items-center justify-between gap-2 rounded-xl border border-border bg-card/60 px-4 py-3 text-sm hover:bg-accent/40 transition-colors"
+          >
+            <span>All resources</span>
+            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+          </Link>
+        </div>
+      </Section>
 
-      <form onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-display flex items-center gap-2">
-              <User className="h-4 w-4 text-accent" /> Profile
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+      <Section
+        icon={<User className="h-3.5 w-3.5 text-amber" />}
+        eyebrow="You"
+        title="Profile"
+        description="Used in greetings, recap cards, and your account email."
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="name" className="text-xs uppercase tracking-widest text-muted-foreground">
+                Name
+              </Label>
               <Input
                 id="name"
                 value={name}
@@ -193,125 +240,149 @@ export function SettingsForm({ planTier }: SettingsFormProps) {
                 placeholder="Your name"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                value={email}
-                disabled
-                className="bg-muted"
-              />
-              <p className="text-xs text-muted-foreground">
-                Email is managed by your sign-in provider.
-              </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs uppercase tracking-widest text-muted-foreground">
+                Email
+              </Label>
+              <Input id="email" value={email} disabled className="bg-muted/40" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="timezone">Timezone</Label>
-              <Select value={timezone} onValueChange={setTimezone}>
-                <SelectTrigger id="timezone">
-                  <SelectValue placeholder="Select timezone" />
-                </SelectTrigger>
-                <SelectContent>
-                  {COMMON_TIMEZONES.map((tz) => (
-                    <SelectItem key={tz} value={tz}>
-                      {tz.replace(/_/g, " ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button type="submit" disabled={saving}>
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
-          </CardContent>
-        </Card>
-      </form>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-display">Legal</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground space-y-2">
-          <p>Policies for {SITE_LEGAL_NAME}:</p>
-          <ul className="list-disc pl-5 space-y-1">
-            <li>
-              <Link href="/terms" className="text-primary hover:underline">
-                Terms of Service
-              </Link>
-            </li>
-            <li>
-              <Link href="/privacy" className="text-primary hover:underline">
-                Privacy Policy
-              </Link>
-            </li>
-            <li>
-              <Link href="/cookies" className="text-primary hover:underline">
-                Cookie Policy
-              </Link>
-            </li>
-            <li>
-              <Link href="/privacy/california" className="text-primary hover:underline">
-                California privacy notice
-              </Link>
-            </li>
-            <li>
-              <Link href="/refund" className="text-primary hover:underline">
-                Refund Policy
-              </Link>
-            </li>
-          </ul>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-display">Account</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Sign out on this device. For Google sign-in, you can also revoke the app in your Google
-              account if you want to remove access everywhere.
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="gap-2"
-            >
-              <LogOut className="h-4 w-4" /> Sign out
-            </Button>
           </div>
-        </CardContent>
-      </Card>
+          <p className="text-[11px] text-muted-foreground">
+            Email is managed by your sign-in provider. To change it, sign in with the new address.
+          </p>
+          <SaveButton saving={saving} />
+        </form>
+      </Section>
 
-      <Card className="border-destructive/30">
-        <CardHeader>
-          <CardTitle className="text-lg font-display text-destructive">Danger zone</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Permanently delete your account and all plans, goals, and data. This cannot be undone. If
-            you have an active Pro subscription, cancel billing in your Lemon Squeezy customer
-            portal first (or email{" "}
-            <a href={`mailto:${supportEmail}`} className="text-primary font-medium hover:underline">
+      <Section
+        icon={<Globe className="h-3.5 w-3.5 text-amber" />}
+        eyebrow="Region"
+        title="Timezone"
+        description="Drives 'today' for your daily check-in, systems completion, and recap cards."
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="timezone" className="text-xs uppercase tracking-widest text-muted-foreground">
+              Current
+            </Label>
+            <Select value={timezone} onValueChange={setTimezone}>
+              <SelectTrigger id="timezone" className="w-full sm:w-80">
+                <SelectValue placeholder="Select timezone" />
+              </SelectTrigger>
+              <SelectContent>
+                {COMMON_TIMEZONES.map((tz) => (
+                  <SelectItem key={tz} value={tz}>
+                    {tz.replace(/_/g, " ")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <SaveButton saving={saving} />
+        </form>
+      </Section>
+
+      <Section
+        id="export"
+        icon={<Download className="h-3.5 w-3.5 text-amber" />}
+        eyebrow="Portable"
+        title="Export your data"
+        description="Take your full year with you — reflections, plans, projects, and rhythm history."
+      >
+        <DataExportSection />
+      </Section>
+
+      <Section
+        id="notifications"
+        icon={<Bell className="h-3.5 w-3.5 text-amber" />}
+        eyebrow="Quiet"
+        title="Notifications"
+        description="Email reminders for your rhythm — all on by default; turn off anything you don't want."
+      >
+        <EmailNotificationsSection initialPreferences={initialEmailPreferences} />
+      </Section>
+
+      <Section
+        icon={<ShieldAlert className="h-3.5 w-3.5 text-amber" />}
+        eyebrow="Account"
+        title="Sign out & legal"
+        description="Sign out on this device. For Google sign-in, you can also revoke the app from your Google account to remove access everywhere."
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-sm hover:bg-accent transition-colors"
+          >
+            <LogOut className="h-3.5 w-3.5" /> Sign out
+          </button>
+          <div className="text-xs text-muted-foreground inline-flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>{SITE_LEGAL_NAME} ·</span>
+            <Link href="/terms" className="hover:text-foreground transition-colors">
+              Terms
+            </Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
+              Privacy
+            </Link>
+            <Link href="/cookies" className="hover:text-foreground transition-colors">
+              Cookies
+            </Link>
+            <Link
+              href="/privacy/california"
+              className="hover:text-foreground transition-colors"
+            >
+              California
+            </Link>
+            <Link href="/refund" className="hover:text-foreground transition-colors">
+              Refunds
+            </Link>
+          </div>
+        </div>
+      </Section>
+
+      <Section
+        icon={<Trash2 className="h-3.5 w-3.5 text-rose-500" />}
+        eyebrow="Permanent"
+        title="Danger zone"
+        description="Delete your account and everything tied to it. Cannot be undone."
+        tone="danger"
+      >
+        <div className="rounded-2xl border border-rose-500/20 bg-rose-500/[0.04] p-5">
+          <p className="text-sm leading-relaxed">
+            Export your data first if you want a copy — deletion is permanent.
+            If you have an active Pro subscription, cancel billing in your Lemon
+            Squeezy customer portal first — or email{" "}
+            <a
+              href={`mailto:${supportEmail}`}
+              className="font-medium text-foreground hover:underline underline-offset-2"
+            >
               {supportEmail}
             </a>
-            ).
+            .
           </p>
-          <Button variant="destructive" className="gap-2" onClick={() => setDeleteOpen(true)}>
-            <Trash2 className="h-4 w-4" /> Delete my account
-          </Button>
-        </CardContent>
-      </Card>
+          <button
+            type="button"
+            onClick={() => setDeleteOpen(true)}
+            className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-rose-500/90 text-white px-3 py-1.5 text-sm font-medium hover:bg-rose-500 transition-colors"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Delete my account
+          </button>
+        </div>
+      </Section>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+        <DialogContent
+          className="sm:max-w-md"
+          onPointerDownOutside={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>Delete account permanently?</DialogTitle>
             <DialogDescription className="text-left space-y-3 pt-2">
               <span className="block">
-                All of your data will be removed from our systems. You will lose access immediately.
+                All of your data will be removed. You will lose access immediately.
+              </span>
+              <span className="block text-muted-foreground">
+                Download an export from Settings first if you want to keep a copy.
               </span>
               <span className="block font-medium text-foreground">
                 Type <span className="font-mono text-sm">{deletePhrase}</span> to confirm.
@@ -326,11 +397,15 @@ export function SettingsForm({ planTier }: SettingsFormProps) {
             autoComplete="off"
           />
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+            <button
+              type="button"
+              onClick={() => setDeleteOpen(false)}
+              className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
               Cancel
-            </Button>
-            <Button
-              variant="destructive"
+            </button>
+            <button
+              type="button"
               disabled={deleteConfirm !== deletePhrase || deleting}
               onClick={async () => {
                 if (deleteConfirm !== deletePhrase) return
@@ -345,18 +420,161 @@ export function SettingsForm({ planTier }: SettingsFormProps) {
                   setDeleteOpen(false)
                   await signOut({ callbackUrl: "/" })
                 } catch (e: unknown) {
-                  toast.error(e instanceof Error ? e.message : "Failed to delete account")
+                  toast.error(
+                    e instanceof Error ? e.message : "Failed to delete account",
+                  )
                 } finally {
                   setDeleting(false)
                 }
               }}
+              className="inline-flex items-center gap-1.5 rounded-md bg-rose-500/90 text-white px-3 py-1.5 text-sm font-medium hover:bg-rose-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {deleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Delete forever
-            </Button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Section primitive                                                          */
+/* -------------------------------------------------------------------------- */
+
+function Section({
+  id,
+  icon,
+  eyebrow,
+  title,
+  description,
+  children,
+  tone,
+}: {
+  id?: string
+  icon: React.ReactNode
+  eyebrow: string
+  title: string
+  description: string
+  children: React.ReactNode
+  tone?: "default" | "danger"
+}) {
+  return (
+    <section id={id} className="grid gap-6 md:grid-cols-[200px_1fr]">
+      <header>
+        <div
+          className={`inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-widest uppercase ${
+            tone === "danger" ? "text-rose-500" : "text-amber"
+          }`}
+        >
+          {icon}
+          {eyebrow}
+        </div>
+        <h2 className="font-display text-xl tracking-tight mt-1.5">{title}</h2>
+        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+          {description}
+        </p>
+      </header>
+      <div>{children}</div>
+    </section>
+  )
+}
+
+function SaveButton({ saving }: { saving: boolean }) {
+  return (
+    <button
+      type="submit"
+      disabled={saving}
+      className="inline-flex items-center gap-1.5 rounded-md bg-foreground text-background px-3 py-1.5 text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+    >
+      {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+      Save changes
+    </button>
+  )
+}
+
+function ProActiveCard() {
+  return (
+    <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-5">
+      <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-widest uppercase text-emerald-600">
+        <Check className="h-3 w-3" />
+        Pro · Active
+      </div>
+      <h3 className="font-display text-lg tracking-tight mt-1.5">
+        You&apos;re on Pro
+      </h3>
+      <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+        Full access to up to {marketingPlanCopy.proProjects} projects, monthly + quarterly reviews,
+        analytics depth, file uploads, and the cinematic Wrapped.
+      </p>
+      <div className="mt-3 flex items-center gap-3 text-xs">
+        <Link
+          href="/pricing"
+          className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          See plan details
+          <ExternalLink className="h-3 w-3" />
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+function ProUpsellCardInline({
+  onCheckout,
+  checkoutLoading,
+}: {
+  onCheckout: () => Promise<void>
+  checkoutLoading: boolean
+}) {
+  return (
+    <div className="rounded-2xl border border-amber/30 bg-gradient-to-br from-amber/[0.06] via-card to-card p-6 shadow-sm">
+      <div className="text-[10px] font-semibold tracking-widest uppercase text-amber mb-2">
+        Pro · $49 / year
+      </div>
+      <h3 className="font-display text-2xl tracking-tight leading-snug">
+        The whole year, without the caps
+      </h3>
+      <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+        Unlimited projects, monthly + quarterly reviews, file uploads, advanced
+        analytics, and the cinematic Wrapped at year&apos;s end.
+      </p>
+      <ul className="mt-4 grid gap-1.5 sm:grid-cols-2 text-xs text-foreground/85">
+        {[
+          "Up to 20 projects per plan",
+          "200 tasks per project",
+          "Quarterly review & full Wrapped",
+          "2 GB file storage on resources",
+        ].map((b) => (
+          <li key={b} className="flex items-start gap-1.5">
+            <span aria-hidden className="mt-1.5 h-1 w-1 rounded-full bg-amber shrink-0" />
+            <span>{b}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={onCheckout}
+          disabled={checkoutLoading}
+          className="inline-flex items-center gap-1.5 rounded-md bg-foreground text-background px-4 py-2 text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+        >
+          {checkoutLoading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="h-3.5 w-3.5" />
+          )}
+          Upgrade to Pro
+        </button>
+        <Link
+          href="/pricing"
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          See full comparison
+          <ArrowRight className="h-3 w-3" />
+        </Link>
+      </div>
     </div>
   )
 }

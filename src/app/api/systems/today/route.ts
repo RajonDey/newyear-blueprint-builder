@@ -26,7 +26,7 @@ export async function GET() {
     data: {
       systems: data,
       total,
-      weeklyFocus: { goals: focus.goals, protectCategory: focus.protectCategory },
+      weeklyFocus: { projects: focus.projects, protectCategory: focus.protectCategory },
     },
     date: new Date().toISOString().slice(0, 10),
   })

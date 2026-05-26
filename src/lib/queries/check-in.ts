@@ -15,7 +15,7 @@ export async function getCheckInFormData(userId: string) {
   const plan = await db.yearlyPlan.findFirst({
     where: { userId, status: "ACTIVE" },
     include: {
-      goals: {
+      projects: {
         where: { status: { not: "COMPLETED" } },
         select: { id: true, title: true, category: true },
         orderBy: [{ type: "asc" }, { sortOrder: "asc" }],
@@ -33,12 +33,13 @@ export async function getCheckInFormData(userId: string) {
         year,
       },
     },
-    include: { goalCheckIns: true },
+    include: { projectCheckIns: true },
   })
 
   return {
     plan: { id: plan.id, year: plan.year },
-    goals: plan.goals,
+    /** PARA-aligned name. Old callers can still read `data.projects` via the alias. */
+    projects: plan.projects,
     weekNumber,
     year,
     existingCheckIn,

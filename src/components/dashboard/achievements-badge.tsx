@@ -1,41 +1,61 @@
-import { db } from "@/lib/db"
-import { ACHIEVEMENTS } from "@/lib/constants/achievements"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trophy } from "lucide-react"
+import { ACHIEVEMENTS } from "@/lib/constants/achievements"
+import { Eyebrow } from "@/components/atmosphere/eyebrow"
 
-export async function AchievementsBadge({ userId }: { userId: string }) {
-  const earned = await db.achievement.findMany({
-    where: { userId },
-    orderBy: { earnedAt: "desc" },
-    take: 5,
-  })
+interface AchievementRecord {
+  id: string
+  type: string
+  title: string
+  earnedAt: Date
+}
 
-  if (earned.length === 0) return null
+interface AchievementsBadgeProps {
+  achievements: AchievementRecord[]
+}
+
+/**
+ * Pure presentational component — receives the achievements list from
+ * `getDashboardData()` rather than fetching its own. This keeps all dashboard
+ * data in a single round-trip and makes the component trivially testable.
+ *
+ * Returns `null` when there are no achievements (the page should skip
+ * rendering the card entirely in that case).
+ */
+export function AchievementsBadge({ achievements }: AchievementsBadgeProps) {
+  if (achievements.length === 0) return null
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-display flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-accent" /> Achievements
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-2">
-          {earned.map((a) => {
-            const meta = ACHIEVEMENTS[a.type as keyof typeof ACHIEVEMENTS]
-            return (
-              <div
-                key={a.id}
-                className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
-                title={meta?.description ?? a.title}
-              >
-                <span className="text-lg">{meta?.icon ?? "🏅"}</span>
-                <span className="font-medium">{meta?.title ?? a.title}</span>
-              </div>
-            )
-          })}
+    <section className="rounded-2xl border border-border bg-card p-6">
+      <header className="mb-4 flex items-end justify-between gap-3">
+        <div>
+          <Eyebrow className="mb-1.5 flex items-center gap-1.5">
+            <Trophy className="h-3 w-3" />
+            Quiet wins
+          </Eyebrow>
+          <h3 className="font-display text-xl md:text-2xl tracking-tight">
+            What you&apos;ve held
+          </h3>
         </div>
-      </CardContent>
-    </Card>
+      </header>
+
+      <ul className="flex flex-wrap gap-2">
+        {achievements.map((a) => {
+          const meta = ACHIEVEMENTS[a.type as keyof typeof ACHIEVEMENTS]
+          return (
+            <li key={a.id}>
+              <span
+                title={meta?.description ?? a.title}
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-background/60 px-3 py-2 text-sm"
+              >
+                <span aria-hidden className="text-base leading-none">
+                  {meta?.icon ?? "🏅"}
+                </span>
+                <span className="font-medium">{meta?.title ?? a.title}</span>
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+    </section>
   )
 }

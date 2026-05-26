@@ -1,0 +1,47 @@
+// ─────────────────────────────────────────────────────────────
+// Knowledge — polymorphic Note + Resource (PARA's "R").
+// Both attach to any of the parent kinds via `(parentType, parentId)`.
+// Free tier: link-only Resources, max 10 total.
+// Pro tier:  link + file (Vercel Blob), 25 MB/file, 2 GB total, 200 max.
+// ─────────────────────────────────────────────────────────────
+
+/// Polymorphic note. Attaches to any PARA entity via (parentType, parentId).
+/// All notes belong to one User for quota and ownership checks.
+model Note {
+  id         String     @id @default(cuid())
+  userId     String
+  parentType ParentType
+  parentId   String
+  content    String     @db.Text
+  pinned     Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([parentType, parentId, createdAt])
+  @@index([userId])
+  @@map("notes")
+}
+
+/// Polymorphic resource. `kind = LINK` for all tiers; `kind = FILE` for Pro
+/// only (uploaded via Vercel Blob). `url` is the external URL for LINK or
+/// the Blob URL for FILE. `sizeBytes` powers per-user storage quota math.
+model Resource {
+  id         String       @id @default(cuid())
+  userId     String
+  parentType ParentType
+  parentId   String
+  kind       ResourceKind
+  title      String
+  url        String
+  mimeType   String?
+  sizeBytes  Int?
+  createdAt  DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([parentType, parentId])
+  @@index([userId, kind])
+  @@map("resources")
+}

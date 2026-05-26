@@ -28,8 +28,15 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json().catch(() => ({}))
-  const plan = body.plan === "monthly" && monthlyVariantId ? "monthly" : "yearly"
-  const variant = plan === "monthly" ? monthlyVariantId : yearlyVariantId
+  if (body.plan === "monthly") {
+    return NextResponse.json(
+      { error: "Monthly billing is not available yet" },
+      { status: 400 },
+    )
+  }
+
+  const plan = "yearly"
+  const variant = yearlyVariantId
 
   if (!variant) {
     return NextResponse.json(

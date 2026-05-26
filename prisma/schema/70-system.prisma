@@ -1,0 +1,82 @@
+// ─────────────────────────────────────────────────────────────
+// System — gamification / cross-cutting user-scoped meta.
+// Streak, Achievement, Drift (quick-capture inbox), DailyState.
+// ─────────────────────────────────────────────────────────────
+
+model Streak {
+  id              String     @id @default(cuid())
+  userId          String
+  type            StreakType
+  currentStreak   Int        @default(0)
+  longestStreak   Int        @default(0)
+  lastCompletedAt DateTime?
+  shieldsUsed     Int        @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@map("streaks")
+}
+
+model Achievement {
+  id       String   @id @default(cuid())
+  userId   String
+  type     String
+  title    String
+  earnedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@map("achievements")
+}
+
+/// Quick Capture inbox row. Becomes the source of truth for `⌘K`–captured
+/// thoughts. Each Drift can be promoted to a Note / Task / Resource
+/// (and marked resolved) or trashed.
+model Drift {
+  id          String    @id @default(cuid())
+  userId      String
+  content     String    @db.Text
+  kind        DriftKind @default(THOUGHT)
+  /// When the drift was promoted or dismissed.
+  resolvedAt  DateTime?
+  /// Free-form tag for how it was resolved — e.g. "task", "note", "trashed".
+  resolvedAs  String?
+  /// Optional id of the entity it was promoted to (Task, Note, Resource, ...).
+  resolvedRef String?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, resolvedAt])
+  @@map("drifts")
+}
+
+/// One row per user per date in the user's timezone. Captures mood, energy,
+/// today's intention, and an end-of-day reflection. Powers `<TodayCard>`
+/// and feeds analytics.
+model DailyState {
+  id         String   @id @default(cuid())
+  userId     String
+  date       DateTime @db.Date
+  /// 1-5 scale; nullable so partial days don't force a value.
+  mood       Int?
+  energy     Int?
+  intention        String?  @db.Text
+  reflection       String?  @db.Text
+  /// Which anti-goal the user marked held/slipped today (one rotating pill).
+  antiGoalHeldId   String?
+  /// `true` = held the line, `false` = slipped, `null` = not answered.
+  antiGoalHeld     Boolean?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  antiGoal AntiGoal? @relation(fields: [antiGoalHeldId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, date])
+  @@index([userId, date(sort: Desc)])
+  @@map("daily_states")
+}

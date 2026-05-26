@@ -10,11 +10,13 @@ import { Slider } from "@/components/ui/slider"
 import { EmptyState } from "@/components/shared/empty-state"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
 import { sanitizeRichTextHtml } from "@/lib/sanitize-client"
-import { ClipboardCheck, Loader2, Sparkles, Smile, CheckCircle2 } from "lucide-react"
+import { ClipboardCheck, Loader2, Pencil, Sparkles, Smile, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
+import type { WeeklyCommitment } from "@/types/weekly"
+import { WeeklyPlanSummary } from "@/components/check-in/weekly-plan-summary"
 
-interface Goal {
+interface ProjectRow {
   id: string
   title: string
   category: string
@@ -22,15 +24,20 @@ interface Goal {
 
 interface FormData {
   plan: { id: string; year: number }
-  goals: Goal[]
+  projects: ProjectRow[]
   weekNumber: number
   year: number
+  weeklyPlan?: {
+    priorityProjectIds: string[]
+    protectCategory: string | null
+    commitments: WeeklyCommitment[]
+  } | null
   existingCheckIn: {
     id: string
     overallMood: number | null
     notes: string | null
     nextWeekFocus?: string | null
-    goalCheckIns: { goalId: string; progressRating: number; notes: string | null; blockers: string | null }[]
+    projectCheckIns: { projectId: string; progressRating: number; notes: string | null; blockers: string | null }[]
   } | null
 }
 
@@ -45,27 +52,33 @@ export function WeeklyCheckInForm({
 }) {
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
+  // When `editing` is true we render the form pre-populated with the
+  // existing check-in's data and submit via PATCH instead of POST.
+  // Only allowed for the current ISO week (the server also enforces this).
+  const [editing, setEditing] = useState(false)
   const [overallMood, setOverallMood] = useState(
     data.existingCheckIn?.overallMood ?? 3
   )
   const [notes, setNotes] = useState(data.existingCheckIn?.notes ?? "")
-  const [goalRatings, setGoalRatings] = useState<Record<string, number>>(() => {
+  const [projectRatings, setProjectRatings] = useState<Record<string, number>>(() => {
     const init: Record<string, number> = {}
-    for (const gc of data.existingCheckIn?.goalCheckIns ?? []) {
-      init[gc.goalId] = gc.progressRating
+    for (const gc of data.existingCheckIn?.projectCheckIns ?? []) {
+      init[gc.projectId] = gc.progressRating
     }
-    for (const g of data.goals) {
+    for (const g of data.projects) {
       if (!(g.id in init)) init[g.id] = 3
     }
     return init
   })
-  const [nextWeekFocus, setNextWeekFocus] = useState("")
+  const [nextWeekFocus, setNextWeekFocus] = useState(
+    data.existingCheckIn?.nextWeekFocus ?? "",
+  )
 
-  const [goalNotes, setGoalNotes] = useState<Record<string, string>>(() => {
+  const [projectNotes, setProjectNotes] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {}
-    for (const gc of data.existingCheckIn?.goalCheckIns ?? []) {
-      if (gc.notes) init[gc.goalId] = gc.notes
-      if (gc.blockers) init[`${gc.goalId}_blockers`] = gc.blockers
+    for (const gc of data.existingCheckIn?.projectCheckIns ?? []) {
+      if (gc.notes) init[gc.projectId] = gc.notes
+      if (gc.blockers) init[`${gc.projectId}_blockers`] = gc.blockers
     }
     return init
   })
@@ -74,51 +87,72 @@ export function WeeklyCheckInForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (alreadyDone) {
-      toast.info("You've already completed this week's review.")
-      return
-    }
     setSubmitting(true)
     try {
-      const res = await fetch("/api/check-ins/weekly", {
-        method: "POST",
+      const isEditing = alreadyDone && editing
+      const url = isEditing
+        ? `/api/check-ins/weekly/${data.existingCheckIn!.id}`
+        : "/api/check-ins/weekly"
+      const method = isEditing ? "PATCH" : "POST"
+      const payload = isEditing
+        ? {
+            overallMood,
+            notes: notes.trim() || undefined,
+            nextWeekFocus: nextWeekFocus.trim() || undefined,
+            projectCheckIns: data.projects.map((g) => ({
+              projectId: g.id,
+              progressRating: projectRatings[g.id] ?? 3,
+              notes: projectNotes[g.id]?.trim() || undefined,
+              blockers: projectNotes[`${g.id}_blockers`]?.trim() || undefined,
+            })),
+          }
+        : {
+            planId: data.plan.id,
+            overallMood,
+            notes: notes.trim() || undefined,
+            nextWeekFocus: nextWeekFocus.trim() || undefined,
+            projectCheckIns: data.projects.map((g) => ({
+              projectId: g.id,
+              progressRating: projectRatings[g.id] ?? 3,
+              notes: projectNotes[g.id]?.trim() || undefined,
+              blockers: projectNotes[`${g.id}_blockers`]?.trim() || undefined,
+            })),
+          }
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planId: data.plan.id,
-          overallMood,
-          notes: notes.trim() || undefined,
-          nextWeekFocus: nextWeekFocus.trim() || undefined,
-          goalCheckIns: data.goals.map((g) => ({
-            goalId: g.id,
-            progressRating: goalRatings[g.id] ?? 3,
-            notes: goalNotes[g.id]?.trim() || undefined,
-            blockers: goalNotes[`${g.id}_blockers`]?.trim() || undefined,
-          })),
-        }),
+        body: JSON.stringify(payload),
       })
       if (!res.ok) {
         const err = await res.json()
-        throw new Error(err.error || "Failed to save")
+        throw new Error(err.message || err.error || "Failed to save")
       }
       const json = await res.json()
-      const streak = json.streak ?? 0
-      const newAchievements: string[] = json.newAchievements ?? []
-
-      if (newAchievements.length > 0) {
-        const label =
-          newAchievements.includes("first_check_in")
-            ? "Achievement unlocked: First Step!"
-            : `Achievement unlocked: ${streak}-week streak!`
-        toast.success(label, {
-          description: "You're building something real. Keep showing up.",
-          duration: 5000,
+      if (alreadyDone && editing) {
+        toast.success("Weekly review updated!", {
+          description: "Your latest reflection now reflects this edit.",
         })
+        setEditing(false)
       } else {
-        toast.success("Weekly review saved!", {
-          description: streak > 1
-            ? `${streak}-week streak and counting!`
-            : "Your streak is building. Keep it up!",
-        })
+        const streak = json.streak ?? 0
+        const newAchievements: string[] = json.newAchievements ?? []
+
+        if (newAchievements.length > 0) {
+          const label =
+            newAchievements.includes("first_check_in")
+              ? "Achievement unlocked: First Step!"
+              : `Achievement unlocked: ${streak}-week streak!`
+          toast.success(label, {
+            description: "You're building something real. Keep showing up.",
+            duration: 5000,
+          })
+        } else {
+          toast.success("Weekly review saved!", {
+            description: streak > 1
+              ? `${streak}-week streak and counting!`
+              : "Your streak is building. Keep it up!",
+          })
+        }
       }
       router.refresh()
     } catch (err: unknown) {
@@ -128,16 +162,16 @@ export function WeeklyCheckInForm({
     }
   }
 
-  if (data.goals.length === 0) {
+  if (data.projects.length === 0) {
     return (
       <EmptyState
         icon={ClipboardCheck}
-        title="Add goals to review your week"
-        description="Your weekly review is based on your yearly goals. Create goals first, then come back."
+        title="Add projects to review your week"
+        description="Your weekly review is based on your yearly projects. Create a project first, then come back."
         action={
           <Button asChild>
-            <Link href="/goals">
-              <Sparkles className="mr-2 h-4 w-4" /> Go to goals
+            <Link href="/projects">
+              <Sparkles className="mr-2 h-4 w-4" /> Go to projects
             </Link>
           </Button>
         }
@@ -145,33 +179,41 @@ export function WeeklyCheckInForm({
     )
   }
 
-  if (alreadyDone) {
+  if (alreadyDone && !editing) {
     const mood = data.existingCheckIn?.overallMood
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-3 rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 p-4">
           <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <div>
+          <div className="flex-1">
             <p className="font-medium text-sm">Week {data.weekNumber} reviewed</p>
             <p className="text-xs text-muted-foreground mt-0.5">
               {mood ? `Mood: ${MOOD_LABELS[mood]}` : ""}
               {mood ? " · " : ""}Come back next week to keep the streak going.
             </p>
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setEditing(true)}
+          >
+            <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit
+          </Button>
         </div>
 
-        {data.existingCheckIn?.goalCheckIns && data.existingCheckIn.goalCheckIns.length > 0 && (
+        {data.existingCheckIn?.projectCheckIns && data.existingCheckIn.projectCheckIns.length > 0 && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Goal ratings</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Project ratings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {data.existingCheckIn.goalCheckIns.map((gc) => {
-                const goal = data.goals.find((g) => g.id === gc.goalId)
+              {data.existingCheckIn.projectCheckIns.map((gc) => {
+                const goal = data.projects.find((g) => g.id === gc.projectId)
                 if (!goal) return null
                 const cat = LIFE_CATEGORIES.find((c) => c.id === goal.category)
                 return (
-                  <div key={gc.goalId} className="flex items-center gap-3 text-sm">
+                  <div key={gc.projectId} className="flex items-center gap-3 text-sm">
                     {cat && <cat.icon className="h-3.5 w-3.5 shrink-0" style={{ color: cat.color }} />}
                     <span className="flex-1 truncate">{goal.title}</span>
                     <div className="flex gap-0.5">
@@ -214,6 +256,8 @@ export function WeeklyCheckInForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <WeeklyPlanSummary projects={data.projects} weeklyPlan={data.weeklyPlan ?? null} />
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base font-display flex items-center gap-2">
@@ -254,17 +298,17 @@ export function WeeklyCheckInForm({
       <Card>
         <CardHeader>
           <CardTitle className="text-base font-display">
-            Goal Progress
+            Project progress
           </CardTitle>
           <p className="text-sm text-muted-foreground font-normal">
-            Rate each goal from 1 (stalled) to 5 (crushing it)
+            Rate each project from 1 (stalled) to 5 (crushing it)
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
-          {data.goals.map((goal) => {
-            const catInfo = LIFE_CATEGORIES.find((c) => c.id === goal.category)
+          {data.projects.map((project) => {
+            const catInfo = LIFE_CATEGORIES.find((c) => c.id === project.category)
             return (
-              <div key={goal.id} className="space-y-3">
+              <div key={project.id} className="space-y-3">
                 <div className="flex items-center gap-2">
                   {catInfo && (
                     <catInfo.icon
@@ -272,15 +316,15 @@ export function WeeklyCheckInForm({
                       style={{ color: catInfo.color }}
                     />
                   )}
-                  <span className="text-sm font-medium">{goal.title}</span>
+                  <span className="text-sm font-medium">{project.title}</span>
                   <span className="text-xs text-muted-foreground ml-auto tabular-nums">
-                    {goalRatings[goal.id] ?? 3}/5
+                    {projectRatings[project.id] ?? 3}/5
                   </span>
                 </div>
                 <Slider
-                  value={[goalRatings[goal.id] ?? 3]}
+                  value={[projectRatings[project.id] ?? 3]}
                   onValueChange={([v]) =>
-                    setGoalRatings((prev) => ({ ...prev, [goal.id]: v }))
+                    setProjectRatings((prev) => ({ ...prev, [project.id]: v }))
                   }
                   min={1}
                   max={5}
@@ -292,11 +336,11 @@ export function WeeklyCheckInForm({
                       Notes
                     </label>
                     <Input
-                      value={goalNotes[goal.id] ?? ""}
+                      value={projectNotes[project.id] ?? ""}
                       onChange={(e) =>
-                        setGoalNotes((prev) => ({
+                        setProjectNotes((prev) => ({
                           ...prev,
-                          [goal.id]: e.target.value,
+                          [project.id]: e.target.value,
                         }))
                       }
                       placeholder="Wins, learnings..."
@@ -308,11 +352,11 @@ export function WeeklyCheckInForm({
                       Blockers
                     </label>
                     <Input
-                      value={goalNotes[`${goal.id}_blockers`] ?? ""}
+                      value={projectNotes[`${project.id}_blockers`] ?? ""}
                       onChange={(e) =>
-                        setGoalNotes((prev) => ({
+                        setProjectNotes((prev) => ({
                           ...prev,
-                          [`${goal.id}_blockers`]: e.target.value,
+                          [`${project.id}_blockers`]: e.target.value,
                         }))
                       }
                       placeholder="What's in the way?"
@@ -347,19 +391,33 @@ export function WeeklyCheckInForm({
         </CardContent>
       </Card>
 
-      <Button
-        type="submit"
-        size="lg"
-        className="w-full"
-        disabled={submitting}
-      >
-        {submitting ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          <ClipboardCheck className="mr-2 h-4 w-4" />
+      <div className="sticky bottom-0 z-10 -mx-1 flex gap-2 border-t border-border/80 bg-background/95 px-1 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:static sm:z-auto sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:pt-0 sm:pb-0 sm:backdrop-blur-none">
+        {editing && (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={() => setEditing(false)}
+            disabled={submitting}
+            className="min-h-11"
+          >
+            Cancel
+          </Button>
         )}
-        Save review
-      </Button>
+        <Button
+          type="submit"
+          size="lg"
+          className="min-h-11 flex-1"
+          disabled={submitting}
+        >
+          {submitting ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <ClipboardCheck className="mr-2 h-4 w-4" />
+          )}
+          {editing ? "Update review" : "Save review"}
+        </Button>
+      </div>
     </form>
   )
 }

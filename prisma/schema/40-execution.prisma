@@ -1,0 +1,46 @@
+// ─────────────────────────────────────────────────────────────
+// Execution — the doing layer.
+// Task (was Action), System (was DailySystem), SystemCompletion.
+// DB tables remain `actions` / `daily_systems` via `@@map`;
+// FK column stays `goalId` via `@map`.
+// ─────────────────────────────────────────────────────────────
+
+model Task {
+  id          String     @id @default(cuid())
+  projectId   String     @map("goalId")
+  type        ActionType
+  description String     @db.Text
+  status      GoalStatus @default(NOT_STARTED)
+  targetDate  DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("actions")
+}
+
+model System {
+  id          String    @id @default(cuid())
+  projectId   String    @map("goalId")
+  description String
+  frequency   Frequency @default(DAILY)
+  isActive    Boolean   @default(true)
+
+  project     Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  completions SystemCompletion[]
+
+  @@index([projectId])
+  @@map("daily_systems")
+}
+
+model SystemCompletion {
+  id          String   @id @default(cuid())
+  systemId    String
+  completedAt DateTime @default(now())
+  date        DateTime @db.Date
+
+  system System @relation(fields: [systemId], references: [id], onDelete: Cascade)
+
+  @@unique([systemId, date])
+  @@map("system_completions")
+}

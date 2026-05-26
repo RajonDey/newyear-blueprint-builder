@@ -1,12 +1,16 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import {
+  addDays,
+  addWeeks,
+  endOfMonth,
+  format,
   getISOWeek,
   getISOWeekYear,
   setISOWeek,
   startOfISOWeek,
+  startOfMonth,
   subWeeks,
-  addWeeks,
 } from "date-fns"
 
 export function cn(...inputs: ClassValue[]) {
@@ -87,4 +91,69 @@ export function getNextIsoWeekContext(
 
 export function getWeekNumber(date: Date): number {
   return getIsoWeekContext(date).weekNumber
+}
+
+/** ISO week anchor (Monday UTC noon) for a given week number + ISO week-year. */
+export function getIsoWeekAnchor(weekNumber: number, year: number): Date {
+  return startOfISOWeek(
+    setISOWeek(new Date(Date.UTC(year, 0, 4, 12, 0, 0)), weekNumber),
+  )
+}
+
+function quarterForMonth(monthIndex: number): string {
+  if (monthIndex < 3) return "Q1"
+  if (monthIndex < 6) return "Q2"
+  if (monthIndex < 9) return "Q3"
+  return "Q4"
+}
+
+/**
+ * Human label for weekly navigation — e.g. "Week 2 of 4 in May · Q2".
+ */
+export function getWeekRhythmLabel(weekNumber: number, year: number): string {
+  const weekStart = getIsoWeekAnchor(weekNumber, year)
+  const thursday = addDays(weekStart, 3)
+  const monthIndex = thursday.getUTCMonth()
+  const calYear = thursday.getUTCFullYear()
+  const monthName = format(thursday, "MMMM")
+  const quarter = quarterForMonth(monthIndex)
+
+  const monthStart = startOfMonth(
+    new Date(Date.UTC(calYear, monthIndex, 1, 12, 0, 0)),
+  )
+  const monthEnd = endOfMonth(monthStart)
+
+  const weeksInMonth: { weekNumber: number; year: number }[] = []
+  const seen = new Set<string>()
+  let cursor = startOfISOWeek(monthStart)
+
+  for (let i = 0; i < 6; i++) {
+    const thurs = addDays(cursor, 3)
+    if (
+      thurs.getUTCMonth() === monthIndex &&
+      thurs.getUTCFullYear() === calYear
+    ) {
+      const wn = getISOWeek(cursor)
+      const wy = getISOWeekYear(cursor)
+      const key = `${wy}-${wn}`
+      if (!seen.has(key)) {
+        seen.add(key)
+        weeksInMonth.push({ weekNumber: wn, year: wy })
+      }
+    }
+    cursor = addWeeks(cursor, 1)
+    if (cursor > addWeeks(monthEnd, 1)) break
+  }
+
+  weeksInMonth.sort((a, b) =>
+    a.year !== b.year ? a.year - b.year : a.weekNumber - b.weekNumber,
+  )
+
+  const idx = weeksInMonth.findIndex(
+    (w) => w.weekNumber === weekNumber && w.year === year,
+  )
+  const weekInMonth = idx >= 0 ? idx + 1 : 1
+  const totalWeeks = weeksInMonth.length || 4
+
+  return `Week ${weekInMonth} of ${totalWeeks} in ${monthName} · ${quarter}`
 }

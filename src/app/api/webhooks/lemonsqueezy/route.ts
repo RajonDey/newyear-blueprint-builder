@@ -2,10 +2,18 @@ import { NextResponse } from "next/server"
 import crypto from "crypto"
 import { db } from "@/lib/db"
 
-function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
-  const hmac = crypto.createHmac("sha256", secret)
-  const digest = hmac.update(payload).digest("hex")
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))
+function verifyWebhookSignature(
+  payload: string,
+  signature: string,
+  secret: string,
+): boolean {
+  const digest = crypto.createHmac("sha256", secret).update(payload).digest("hex")
+  const sigBuf = Buffer.from(signature, "utf8")
+  const digBuf = Buffer.from(digest, "utf8")
+  if (sigBuf.length !== digBuf.length) {
+    return false
+  }
+  return crypto.timingSafeEqual(sigBuf, digBuf)
 }
 
 export async function POST(req: Request) {
@@ -21,22 +29,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Webhook not configured" }, { status: 500 })
   }
 
-  const isValid = verifyWebhookSignature(body, signature, secret)
-
-  if (!isValid) {
+  if (!verifyWebhookSignature(body, signature, secret)) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
   }
 
-  const event = JSON.parse(body)
+  let event: { meta?: { event_name?: string; custom_data?: { user_id?: string } }; data?: { id?: unknown; attributes?: Record<string, unknown> } }
+  try {
+    event = JSON.parse(body)
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 })
+  }
+
   const eventName = event.meta?.event_name
 
   switch (eventName) {
     case "subscription_created": {
       const data = event.data
-      const attrs = data.attributes
+      const attrs = data?.attributes
       const userId = event.meta?.custom_data?.user_id
 
-      if (!userId) break
+      if (!userId || !data || !attrs) break
 
       await db.subscription.upsert({
         where: { lsCustomerId: String(attrs.customer_id) },
@@ -46,14 +58,18 @@ export async function POST(req: Request) {
           lsSubscriptionId: String(data.id),
           lsVariantId: String(attrs.variant_id),
           status: "ACTIVE",
-          currentPeriodStart: new Date(attrs.created_at),
-          currentPeriodEnd: attrs.renews_at ? new Date(attrs.renews_at) : null,
+          currentPeriodStart: new Date(attrs.created_at as string),
+          currentPeriodEnd: attrs.renews_at
+            ? new Date(attrs.renews_at as string)
+            : null,
         },
         update: {
           lsSubscriptionId: String(data.id),
           lsVariantId: String(attrs.variant_id),
           status: "ACTIVE",
-          currentPeriodEnd: attrs.renews_at ? new Date(attrs.renews_at) : null,
+          currentPeriodEnd: attrs.renews_at
+            ? new Date(attrs.renews_at as string)
+            : null,
         },
       })
 
@@ -66,7 +82,8 @@ export async function POST(req: Request) {
 
     case "subscription_updated": {
       const data = event.data
-      const attrs = data.attributes
+      const attrs = data?.attributes
+      if (!attrs) break
       const customerId = String(attrs.customer_id)
 
       const statusMap: Record<string, "ACTIVE" | "PAST_DUE" | "CANCELED" | "INACTIVE"> = {
@@ -80,9 +97,11 @@ export async function POST(req: Request) {
       await db.subscription.updateMany({
         where: { lsCustomerId: customerId },
         data: {
-          status: statusMap[attrs.status] || "INACTIVE",
-          cancelAtPeriodEnd: attrs.cancelled ?? false,
-          currentPeriodEnd: attrs.renews_at ? new Date(attrs.renews_at) : undefined,
+          status: statusMap[String(attrs.status)] || "INACTIVE",
+          cancelAtPeriodEnd: Boolean(attrs.cancelled),
+          currentPeriodEnd: attrs.renews_at
+            ? new Date(attrs.renews_at as string)
+            : undefined,
         },
       })
       break
@@ -90,7 +109,8 @@ export async function POST(req: Request) {
 
     case "subscription_expired": {
       const data = event.data
-      const attrs = data.attributes
+      const attrs = data?.attributes
+      if (!attrs) break
       const customerId = String(attrs.customer_id)
 
       await db.subscription.updateMany({
@@ -112,7 +132,8 @@ export async function POST(req: Request) {
 
     case "subscription_cancelled": {
       const data = event.data
-      const attrs = data.attributes
+      const attrs = data?.attributes
+      if (!attrs) break
       const customerId = String(attrs.customer_id)
 
       await db.subscription.updateMany({

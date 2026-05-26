@@ -1,0 +1,29 @@
+# Local PostgreSQL for fast dev. Production/staging stays on Neon.
+#
+# Start:  docker compose up -d
+# Stop:   docker compose down
+# Reset:  docker compose down -v && docker compose up -d
+#
+# Then in .env.local:
+#   DATABASE_URL="postgresql://yearinreview:yearinreview@localhost:5432/yearinreview"
+# Run once: npm run db:deploy
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: yearinreview
+      POSTGRES_PASSWORD: yearinreview
+      POSTGRES_DB: yearinreview
+    volumes:
+      - yearinreview_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yearinreview -d yearinreview"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  yearinreview_pg:

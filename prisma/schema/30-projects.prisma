@@ -1,0 +1,84 @@
+// ─────────────────────────────────────────────────────────────
+// Projects — the PARA "Project" layer (renamed from Goal in Phase 2).
+// The DB table remains `goals` via `@@map`; FK columns stay `goalId`
+// via `@map` so no SQL migration is needed for the rename.
+//
+// Includes structural sub-models: KeyResult, ProjectCheckpoint,
+// Motivation, Habit. (Legacy `GoalNote` was dropped in Phase 7 — all
+// rows live in the polymorphic `Note` table now.)
+// ─────────────────────────────────────────────────────────────
+
+model Project {
+  id          String       @id @default(cuid())
+  planId      String
+  /// Optional anchor to a PARA Area. Nullable so legacy projects without
+  /// an Area still load; Phase 2 migration back-fills from `category`.
+  areaId       String?
+  /// Optional link to a life-vision board card this year's work serves.
+  visionItemId String?
+  category    LifeCategory
+  type        GoalType
+  title       String
+  description String?      @db.Text
+  status      GoalStatus   @default(NOT_STARTED)
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  plan        YearlyPlan          @relation(fields: [planId], references: [id], onDelete: Cascade)
+  area        Area?               @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  visionItem  VisionItem?         @relation(fields: [visionItemId], references: [id], onDelete: SetNull)
+  tasks       Task[]
+  checkpoints ProjectCheckpoint[]
+  systems     System[]
+  motivation  Motivation?
+  checkIns    ProjectCheckIn[]
+  keyResults  KeyResult[]
+
+  @@index([areaId])
+  @@index([visionItemId])
+  @@index([planId])
+  @@map("goals")
+}
+
+model ProjectCheckpoint {
+  id          String     @id @default(cuid())
+  projectId   String     @map("goalId")
+  quarter     Quarter
+  title       String
+  description String?    @db.Text
+  status      GoalStatus @default(NOT_STARTED)
+  targetDate  DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("checkpoint_goals")
+}
+
+model KeyResult {
+  id           String   @id @default(cuid())
+  projectId    String   @map("goalId")
+  title        String
+  currentValue Float    @default(0)
+  targetValue  Float
+  unit         String   @default("")
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("key_results")
+}
+
+model Motivation {
+  id              String @id @default(cuid())
+  projectId       String @unique @map("goalId")
+  whyText         String @db.Text
+  consequenceText String @db.Text
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("motivations")
+}

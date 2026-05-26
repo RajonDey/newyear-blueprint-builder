@@ -7,17 +7,36 @@ globs: ["**/*"]
 
 | Entity | Convention | Example |
 |--------|-----------|---------|
-| Files (components) | kebab-case | goal-card.tsx |
+| Files (components) | kebab-case | project-card.tsx |
 | Files (hooks) | use-kebab-case | use-current-user.ts |
-| Components | PascalCase | GoalCard |
-| Props types | PascalCase + Props | GoalCardProps |
+| Components | PascalCase | ProjectCard |
+| Props types | PascalCase + Props | ProjectCardProps |
 | Hooks | camelCase with use | useCurrentUser |
 | Utility functions | camelCase | formatDate |
-| Constants | UPPER_SNAKE_CASE | MAX_FREE_GOALS |
+| Constants | UPPER_SNAKE_CASE | MAX_FREE_PROJECTS |
 | Env vars | UPPER_SNAKE_CASE | DATABASE_URL |
 | DB tables | snake_case plural | yearly_plans |
 | API routes | kebab-case paths | /api/check-ins/weekly |
-| Zod schemas | camelCase + Schema | createGoalSchema |
-| TypeScript types | PascalCase | GoalWithActions |
+| Zod schemas | camelCase + Schema | createProjectSchema |
+| TypeScript types | PascalCase | ProjectWithTasks |
 | CSS variables | kebab-case | --color-primary |
 | Route groups | (lowercase) | (marketing), (auth), (app) |
+
+## PARA Terminology (Phase 2+)
+
+We renamed the core domain to align with the Second-Brain / PARA model. Always use the new names in new code:
+
+| Old name | New name | Notes |
+|----------|----------|-------|
+| Goal | **Project** | `db.project`, table still `goals` via `@@map` |
+| Action | **Task** | `db.task`, table still `actions` via `@@map` |
+| DailySystem | **System** | `db.system`, table still `daily_systems` |
+| GoalCheckIn | **ProjectCheckIn** | table still `goal_check_ins` |
+| CheckpointGoal | **ProjectCheckpoint** | table still `checkpoint_goals` |
+| (new) | **Area** | PARA life-domain anchor; six default areas seeded per user |
+| (new) | **Vision** / **VisionItem** | Life-spanning vision board (1:1 to User) |
+| (new) | **Note** / **Resource** | Polymorphic — attach to any PARA entity |
+| (new) | **Drift** | Quick-capture inbox row |
+| (new) | **DailyState** | Per-day mood / energy / intention / reflection |
+
+URL path params still use legacy keys where the dynamic segment is `[goalId]` etc.; only rename the segment when the page itself is moved (Phase 7).

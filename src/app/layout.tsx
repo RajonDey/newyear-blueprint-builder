@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Inter, Cormorant_Garamond, JetBrains_Mono } from "next/font/google"
+import { Inter, Fraunces, JetBrains_Mono } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { Providers } from "@/components/providers"
 import "./globals.css"
@@ -9,7 +9,7 @@ const inter = Inter({
   variable: "--font-inter",
 })
 
-const cormorant = Cormorant_Garamond({
+const fraunces = Fraunces({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-display",
@@ -21,6 +21,9 @@ const mono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://yearinreview.online",
+  ),
   title: {
     default: "YearInReview — Design a Life Worth Living",
     template: "%s | YearInReview",
@@ -52,6 +55,7 @@ export const metadata: Metadata = {
     title: "YearInReview — Design a Life Worth Living",
     description:
       "Reflect on your journey. Set intentional goals. Walk your path all year long.",
+    images: ["/opengraph-image"],
   },
 }
 
@@ -63,7 +67,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${cormorant.variable} ${mono.variable} font-sans antialiased`}
+        className={`${inter.variable} ${fraunces.variable} ${mono.variable} font-sans antialiased`}
       >
         <ThemeProvider
           attribute="class"

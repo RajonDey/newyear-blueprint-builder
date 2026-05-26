@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,15 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   Default: "Something went wrong while signing in. Please try again.",
 };
 
+/** Clear any stale JWT before starting OAuth / magic link (e.g. after switching DATABASE_URL). */
+async function freshSignIn(
+  provider: "google" | "resend",
+  options?: Parameters<typeof signIn>[1],
+) {
+  await signOut({ redirect: false });
+  await signIn(provider, options);
+}
+
 interface LoginFormProps {
   mode?: "login" | "signup";
   authError?: string;
@@ -37,14 +46,14 @@ export function LoginForm({ mode = "login", authError }: LoginFormProps) {
 
   async function handleGoogle() {
     setLoading("google");
-    await signIn("google", { callbackUrl: "/dashboard" });
+    await freshSignIn("google", { callbackUrl: "/dashboard" });
   }
 
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
     setLoading("email");
-    await signIn("resend", { email, callbackUrl: "/dashboard" });
+    await freshSignIn("resend", { email, callbackUrl: "/dashboard" });
   }
 
   return (

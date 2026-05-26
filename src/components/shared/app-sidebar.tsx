@@ -2,22 +2,12 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  LayoutDashboard,
-  Target,
-  CalendarCheck,
-  CalendarDays,
-  Activity,
-  BarChart3,
-  Gift,
-  Settings,
-  Sparkles,
-  ListChecks,
-  Shield,
-} from "lucide-react"
+import { Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { hasProProductAccess } from "@/lib/plan-access"
+import { getVisibleNavGroups, type NavLink } from "@/lib/nav-config"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { ProMark } from "@/components/atmosphere/pro-mark"
 import type { PlanTier, Role } from "@prisma/client"
 
 interface AppSidebarProps {
@@ -26,110 +16,98 @@ interface AppSidebarProps {
     planTier: PlanTier
     role: Role
   }
+  driftInboxCount?: number
 }
 
-type NavItem =
-  | { kind: "link"; label: string; href: string; icon: typeof LayoutDashboard; premium?: boolean }
-  | { kind: "divider" }
-
-const navigationBase: NavItem[] = [
-  { kind: "link", label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { kind: "divider" },
-  { kind: "link", label: "Goals", href: "/goals", icon: Target },
-  { kind: "divider" },
-  { kind: "link", label: "Daily Habits", href: "/rhythm/daily", icon: ListChecks },
-  { kind: "link", label: "Weekly Planner", href: "/rhythm/weekly", icon: CalendarCheck },
-  { kind: "divider" },
-  { kind: "link", label: "Monthly Review", href: "/rhythm/monthly", icon: CalendarDays, premium: true },
-  { kind: "link", label: "Quarterly Review", href: "/rhythm/quarterly", icon: Activity, premium: true },
-  { kind: "link", label: "Analytics", href: "/analytics", icon: BarChart3, premium: true },
-  { kind: "link", label: "Year Wrapped", href: "/wrapped", icon: Gift },
-  { kind: "divider" },
-  { kind: "link", label: "Settings", href: "/settings", icon: Settings },
-]
-
-function buildNavigation(role: string): NavItem[] {
-  if (role !== "ADMIN") return navigationBase
-
-  const settingsIdx = navigationBase.findIndex(
-    (item) => item.kind === "link" && item.href === "/settings"
-  )
-  return [
-    ...navigationBase.slice(0, settingsIdx),
-    { kind: "link", label: "Admin", href: "/admin", icon: Shield },
-    ...navigationBase.slice(settingsIdx),
-  ]
-}
-
-export function AppSidebar({ user }: AppSidebarProps) {
+export function AppSidebar({ user, driftInboxCount = 0 }: AppSidebarProps) {
   const pathname = usePathname()
   const isPro = hasProProductAccess(user.planTier, user.role)
-  const navigation = buildNavigation(user.role)
+  const groups = getVisibleNavGroups(user.role)
+
+  function linkActive(href: string) {
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
+
+  function renderItem(item: NavLink) {
+    const active = linkActive(item.href)
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={cn(
+          "group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+          active
+            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+            : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
+        )}
+      >
+        <item.icon className="h-4 w-4 shrink-0" />
+        <span className="flex-1 truncate">{item.label}</span>
+        {item.href === "/drifts" && driftInboxCount > 0 && (
+          <span className="shrink-0 rounded-full bg-amber/15 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-amber">
+            {driftInboxCount > 99 ? "99+" : driftInboxCount}
+          </span>
+        )}
+        {item.premium && !isPro && (
+          <Sparkles className="h-3 w-3 shrink-0 text-accent" aria-label="Pro" />
+        )}
+      </Link>
+    )
+  }
 
   return (
-    <aside className="hidden md:flex w-64 flex-col border-r bg-sidebar">
-      <div className="flex h-16 items-center border-b px-6 gap-2.5">
-        <svg
-          viewBox="0 0 28 28"
-          fill="none"
-          className="h-6 w-6 text-sidebar-primary"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle cx="14" cy="14" r="12" stroke="currentColor" strokeWidth="1.5" />
-          <circle cx="14" cy="14" r="7" stroke="currentColor" strokeWidth="1" opacity="0.6" />
-          <circle cx="14" cy="14" r="2.5" fill="currentColor" opacity="0.4" />
-        </svg>
-        <Link href="/dashboard">
-          <span className="text-lg font-display font-semibold tracking-wide text-sidebar-foreground">
+    <aside className="hidden md:flex w-64 flex-col border-r border-sidebar-border bg-sidebar">
+      <div className="flex h-16 items-center gap-2.5 border-b border-sidebar-border px-6">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground text-background font-display text-sm font-semibold">
+          Y
+        </div>
+        <Link href="/dashboard" className="flex flex-col leading-tight">
+          <span className="font-display text-base text-sidebar-foreground">
             YearInReview
+          </span>
+          <span className="text-[10px] uppercase tracking-widest text-sidebar-foreground/60">
+            Plan · Live · Wrap
           </span>
         </Link>
       </div>
+
       <ScrollArea className="flex-1 px-3 py-4">
-        <nav className="space-y-1">
-          {navigation.map((item, i) => {
-            if (item.kind === "divider") {
-              return (
-                <div
-                  key={`divider-${i}`}
-                  className="my-3 h-px bg-sidebar-border"
-                />
-              )
-            }
-
-            const isActive =
-              pathname === item.href || pathname.startsWith(item.href + "/")
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                  isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                )}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                <span className="flex-1">{item.label}</span>
-                {item.premium && !isPro && (
-                  <Sparkles className="h-3 w-3 text-accent" />
-                )}
-              </Link>
-            )
-          })}
+        <nav className="space-y-6">
+          {groups.map((group) => (
+            <div key={group.id}>
+              <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-widest text-sidebar-foreground/50">
+                {group.label}
+              </div>
+              <div className="space-y-0.5">
+                {group.items.map(renderItem)}
+              </div>
+            </div>
+          ))}
         </nav>
       </ScrollArea>
-      {!isPro && (
-        <div className="border-t p-4">
+
+      {!isPro ? (
+        <div className="border-t border-sidebar-border p-3">
           <Link
             href="/settings#billing"
-            className="flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="group block rounded-lg border border-sidebar-border bg-background/40 p-3 transition-colors hover:border-amber/40 hover:bg-amber/[0.04]"
           >
-            <Sparkles className="h-4 w-4" />
-            Upgrade to Pro
+            <div className="flex items-baseline gap-2">
+              <ProMark className="text-sm" />
+              <div className="text-sm font-medium tracking-tight text-sidebar-foreground">
+                Upgrade to Pro
+              </div>
+            </div>
+            <div className="mt-1 text-[11px] leading-snug text-sidebar-foreground/65">
+              Up to 20 projects, full reviews, annual Wrapped.
+            </div>
           </Link>
+        </div>
+      ) : (
+        <div className="border-t border-sidebar-border px-4 py-3 text-[11px] text-sidebar-foreground/65">
+          <span className="inline-flex items-center gap-1.5">
+            <ProMark className="text-[11px]" /> Pro plan
+          </span>
         </div>
       )}
     </aside>

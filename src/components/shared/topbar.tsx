@@ -1,42 +1,34 @@
 "use client"
 
+import Link from "next/link"
 import { useTheme } from "next-themes"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, LogOut, User as UserIcon } from "lucide-react"
+import { signOut } from "next-auth/react"
+import {
+  CreditCard,
+  LogOut,
+  Moon,
+  Settings as SettingsIcon,
+  Shield,
+  Sun,
+  User as UserIcon,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { signOut } from "next-auth/react"
-import Link from "next/link"
 import { MobileNav } from "@/components/shared/mobile-nav"
+import { QuickCaptureButton, GlobalSearchTrigger } from "@/components/shared/quick-capture-button"
+import { ProMark } from "@/components/atmosphere/pro-mark"
+import { deriveRouteLabel } from "@/lib/nav-config"
+import { hasProProductAccess } from "@/lib/plan-access"
 import type { PlanTier, Role } from "@prisma/client"
-
-const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/goals": "Goals",
-  "/rhythm/daily": "Daily Habits",
-  "/rhythm/weekly": "Weekly Planner",
-  "/rhythm/monthly": "Monthly Review",
-  "/rhythm/quarterly": "Quarterly Review",
-  "/analytics": "Analytics",
-  "/wrapped": "Year Wrapped",
-  "/settings": "Settings",
-  "/admin": "Admin",
-}
-
-function getPageTitle(pathname: string): string | null {
-  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname]
-  if (pathname.startsWith("/goals/")) return "Goal Detail"
-  if (pathname.startsWith("/plan/new")) return "Plan Wizard"
-  if (pathname.startsWith("/plan/")) return "Your Plan"
-  return null
-}
 
 interface TopbarProps {
   user: {
@@ -46,63 +38,131 @@ interface TopbarProps {
     planTier: PlanTier
     role: Role
   }
+  weekContext?: {
+    weekNumber: number
+    quarter: "Q1" | "Q2" | "Q3" | "Q4"
+  }
+  driftInboxCount?: number
 }
 
-export function Topbar({ user }: TopbarProps) {
+export function Topbar({ user, weekContext, driftInboxCount = 0 }: TopbarProps) {
   const { setTheme, theme } = useTheme()
   const pathname = usePathname()
-  const pageTitle = getPageTitle(pathname)
-  const initials = user.name
-    ?.split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase() || "U"
+  const pageLabel = deriveRouteLabel(pathname)
+  const isPro = hasProProductAccess(user.planTier, user.role)
+  const isAdmin = user.role === "ADMIN"
+  const initials =
+    user.name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "U"
 
   return (
-    <header className="flex h-16 items-center justify-between border-b px-4 sm:px-6">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border/60 bg-background/70 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
       <div className="md:hidden">
-        <MobileNav planTier={user.planTier} role={user.role} />
+        <MobileNav
+          planTier={user.planTier}
+          role={user.role}
+          driftInboxCount={driftInboxCount}
+        />
       </div>
-      {pageTitle && (
-        <p className="hidden md:block text-sm font-medium text-muted-foreground">
-          {pageTitle}
-        </p>
-      )}
-      <div className="flex-1" />
-      <div className="flex items-center gap-2">
+
+      <div className="hidden md:flex items-baseline gap-2 text-sm">
+        <span className="font-display tracking-tight text-foreground">
+          {pageLabel}
+        </span>
+      </div>
+
+      <div className="ml-auto flex items-center gap-3 sm:gap-4">
+        <GlobalSearchTrigger />
+        <QuickCaptureButton />
+
+        {weekContext && (
+          <span className="hidden sm:inline text-xs text-muted-foreground tabular-nums">
+            Week {weekContext.weekNumber}
+            <span className="mx-1.5 opacity-40">·</span>
+            {weekContext.quarter}
+          </span>
+        )}
+
         <Button
           variant="ghost"
           size="icon"
-          className="relative"
+          aria-label="Toggle theme"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
         >
           <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
         </Button>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+            <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
               <Avatar className="h-9 w-9">
                 <AvatarImage src={user.image || undefined} alt={user.name || ""} />
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
+              {isPro && (
+                <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-background text-[10px] leading-none">
+                  <ProMark />
+                </span>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <div className="flex items-center gap-2 p-2">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">{user.name}</p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
+            <DropdownMenuLabel className="font-normal">
+              <div className="text-sm font-medium">{user.name || "Account"}</div>
+              <div className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
+                {isPro ? (
+                  <>
+                    Pro plan <ProMark className="text-[11px]" />
+                  </>
+                ) : (
+                  "Free plan"
+                )}
               </div>
-            </div>
+              {user.email && (
+                <div className="text-[11px] text-muted-foreground/80 mt-0.5 truncate">
+                  {user.email}
+                </div>
+              )}
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href="/settings" className="cursor-pointer">
-                <UserIcon className="mr-2 h-4 w-4" />
+                <SettingsIcon className="mr-2 h-4 w-4" />
                 Settings
               </Link>
             </DropdownMenuItem>
+            {!isPro ? (
+              <DropdownMenuItem asChild>
+                <Link href="/settings#billing" className="cursor-pointer">
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  Upgrade to Pro
+                </Link>
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem asChild>
+                <Link href="/settings#billing" className="cursor-pointer">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Manage plan
+                </Link>
+              </DropdownMenuItem>
+            )}
+            {isAdmin && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/admin" className="cursor-pointer">
+                    <Shield className="mr-2 h-4 w-4" />
+                    Admin
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer text-destructive focus:text-destructive"

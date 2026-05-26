@@ -1,9 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import type { WrappedData } from "@/lib/queries/wrapped"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { WheelChart } from "@/components/dashboard/wheel-chart"
-import { MandalaWatermark } from "@/components/shared/mandala-watermark"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
 import { EmptyState } from "@/components/shared/empty-state"
 import {
@@ -12,76 +11,42 @@ import {
   Trophy,
   Flame,
   Sparkles,
-  Loader2,
   Quote,
 } from "lucide-react"
 
-interface WrappedData {
-  plan: { id: string; year: number; status: string }
-  stats: {
-    totalGoals: number
-    completedGoals: number
-    totalCheckIns: number
-    avgMood: number | null
-    longestStreak: number
-    totalReviews: number
-    totalAntiGoals: number
-  }
-  goals: { id: string; title: string; category: string; status: string }[]
-  completedGoals: { id: string; title: string; category: string }[]
-  wheelScores: { category: string; rating: number }[]
-  achievements: { id: string; type: string; title: string; earnedAt: string; meta?: { icon: string; title: string; description: string } }[]
-  reflections: Record<string, string> | null
-  quarterlyReviews: { quarter: string }[]
-}
-
-export function WrappedSummary() {
-  const [data, setData] = useState<WrappedData | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetch("/api/wrapped")
-      .then((res) => res.json())
-      .then((json) => setData(json.data))
-      .catch(() => setData(null))
-      .finally(() => setLoading(false))
-  }, [])
-
-  if (loading) {
+export function WrappedSummary({
+  initialData,
+  showOffSeasonBanner = false,
+}: {
+  initialData: WrappedData
+  showOffSeasonBanner?: boolean
+}) {
+  if (!initialData) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-accent" />
-      </div>
-    )
-  }
-
-  if (!data) {
-    return (
-      <div className="relative">
-        <MandalaWatermark position="center" size="lg" />
+      <div className="space-y-6">
+        {showOffSeasonBanner && <WrappedOffSeasonBanner />}
         <EmptyState
-          icon={Sparkles}
-          title="No year to wrap yet"
-          description="Create your yearly plan and live through the year. Your Year Wrapped will appear here with your progress, achievements, and reflections."
-          action={
-            <a
-              href="/plan/new"
-              className="inline-flex items-center gap-2 text-accent hover:underline font-medium"
-            >
-              Create your plan →
-            </a>
-          }
+        icon={Sparkles}
+        title="No year to wrap yet"
+        description="Create your yearly plan and live through the year. Your Year Wrapped will appear here with your progress, achievements, and reflections."
+        action={
+          <a
+            href="/onboarding"
+            className="inline-flex items-center gap-2 text-amber hover:underline font-medium"
+          >
+            Create your plan →
+          </a>
+        }
         />
       </div>
     )
   }
 
-  const { plan, stats, completedGoals, wheelScores, achievements } = data
+  const { plan, stats, completedGoals, wheelScores, achievements } = initialData
 
   return (
-    <div className="relative max-w-2xl mx-auto space-y-12 py-8">
-      <MandalaWatermark position="top-right" size="lg" />
-
+    <div className="max-w-2xl mx-auto space-y-12 py-8">
+      {showOffSeasonBanner && <WrappedOffSeasonBanner />}
       <div className="text-center space-y-4">
         <h1 className="font-display text-4xl font-semibold sm:text-5xl">
           Your {plan.year} in Review
@@ -102,7 +67,7 @@ export function WrappedSummary() {
               </div>
               <div>
                 <p className="text-3xl font-bold">{stats.completedGoals}/{stats.totalGoals}</p>
-                <p className="text-sm text-muted-foreground">Goals completed</p>
+                <p className="text-sm text-muted-foreground">Projects completed</p>
               </div>
             </div>
           </CardContent>
@@ -165,7 +130,7 @@ export function WrappedSummary() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg font-display flex items-center gap-2">
-              <Target className="h-4 w-4 text-accent" /> Goals You Crushed
+              <Target className="h-4 w-4 text-accent" /> Projects you crushed
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -215,6 +180,21 @@ export function WrappedSummary() {
         </blockquote>
         <p className="text-sm text-muted-foreground mt-2">— Lao Tzu</p>
       </div>
+    </div>
+  )
+}
+
+function WrappedOffSeasonBanner() {
+  return (
+    <div className="rounded-2xl border border-amber/30 bg-amber/[0.04] px-4 py-3.5 text-sm text-muted-foreground leading-relaxed">
+      <p className="font-medium text-foreground">
+        Your year-end story unlocks in December
+      </p>
+      <p className="mt-1 text-xs">
+        Year Wrapped shines brightest at the close of the year. You can still
+        browse your progress here anytime — the cinematic recap lands when the
+        year turns.
+      </p>
     </div>
   )
 }

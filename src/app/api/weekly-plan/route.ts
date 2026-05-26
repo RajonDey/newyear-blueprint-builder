@@ -16,7 +16,7 @@ const lifeCategory = z.enum([
 
 const upsertSchema = z.object({
   planId: z.string().min(1),
-  priorityGoalIds: z.array(z.string()).max(3),
+  priorityProjectIds: z.array(z.string()).max(3),
   protectCategory: lifeCategory.nullable().optional(),
   commitments: z
     .array(
@@ -79,12 +79,12 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 })
   }
 
-  const { planId, priorityGoalIds, protectCategory, commitments } = parsed.data
+  const { planId, priorityProjectIds, protectCategory, commitments } = parsed.data
 
   const plan = await db.yearlyPlan.findFirst({
     where: { id: planId, userId: session.user.id, status: "ACTIVE" },
     include: {
-      goals: { where: { status: { not: "COMPLETED" } }, select: { id: true } },
+      projects: { where: { status: { not: "COMPLETED" } }, select: { id: true } },
       user: { select: { timezone: true } },
     },
   })
@@ -92,10 +92,10 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: "Plan not found" }, { status: 404 })
   }
 
-  const allowed = new Set(plan.goals.map((g) => g.id))
-  if (priorityGoalIds.some((id) => !allowed.has(id))) {
+  const allowed = new Set(plan.projects.map((g) => g.id))
+  if (priorityProjectIds.some((id) => !allowed.has(id))) {
     return NextResponse.json(
-      { error: "Priority goals must be active goals on this plan." },
+      { error: "Priority projects must be active projects on this plan." },
       { status: 400 }
     )
   }
@@ -126,12 +126,12 @@ export async function PUT(req: Request) {
       planId,
       weekNumber,
       year,
-      priorityGoalIds,
+      priorityProjectIds,
       protectCategory: protectCategory ?? null,
       commitments: safeCommitments ?? [],
     },
     update: {
-      priorityGoalIds,
+      priorityProjectIds,
       ...(protectCategory !== undefined && { protectCategory }),
       ...(safeCommitments !== undefined && { commitments: safeCommitments }),
     },

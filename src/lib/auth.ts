@@ -27,7 +27,7 @@ function tokenUserId(token: {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db) as Adapter,
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: 7 * 24 * 60 * 60 },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -58,6 +58,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id;
         token.sub = user.id;
+        token.email = user.email;
         token.role = (user as any).role;
         token.planTier = (user as any).planTier;
         token.accountActive = !(user as any).disabledAt;
@@ -78,20 +79,48 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return token;
         }
         try {
-          const dbUser = await db.user.findUnique({
+          let dbUser = await db.user.findUnique({
             where: { id: uid },
-            select: { role: true, planTier: true, disabledAt: true },
+            select: {
+              id: true,
+              email: true,
+              role: true,
+              planTier: true,
+              disabledAt: true,
+            },
           });
+
+          // Same email, different id — e.g. switched DATABASE_URL (local ↔ Neon).
+          if (
+            !dbUser &&
+            typeof token.email === "string" &&
+            token.email.length > 0
+          ) {
+            dbUser = await db.user.findFirst({
+              where: { email: { equals: token.email, mode: "insensitive" } },
+              select: {
+                id: true,
+                email: true,
+                role: true,
+                planTier: true,
+                disabledAt: true,
+              },
+            });
+            if (dbUser) {
+              token.id = dbUser.id;
+              token.sub = dbUser.id;
+            }
+          }
+
           if (dbUser) {
             token.role = dbUser.role;
             token.planTier = dbUser.planTier;
             token.accountActive = !dbUser.disabledAt;
           } else {
-            // Do not set accountActive=false here: a transient DB/read issue or id drift
-            // would log everyone out after the first 30s refresh. Back off like a failed query.
             console.warn(
-              "[auth] jwt refresh: no user row for token id; keeping session",
+              "[auth] jwt refresh: no user row for token id; invalidating session",
             );
+            token.accountActive = false;
             token.roleSyncedAt = Date.now();
             return token;
           }

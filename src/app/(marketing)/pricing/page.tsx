@@ -1,117 +1,50 @@
 import type { Metadata } from "next"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { OrnamentDivider } from "@/components/shared/ornament-divider"
-import { MandalaWatermark } from "@/components/shared/mandala-watermark"
-import { Check, Sparkles } from "lucide-react"
+import { SoftBackdrop } from "@/components/atmosphere/soft-backdrop"
+import { PricingPlans } from "@/components/marketing/pricing-plans"
+import { PricingCompare } from "@/components/marketing/pricing-compare"
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Simple, mindful pricing for your annual planning journey.",
+  description:
+    "Free is real — the whole loop, kept simple. Pro is for the year you want proof of.",
 }
-
-const freeFeatures = [
-  "Full planning wizard",
-  "Up to 3 intentional goals",
-  "Weekly planner",
-  "Daily habits tied to goals",
-  "Basic streak tracking",
-  "Wheel of Life assessment",
-  "90-day habits heatmap",
-]
-
-const proFeatures = [
-  "Everything in Free",
-  "Unlimited goals & categories",
-  "Quarterly review wizard",
-  "Advanced progress analytics",
-  "Monthly review workspace",
-  "Year Wrapped summary",
-]
 
 export default function PricingPage() {
   return (
-    <div className="relative overflow-hidden">
-      <MandalaWatermark size="lg" position="top-right" className="opacity-[0.025]" />
-      <div className="container py-24">
-        <div className="text-center space-y-4 mb-6">
-          <h2 className="text-sm font-medium uppercase tracking-[0.2em] text-accent">
-            Pricing
-          </h2>
-          <h1 className="text-4xl md:text-5xl font-display font-semibold text-foreground">
-            Walk your path, at your pace
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Begin free. Grow when you're ready for deeper guidance.
-          </p>
-        </div>
+    <section className="py-16 md:py-24">
+      <div className="relative mx-auto w-full max-w-5xl px-6">
+        <SoftBackdrop intensity="quiet" />
 
-        <OrnamentDivider variant="dot" className="max-w-xs mx-auto" />
-
-        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto mt-8">
-          {/* Free Tier */}
-          <div className="rounded-lg border p-8 space-y-6 bg-card bg-lotus-corner">
-            <div>
-              <h3 className="text-xl font-display font-semibold">Free</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Everything you need to begin
-              </p>
+        <div className="relative">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <div className="text-[10px] font-semibold tracking-[0.28em] uppercase text-amber mb-4">
+              Pricing
             </div>
-            <p className="text-4xl font-display font-bold">
-              $0
-              <span className="text-base font-normal text-muted-foreground">
-                /forever
-              </span>
+            <h1 className="font-display text-5xl md:text-6xl tracking-tight leading-[1.05]">
+              Two ways to{" "}
+              <em className="not-italic text-amber">end the year proud</em>.
+            </h1>
+            <p className="text-muted-foreground mt-5 text-base md:text-lg leading-relaxed">
+              Free is genuinely useful — forever. Pro is for the year you want
+              proof of.
             </p>
-            <ul className="space-y-3">
-              {freeFeatures.map((f) => (
-                <li key={f} className="flex items-start gap-3 text-sm">
-                  <Check className="h-4 w-4 text-success shrink-0 mt-0.5" />
-                  <span className="text-muted-foreground">{f}</span>
-                </li>
-              ))}
-            </ul>
-            <Link href="/signup" className="block">
-              <Button variant="outline" className="w-full h-11 font-medium border-border/90">
-                Begin free
-              </Button>
-            </Link>
           </div>
 
-          {/* Pro Tier */}
-          <div className="rounded-lg border-2 border-accent/40 p-8 space-y-6 relative bg-card">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground px-4 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
-              <Sparkles className="h-3 w-3" />
-              Recommended
+          <PricingPlans />
+
+          <div className="mt-24">
+            <div className="text-center mb-8">
+              <div className="text-[10px] font-semibold tracking-[0.28em] uppercase text-amber mb-3">
+                Compare
+              </div>
+              <h2 className="font-display text-3xl md:text-4xl tracking-tight">
+                Everything in Free, plus depth in Pro.
+              </h2>
             </div>
-            <div>
-              <h3 className="text-xl font-display font-semibold">Pro</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                For those committed to transformation
-              </p>
-            </div>
-            <p className="text-4xl font-display font-bold">
-              $49
-              <span className="text-base font-normal text-muted-foreground">
-                /year
-              </span>
-            </p>
-            <ul className="space-y-3">
-              {proFeatures.map((f) => (
-                <li key={f} className="flex items-start gap-3 text-sm">
-                  <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
-                  <span className="text-muted-foreground">{f}</span>
-                </li>
-              ))}
-            </ul>
-            <Link href="/signup" className="block">
-              <Button className="w-full h-11 font-display font-semibold tracking-wide shadow-sm">
-                Begin your journey
-              </Button>
-            </Link>
+            <PricingCompare />
           </div>
         </div>
       </div>
-    </div>
+    </section>
   )
 }

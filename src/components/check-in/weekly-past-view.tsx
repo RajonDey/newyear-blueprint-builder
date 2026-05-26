@@ -14,9 +14,9 @@ interface Goal {
 }
 
 interface PastWeekData {
-  goals: Goal[]
+  projects: Goal[]
   weeklyPlan: {
-    priorityGoalIds: string[]
+    priorityProjectIds: string[]
     protectCategory: string | null
     commitments: WeeklyCommitment[]
   } | null
@@ -24,8 +24,8 @@ interface PastWeekData {
     overallMood: number | null
     notes: string | null
     nextWeekFocus?: string | null
-    goalCheckIns: {
-      goalId: string
+    projectCheckIns: {
+      projectId: string
       progressRating: number
       notes: string | null
       blockers: string | null
@@ -62,19 +62,19 @@ export function WeeklyPastView({ data }: { data: PastWeekData }) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {data.weeklyPlan!.priorityGoalIds.length > 0 && (
+            {data.weeklyPlan!.priorityProjectIds.length > 0 && (
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                  Priority goals
+                  Priority projects
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {data.weeklyPlan!.priorityGoalIds.map((gid) => {
-                    const goal = data.goals.find((g) => g.id === gid)
+                  {data.weeklyPlan!.priorityProjectIds.map((gid) => {
+                    const goal = data.projects.find((g) => g.id === gid)
                     const cat = goal ? LIFE_CATEGORIES.find((c) => c.id === goal.category) : null
                     return (
                       <Badge key={gid} variant="outline" className="gap-1.5 py-1">
                         {cat && <cat.icon className="h-3 w-3" style={{ color: cat.color }} />}
-                        {goal?.title ?? "Unknown goal"}
+                        {goal?.title ?? "Unknown project"}
                       </Badge>
                     )
                   })}
@@ -130,20 +130,20 @@ export function WeeklyPastView({ data }: { data: PastWeekData }) {
               </div>
             )}
 
-            {data.existingCheckIn!.goalCheckIns.length > 0 && (
+            {data.existingCheckIn!.projectCheckIns.length > 0 && (
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                  Goal ratings
+                  Project ratings
                 </p>
                 <div className="space-y-2">
-                  {data.existingCheckIn!.goalCheckIns.map((gc) => {
-                    const goal = data.goals.find((g) => g.id === gc.goalId)
+                  {data.existingCheckIn!.projectCheckIns.map((gc) => {
+                    const goal = data.projects.find((g) => g.id === gc.projectId)
                     const cat = goal ? LIFE_CATEGORIES.find((c) => c.id === goal.category) : null
                     return (
-                      <div key={gc.goalId} className="space-y-1">
+                      <div key={gc.projectId} className="space-y-1">
                         <div className="flex items-center gap-3 text-sm">
                           {cat && <cat.icon className="h-3.5 w-3.5 shrink-0" style={{ color: cat.color }} />}
-                          <span className="flex-1 truncate">{goal?.title ?? "Goal"}</span>
+                          <span className="flex-1 truncate">{goal?.title ?? "Project"}</span>
                           <div className="flex gap-0.5">
                             {[1, 2, 3, 4, 5].map((n) => (
                               <div

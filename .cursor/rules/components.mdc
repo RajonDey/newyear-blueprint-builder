@@ -5,17 +5,27 @@ globs: ["src/components/**/*.tsx"]
 
 # Component Patterns
 
+> Size limits, fetch rules, anti-patterns: `docs/PRODUCTION_STANDARDS.md` §4.
+
 ## Server vs Client
 - Default to Server Components. Only add "use client" when the component needs:
   useState, useEffect, event handlers, browser APIs, or client-side hooks.
-- Data fetching happens in Server Components or page.tsx files.
+- Data fetching happens in Server Components or page.tsx via `lib/queries/*` — **not** `useEffect` + `fetch` for primary content.
+- Client files: target ≤ 300 lines; split before 400. Do not add new god components.
+
+## Client mutations
+- Always check `res.ok` after `fetch`; show toast on error.
+- On success: `startTransition(() => router.refresh())` to reload RSC data.
+- Never call deleted API paths — notes use `POST /api/notes` with `parentType` + `parentId`.
 
 ## Props
 - Props interface named `{ComponentName}Props`. Define above the component.
 - Destructure props in the function signature.
 
 ## App shell layout
-- Authenticated pages: wrap main content in `<AppContent variant="narrow">` (forms, check-ins, settings, goal detail) or `variant="wide"` (dashboard, goals grid, analytics, systems, wrapped, plan year). Do not add separate `max-w-*` on the inner root unless needed for a sub-region.
+- New authenticated pages: prefer `<PageContainer width="wide" | "narrow" spacing="…">` from `@/components/shared/page-container` — it composes max-width with vertical rhythm.
+- Existing pages may still use the lower-level `<AppContent variant="narrow" | "wide">` — both compose; do not add a separate `max-w-*` on the inner root.
+- For full conventions on dashboard surfaces (primitives catalog, gating, charts theme, motion vocabulary) see `.cursor/rules/dashboard.mdc`.
 
 ## Styling
 - Use shadcn/ui primitives from `@/components/ui/*` — never build custom buttons, inputs, dialogs from scratch.
@@ -28,10 +38,10 @@ globs: ["src/components/**/*.tsx"]
 - Empty states: Use the shared EmptyState component with icon, title, and action.
 - Error states: Catch and display user-friendly messages.
 
-## Premium Features
-- Wrap premium-only UI in `<PremiumGate>`.
-- Never hide premium features entirely — show them locked with an upgrade prompt.
-- Check premium status via the user's `planTier` from session.
+## Pro Features
+- Wrap Pro-only UI in `<ProGate planTier={…} role={…} feature="…">` from `@/components/upgrade/pro-gate`. Its default fallback is the editorial `<ProUpsellCard>`.
+- Use feature-level helpers in `@/lib/feature-flags` (`canSeeFullWrapped`, `canSeeAdvancedAnalytics`, …) rather than calling `hasProProductAccess` directly.
+- Never hide Pro features entirely — show them gated with a calm upgrade prompt.
 
 ## Data Display
 - Use `formatDate()` from `@/lib/utils` for dates.

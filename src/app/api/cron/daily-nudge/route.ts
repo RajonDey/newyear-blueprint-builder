@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { shouldSendEmail } from "@/lib/cron/email-eligibility"
 import { sendDailyNudge } from "@/lib/email"
 
 export async function GET(req: Request) {
@@ -29,15 +30,20 @@ export async function GET(req: Request) {
       },
     },
     include: {
-      user: { select: { email: true, name: true } },
+      user: { select: { email: true, name: true, preferences: true } },
     },
   })
 
   const sent: string[] = []
+  const skipped: string[] = []
   const errors: { email: string; error: string }[] = []
 
   for (const streak of droppedOffStreaks) {
     if (!streak.user?.email) continue
+    if (!shouldSendEmail(streak.user.preferences, "dailyNudge")) {
+      skipped.push(streak.user.email)
+      continue
+    }
     try {
       await sendDailyNudge(streak.user.email, streak.user.name ?? undefined)
       sent.push(streak.user.email)
@@ -52,7 +58,9 @@ export async function GET(req: Request) {
   return NextResponse.json({
     data: {
       usersNotified: sent.length,
+      usersSkipped: skipped.length,
       sent,
+      skipped: skipped.length > 0 ? skipped : undefined,
       errors: errors.length > 0 ? errors : undefined,
     },
   })

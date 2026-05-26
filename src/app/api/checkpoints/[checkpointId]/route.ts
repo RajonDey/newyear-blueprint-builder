@@ -12,10 +12,10 @@ const updateSchema = z.object({
 })
 
 async function checkpointForUser(checkpointId: string, userId: string) {
-  return db.checkpointGoal.findFirst({
+  return db.projectCheckpoint.findFirst({
     where: {
       id: checkpointId,
-      goal: { plan: { userId } },
+      project: { plan: { userId } },
     },
   })
 }
@@ -45,10 +45,29 @@ export async function PATCH(
     Object.entries(parsed.data).filter(([, v]) => v !== undefined)
   )
 
-  const checkpoint = await db.checkpointGoal.update({
+  const checkpoint = await db.projectCheckpoint.update({
     where: { id: checkpointId },
     data,
   })
 
   return NextResponse.json({ data: checkpoint })
+}
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ checkpointId: string }> },
+) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const { checkpointId } = await params
+  const existing = await checkpointForUser(checkpointId, session.user.id)
+  if (!existing) {
+    return NextResponse.json({ error: "Checkpoint not found" }, { status: 404 })
+  }
+
+  await db.projectCheckpoint.delete({ where: { id: checkpointId } })
+  return NextResponse.json({ ok: true })
 }

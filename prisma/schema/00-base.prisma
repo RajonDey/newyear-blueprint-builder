@@ -1,0 +1,129 @@
+// ─────────────────────────────────────────────────────────────
+// Base — generator, datasource, and all enums.
+// All enums live here so any model in any file can reference them.
+// ─────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ───────────────────────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PlanTier {
+  FREE
+  PRO
+}
+
+enum PlanStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum LifeCategory {
+  HEALTH
+  CAREER
+  FINANCE
+  RELATIONSHIPS
+  SPIRITUALITY
+  PASSION
+}
+
+enum GoalType {
+  PRIMARY
+  SECONDARY
+}
+
+enum GoalStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  ON_TRACK
+  AT_RISK
+  COMPLETED
+  ABANDONED
+}
+
+enum ActionType {
+  SMALL
+  MEDIUM
+  BIG
+}
+
+enum Quarter {
+  Q1
+  Q2
+  Q3
+  Q4
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum StreakType {
+  WEEKLY_CHECK_IN
+  DAILY_SYSTEM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+}
+
+// ─── PARA / Second Brain enums (Phase 2 additions) ───
+
+/// Polymorphic parent for Note + Resource (and other knowledge entities).
+enum ParentType {
+  AREA
+  PROJECT
+  TASK
+  SYSTEM
+  VISION
+  VISION_ITEM
+}
+
+/// Resource storage kind. FILE is Pro-only (Vercel Blob).
+enum ResourceKind {
+  LINK
+  FILE
+}
+
+/// Vision-board card type.
+enum VisionItemKind {
+  STATEMENT
+  VALUE
+  MILESTONE
+  IMAGE
+  QUOTE
+}
+
+/// Drift (quick-capture) classification — what the row was first sketched as.
+enum DriftKind {
+  THOUGHT
+  TASK
+  NOTE
+  RESOURCE
+  QUESTION
+}
+
+/// Custom review prompt cadence — templates are stored per user per cadence.
+enum ReviewCadence {
+  MONTHLY
+  QUARTERLY
+}

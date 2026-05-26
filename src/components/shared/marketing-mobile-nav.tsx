@@ -5,6 +5,22 @@ import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
+const primaryNav = [
+  { href: "/how-it-works", label: "How it works" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/about", label: "About" },
+] as const
+
+const legalNav = [
+  { href: "/terms", label: "Terms of Service" },
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/cookies", label: "Cookie Policy" },
+  { href: "/privacy/california", label: "California privacy" },
+  { href: "/refund", label: "Refund Policy" },
+  { href: "/blog", label: "Wisdom" },
+] as const
+
 export function MarketingMobileNav() {
   const [open, setOpen] = useState(false)
 
@@ -27,85 +43,53 @@ export function MarketingMobileNav() {
             aria-label="Close menu"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute inset-y-0 right-0 w-72 border-l bg-background p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-8">
-              <span className="font-display text-lg font-semibold">Menu</span>
+          <div className="absolute inset-y-0 right-0 w-72 border-l bg-background p-6 shadow-lg overflow-y-auto">
+            <div className="mb-8 flex items-center justify-between">
+              <span className="inline-flex items-baseline gap-2 font-display text-lg tracking-tight">
+                <span aria-hidden className="text-amber leading-none">✦</span>
+                YearInReview
+              </span>
               <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
                 <X className="h-5 w-5" />
               </Button>
             </div>
+
             <nav className="flex flex-col gap-1">
-              <Link
-                href="/features"
-                className="rounded-md px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={() => setOpen(false)}
-              >
-                Features
-              </Link>
-              <Link
-                href="/pricing"
-                className="rounded-md px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={() => setOpen(false)}
-              >
-                Pricing
-              </Link>
-              <Link
-                href="/blog"
-                className="rounded-md px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={() => setOpen(false)}
-              >
-                Wisdom
-              </Link>
-              <p className="mt-6 mb-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Legal
+              {primaryNav.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-md px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                  onClick={() => setOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+
+              <p className="mt-6 mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/80">
+                More
               </p>
-              <Link
-                href="/terms"
-                className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={() => setOpen(false)}
-              >
-                Terms of Service
-              </Link>
-              <Link
-                href="/privacy"
-                className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={() => setOpen(false)}
-              >
-                Privacy Policy
-              </Link>
-              <Link
-                href="/cookies"
-                className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={() => setOpen(false)}
-              >
-                Cookie Policy
-              </Link>
-              <Link
-                href="/privacy/california"
-                className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={() => setOpen(false)}
-              >
-                California privacy
-              </Link>
-              <Link
-                href="/refund"
-                className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={() => setOpen(false)}
-              >
-                Refund Policy
-              </Link>
-              <div className="my-4 h-px bg-border" />
-              <Button variant="outline" className="w-full h-11 font-medium border-border/90" asChild>
+              {legalNav.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                  onClick={() => setOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+
+              <div className="my-5 h-px bg-border" />
+
+              <Button variant="outline" className="w-full h-11" asChild>
                 <Link href="/login" onClick={() => setOpen(false)}>
-                  Log in
+                  Sign in
                 </Link>
               </Button>
-              <Button
-                className="w-full h-11 mt-3 font-display font-semibold tracking-wide shadow-sm"
-                asChild
-              >
+              <Button className="w-full h-11 mt-3" asChild>
                 <Link href="/signup" onClick={() => setOpen(false)}>
-                  Begin your journey
+                  Begin your year
                 </Link>
               </Button>
             </nav>

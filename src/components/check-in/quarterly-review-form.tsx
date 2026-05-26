@@ -1,74 +1,143 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { EmptyState } from "@/components/shared/empty-state"
-import { WheelChart } from "@/components/dashboard/wheel-chart"
 import { LIFE_CATEGORIES } from "@/lib/constants/categories"
+import { ReviewTemplateEditor } from "@/components/check-in/review-template-editor"
+import {
+  mergeQuarterlyResponses,
+  mergeMonthlyResponses,
+  pickResponsesForTemplate,
+  type ReviewTemplateField,
+} from "@/lib/review-templates"
+import {
+  CadenceContextRichText,
+} from "@/components/check-in/cadence-context-banner"
 import {
   Activity,
+  AlertTriangle,
+  FileText,
   Loader2,
+  RefreshCw,
   Sparkles,
   Trophy,
-  AlertTriangle,
-  RefreshCw,
   CheckCircle2,
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { QuarterlyPastSeasons } from "@/components/rhythm/quarterly-past-seasons"
+import {
+  getCurrentQuarter,
+  monthsInQuarter,
+  MONTH_SHORT_LABELS,
+} from "@/lib/queries/rhythm-context"
+import { QUARTER_OPTIONS, type QuarterValue } from "@/lib/quarters"
 
-const QUARTERS = [
-  { value: "Q1" as const, label: "Q1", months: "Jan – Mar" },
-  { value: "Q2" as const, label: "Q2", months: "Apr – Jun" },
-  { value: "Q3" as const, label: "Q3", months: "Jul – Sep" },
-  { value: "Q4" as const, label: "Q4", months: "Oct – Dec" },
-]
+const QUARTERS = QUARTER_OPTIONS
 
-function getCurrentQuarter(): string {
-  const m = new Date().getMonth()
-  if (m < 3) return "Q1"
-  if (m < 6) return "Q2"
-  if (m < 9) return "Q3"
-  return "Q4"
+interface QuarterlyReviewRow {
+  quarter: string
+  summary: string | null
+  winsText: string | null
+  challengesText: string | null
+  adjustments: string | null
+  responses: unknown
+}
+
+interface MonthlyReviewRow {
+  month: number
+  year: number
+  summary: string | null
+  winsText: string | null
+  challengesText: string | null
+  adjustments: string | null
+  responses: unknown
+  completedAt: Date | string
 }
 
 interface FormData {
   plan: { id: string; year: number }
-  goals: { id: string; title: string; category: string; status: string }[]
+  projects: { id: string; title: string; category: string; status: string }[]
   wheelScores: Record<string, number>
-  reviews: { quarter: string; summary: string | null; winsText: string | null; challengesText: string | null; adjustments: string | null }[]
+  reviews: QuarterlyReviewRow[]
+  monthlyReviews: MonthlyReviewRow[]
 }
 
-export function QuarterlyReviewForm({ data }: { data: FormData }) {
+function monthlyReviewSnippet(review: MonthlyReviewRow): string | null {
+  const merged = mergeMonthlyResponses(review)
+  for (const key of ["summary", "winsText", "adjustments"]) {
+    const v = merged[key]?.trim()
+    if (v) return v
+  }
+  return null
+}
+
+function iconForFieldKey(key: string) {
+  const k = key.toLowerCase()
+  if (k.includes("win")) return Trophy
+  if (k.includes("challenge")) return AlertTriangle
+  if (k.includes("adjust")) return RefreshCw
+  return FileText
+}
+
+function buildQuarterStates(
+  reviews: QuarterlyReviewRow[],
+  templateFields: ReviewTemplateField[],
+): Record<string, Record<string, string>> {
+  const init: Record<string, Record<string, string>> = {}
+  for (const q of QUARTERS) {
+    const r = reviews.find((x) => x.quarter === q.value)
+    const merged = r
+      ? mergeQuarterlyResponses({
+          responses: r.responses,
+          summary: r.summary,
+          winsText: r.winsText,
+          challengesText: r.challengesText,
+          adjustments: r.adjustments,
+        })
+      : {}
+    init[q.value] = pickResponsesForTemplate(templateFields, merged)
+  }
+  return init
+}
+
+export function QuarterlyReviewForm({
+  data,
+  templateFields,
+  initialQuarter,
+  activeQuarter: controlledQuarter,
+  hideQuarterBar = false,
+}: {
+  data: FormData
+  templateFields: ReviewTemplateField[]
+  initialQuarter?: QuarterValue
+  activeQuarter?: QuarterValue
+  hideQuarterBar?: boolean
+}) {
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
-  const [activeQuarter, setActiveQuarter] = useState(getCurrentQuarter)
+  const [internalQuarter, setInternalQuarter] = useState<QuarterValue>(
+    () => initialQuarter ?? getCurrentQuarter(),
+  )
+
+  const activeQuarter =
+    controlledQuarter ??
+    internalQuarter
 
   const reviewedQuarters = new Set(data.reviews.map((r) => r.quarter))
 
-  const [formState, setFormState] = useState<Record<string, { summary: string; wins: string; challenges: string; adjustments: string }>>(
-    () => {
-      const init: Record<string, { summary: string; wins: string; challenges: string; adjustments: string }> = {}
-      for (const q of QUARTERS) {
-        const r = data.reviews.find((x) => x.quarter === q.value)
-        init[q.value] = {
-          summary: r?.summary ?? "",
-          wins: r?.winsText ?? "",
-          challenges: r?.challengesText ?? "",
-          adjustments: r?.adjustments ?? "",
-        }
-      }
-      return init
-    }
-  )
+  const [formState, setFormState] = useState<
+    Record<string, Record<string, string>>
+  >(() => buildQuarterStates(data.reviews, templateFields))
 
-  const wheelScoresArray = Object.entries(data.wheelScores).map(([category, rating]) => ({
-    category,
-    rating,
-  }))
+  useEffect(() => {
+    setFormState(buildQuarterStates(data.reviews, templateFields))
+  }, [data.reviews, templateFields])
 
   async function handleSubmit(quarter: string) {
     const state = formState[quarter]
@@ -81,10 +150,7 @@ export function QuarterlyReviewForm({ data }: { data: FormData }) {
         body: JSON.stringify({
           planId: data.plan.id,
           quarter,
-          summary: state.summary.trim() || undefined,
-          winsText: state.wins.trim() || undefined,
-          challengesText: state.challenges.trim() || undefined,
-          adjustments: state.adjustments.trim() || undefined,
+          responses: state,
           wheelOfLifeSnapshot: data.wheelScores,
         }),
       })
@@ -98,28 +164,20 @@ export function QuarterlyReviewForm({ data }: { data: FormData }) {
     }
   }
 
-  if (data.goals.length === 0) {
+  if (data.projects.length === 0) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="font-display text-2xl font-semibold">Quarterly Review</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Every 3 months, zoom out and recalibrate your goals.
-          </p>
-        </div>
-        <EmptyState
-          icon={Activity}
-          title="Add goals to start quarterly reviews"
-          description="Quarterly reviews help you reflect on goal health and adjust your plan. Create goals first."
-          action={
-            <Button asChild>
-              <a href="/goals">
-                <Sparkles className="mr-2 h-4 w-4" /> Go to goals
-              </a>
-            </Button>
-          }
-        />
-      </div>
+      <EmptyState
+        icon={Activity}
+        title="Add projects to start quarterly reviews"
+        description="Quarterly reviews help you reflect on project health and adjust your plan. Create a project first."
+        action={
+          <Button asChild>
+            <Link href="/projects">
+              <Sparkles className="mr-2 h-4 w-4" /> Go to projects
+            </Link>
+          </Button>
+        }
+      />
     )
   }
 
@@ -127,56 +185,127 @@ export function QuarterlyReviewForm({ data }: { data: FormData }) {
   const activeQ = QUARTERS.find((q) => q.value === activeQuarter)!
   const state = formState[activeQuarter]
   const existing = data.reviews.find((r) => r.quarter === activeQuarter)
+  const reviewedMonths = new Set(data.monthlyReviews.map((r) => r.month))
+  const quarterMonths = monthsInQuarter(activeQuarter)
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-2xl font-semibold">Quarterly Review</h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">
-            {reviewedQuarters.size} of 4 quarters reviewed
-          </p>
+      <ReviewTemplateEditor cadence="QUARTERLY" fields={templateFields} />
+
+      {!hideQuarterBar && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+          {QUARTERS.map((q) => {
+            const isActive = q.value === activeQuarter
+            const isReviewed = reviewedQuarters.has(q.value)
+            const isCurrent = q.value === currentQ
+            return (
+              <button
+                key={q.value}
+                type="button"
+                onClick={() => setInternalQuarter(q.value)}
+                className={cn(
+                  "relative rounded-lg border px-2 py-3 text-center transition-colors",
+                  isActive
+                    ? "border-accent bg-accent/10 text-foreground"
+                    : "hover:bg-muted/50",
+                  isCurrent && !isActive && "border-accent/30",
+                )}
+              >
+                <span className="text-sm font-medium">{q.label}</span>
+                <span className="block text-xs text-muted-foreground">{q.months}</span>
+                {isReviewed && (
+                  <CheckCircle2 className="absolute top-1 right-1 h-3 w-3 text-emerald-500" />
+                )}
+              </button>
+            )
+          })}
         </div>
-      </div>
+      )}
 
-      {/* Quarter selector — mirrors monthly grid pattern */}
-      <div className="grid grid-cols-4 gap-1.5">
-        {QUARTERS.map((q) => {
-          const isActive = q.value === activeQuarter
-          const isReviewed = reviewedQuarters.has(q.value)
-          const isCurrent = q.value === currentQ
-          return (
-            <button
-              key={q.value}
-              onClick={() => setActiveQuarter(q.value)}
-              className={cn(
-                "relative rounded-lg border px-2 py-3 text-center transition-colors",
-                isActive
-                  ? "border-accent bg-accent/10 text-foreground"
-                  : "hover:bg-muted/50",
-                isCurrent && !isActive && "border-accent/30"
-              )}
-            >
-              <span className="text-sm font-medium">{q.label}</span>
-              <span className="block text-xs text-muted-foreground">{q.months}</span>
-              {isReviewed && (
-                <CheckCircle2 className="absolute top-1 right-1 h-3 w-3 text-emerald-500" />
-              )}
-            </button>
-          )
-        })}
-      </div>
+      {quarterMonths.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Monthly reviews in {activeQ.label}
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {quarterMonths.map((month) => {
+              const isReviewed = reviewedMonths.has(month)
+              const label = MONTH_SHORT_LABELS[month - 1] ?? `M${month}`
+              return (
+                <Link
+                  key={month}
+                  href={`/rhythm/monthly?month=${month}`}
+                  className={cn(
+                    "flex flex-col items-center gap-1 rounded-lg border px-2 py-2.5 text-center text-sm transition-colors hover:bg-muted/50",
+                    isReviewed
+                      ? "border-emerald-500/40 bg-emerald-500/10"
+                      : "border-dashed border-border/80",
+                  )}
+                >
+                  <span className="font-medium">{label}</span>
+                  {isReviewed ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground">Not reviewed</span>
+                  )}
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
-      {/* Goal health snapshot */}
-      {data.goals.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {data.goals.map((g) => {
+      {quarterMonths.some((month) =>
+        data.monthlyReviews.some((r) => r.month === month),
+      ) && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            What happened each month
+          </p>
+          <div className="space-y-2">
+            {quarterMonths.map((month) => {
+              const review = data.monthlyReviews.find((r) => r.month === month)
+              if (!review) return null
+              const snippet = monthlyReviewSnippet(review)
+              const label = MONTH_SHORT_LABELS[month - 1] ?? `Month ${month}`
+              return (
+                <details
+                  key={month}
+                  className="group rounded-lg border border-border bg-card overflow-hidden"
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium hover:bg-muted/40 transition-colors">
+                    <span>{label} {data.plan.year}</span>
+                    <span className="text-xs font-normal text-muted-foreground">
+                      Reviewed{" "}
+                      {new Date(review.completedAt).toLocaleDateString()}
+                    </span>
+                  </summary>
+                  <div className="border-t border-border px-4 py-3">
+                    {snippet ? (
+                      <CadenceContextRichText html={snippet} />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        No summary saved for this month.
+                      </p>
+                    )}
+                  </div>
+                </details>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {data.projects.length > 0 && (
+        <div className="flex flex-wrap gap-2 max-w-full">
+          {data.projects.map((g) => {
             const cat = LIFE_CATEGORIES.find((c) => c.id === g.category)
             const statusColor =
-              g.status === "COMPLETED" ? "text-emerald-600 dark:text-emerald-400" :
-              g.status === "AT_RISK" ? "text-red-600 dark:text-red-400" :
-              "text-muted-foreground"
+              g.status === "COMPLETED"
+                ? "text-emerald-600 dark:text-emerald-400"
+                : g.status === "AT_RISK"
+                  ? "text-red-600 dark:text-red-400"
+                  : "text-muted-foreground"
             return (
               <div
                 key={g.id}
@@ -193,7 +322,6 @@ export function QuarterlyReviewForm({ data }: { data: FormData }) {
         </div>
       )}
 
-      {/* Active quarter form */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base font-display flex items-center gap-2">
@@ -207,73 +335,34 @@ export function QuarterlyReviewForm({ data }: { data: FormData }) {
           )}
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium">Summary</label>
-            <RichTextEditor
-              value={state.summary}
-              onChange={(val) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  [activeQuarter]: { ...state, summary: val },
-                }))
-              }
-              placeholder="What happened this quarter? The big picture..."
-              rows={2}
-              className="bg-card"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium flex items-center gap-1.5">
-              <Trophy className="h-3.5 w-3.5 text-accent" /> Wins
-            </label>
-            <RichTextEditor
-              value={state.wins}
-              onChange={(val) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  [activeQuarter]: { ...state, wins: val },
-                }))
-              }
-              placeholder="Celebrate your victories — big and small..."
-              rows={3}
-              className="bg-card"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium flex items-center gap-1.5">
-              <AlertTriangle className="h-3.5 w-3.5 text-accent" /> Challenges
-            </label>
-            <RichTextEditor
-              value={state.challenges}
-              onChange={(val) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  [activeQuarter]: { ...state, challenges: val },
-                }))
-              }
-              placeholder="What was difficult? What got in the way?"
-              rows={3}
-              className="bg-card"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium flex items-center gap-1.5">
-              <RefreshCw className="h-3.5 w-3.5 text-accent" /> Adjustments
-            </label>
-            <RichTextEditor
-              value={state.adjustments}
-              onChange={(val) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  [activeQuarter]: { ...state, adjustments: val },
-                }))
-              }
-              placeholder="What will you do differently next quarter?"
-              rows={3}
-              className="bg-card"
-            />
-          </div>
+          {templateFields.map((field) => {
+            const Icon = iconForFieldKey(field.key)
+            const val = state[field.key] ?? ""
+            return (
+              <div key={field.key} className="space-y-1.5">
+                <label className="text-sm font-medium flex items-center gap-1.5">
+                  <Icon className="h-3.5 w-3.5 text-accent shrink-0" />
+                  {field.label}
+                </label>
+                <RichTextEditor
+                  value={val}
+                  onChange={(next) =>
+                    setFormState((prev) => ({
+                      ...prev,
+                      [activeQuarter]: { ...prev[activeQuarter], [field.key]: next },
+                    }))
+                  }
+                  placeholder={
+                    field.placeholder || `Reflect on ${field.label.toLowerCase()}…`
+                  }
+                  rows={field.key === "summary" ? 2 : 3}
+                  className="bg-card"
+                />
+              </div>
+            )
+          })}
           <Button
+            type="button"
             onClick={() => handleSubmit(activeQuarter)}
             disabled={submitting}
             className="w-full"
@@ -288,19 +377,11 @@ export function QuarterlyReviewForm({ data }: { data: FormData }) {
         </CardContent>
       </Card>
 
-      {/* Wheel of Life snapshot */}
-      {wheelScoresArray.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Current Wheel of Life — included with your review
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <WheelChart scores={wheelScoresArray} />
-          </CardContent>
-        </Card>
-      )}
+      <QuarterlyPastSeasons
+        year={data.plan.year}
+        reviews={data.reviews}
+        activeQuarter={activeQuarter}
+      />
     </div>
   )
 }

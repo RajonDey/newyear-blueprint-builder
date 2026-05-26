@@ -1,9 +1,10 @@
 import { cn } from "@/lib/utils"
 
-type AppContentVariant = "narrow" | "wide"
+type AppContentVariant = "narrow" | "medium" | "wide"
 
 const variantClass: Record<AppContentVariant, string> = {
   narrow: "max-w-2xl",
+  medium: "max-w-3xl",
   wide: "max-w-6xl",
 }
 

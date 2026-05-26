@@ -14,14 +14,14 @@ import {
   Loader2,
   CheckCircle2,
   Sparkles,
-  Target,
   Compass,
-  Flame,
   ChevronDown,
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { HabitsHeatmap } from "@/components/systems/habits-heatmap"
+import { RhythmWorkspaceShell } from "@/components/rhythm/rhythm-workspace-shell"
+import { WeeklyFocusBanner } from "@/components/rhythm/weekly-focus-banner"
 
 interface System {
   id: string
@@ -32,15 +32,23 @@ interface System {
 }
 
 interface WeeklyFocusPayload {
-  goals: { id: string; title: string }[]
+  projects: { id: string; title: string }[]
   protectCategory: string | null
 }
 
-export function SystemsTracker() {
+export function SystemsTracker({
+  initialSystems,
+  initialWeeklyFocus,
+}: {
+  initialSystems?: System[]
+  initialWeeklyFocus?: WeeklyFocusPayload | null
+} = {}) {
   const router = useRouter()
-  const [systems, setSystems] = useState<System[]>([])
-  const [weeklyFocus, setWeeklyFocus] = useState<WeeklyFocusPayload | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [systems, setSystems] = useState<System[]>(initialSystems ?? [])
+  const [weeklyFocus, setWeeklyFocus] = useState<WeeklyFocusPayload | null>(
+    initialWeeklyFocus ?? null,
+  )
+  const [loading, setLoading] = useState(initialSystems === undefined)
   const [toggling, setToggling] = useState<string | null>(null)
   const [collapsedGoals, setCollapsedGoals] = useState<Set<string>>(new Set())
 
@@ -64,11 +72,11 @@ export function SystemsTracker() {
     }, {})
   }, [systems])
 
-  function toggleGoalCollapse(goalId: string) {
+  function toggleGoalCollapse(projectId: string) {
     setCollapsedGoals((prev) => {
       const next = new Set(prev)
-      if (next.has(goalId)) next.delete(goalId)
-      else next.add(goalId)
+      if (next.has(projectId)) next.delete(projectId)
+      else next.add(projectId)
       return next
     })
   }
@@ -80,7 +88,7 @@ export function SystemsTracker() {
       const json = await res.json()
       setSystems(json.data.systems ?? [])
       setWeeklyFocus(
-        json.data.weeklyFocus ?? { goals: [], protectCategory: null }
+        json.data.weeklyFocus ?? { projects: [], protectCategory: null }
       )
     } catch {
       toast.error("Failed to load systems")
@@ -90,8 +98,9 @@ export function SystemsTracker() {
   }
 
   useEffect(() => {
+    if (initialSystems !== undefined) return
     fetchSystems()
-  }, [])
+  }, [initialSystems])
 
   async function toggleComplete(system: System) {
     setToggling(system.id)
@@ -137,12 +146,7 @@ export function SystemsTracker() {
   if (systems.length === 0) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="font-display text-2xl font-semibold">Daily Habits</h1>
-          <p className="text-muted-foreground mt-1 text-sm">{today}</p>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-3 max-w-lg mx-auto">
+        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-3">
           {["Morning routine", "Read 20 min", "Exercise"].map((example) => (
             <div key={example} className="rounded-lg border border-dashed p-3 text-center">
               <div className="flex items-center justify-center gap-2">
@@ -156,14 +160,14 @@ export function SystemsTracker() {
         <EmptyState
           icon={Repeat}
           title="Your daily habits live here"
-          description="Once you create goals, attach small repeatable habits to each one. Check them off every day to build streaks and stay consistent."
+          description="Once you create projects, attach small repeatable habits to each one. Check them off every day to build streaks and stay consistent."
           action={
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Button variant="outline" asChild>
-                <Link href="/goals">Go to your goals</Link>
+                <Link href="/projects">Go to your projects</Link>
               </Button>
               <Button asChild>
-                <Link href="/plan/new">
+                <Link href="/onboarding">
                   <Sparkles className="mr-2 h-4 w-4" /> Create your plan (~15 min)
                 </Link>
               </Button>
@@ -174,76 +178,92 @@ export function SystemsTracker() {
     )
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-2xl font-semibold">Daily Habits</h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">{today}</p>
-        </div>
-        {allDone && (
-          <div className="flex items-center gap-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1.5 text-emerald-700 dark:text-emerald-400 text-xs font-medium shrink-0">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            All done
-          </div>
-        )}
-      </div>
-
-      {/* Stats strip */}
-      <div className="flex items-center gap-4 rounded-lg border bg-card p-4">
-        <div className="flex-1 space-y-1.5">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Today&apos;s progress</span>
-            <span className="font-medium tabular-nums">{completed}/{total}</span>
-          </div>
-          <Progress value={progress} className="h-2" />
-        </div>
-      </div>
-
-      {/* Weekly focus banner */}
-      {weeklyFocus && (weeklyFocus.goals.length > 0 || weeklyFocus.protectCategory) && (
-        <div className="flex items-start gap-3 rounded-lg border border-accent/20 bg-accent/5 p-3 text-sm">
-          <Compass className="h-4 w-4 text-accent mt-0.5 shrink-0" />
-          <div className="min-w-0 space-y-0.5">
-            <p className="font-medium text-xs uppercase tracking-wide text-muted-foreground">This week&apos;s focus</p>
-            <div className="flex flex-wrap gap-x-3 gap-y-1">
-              {weeklyFocus.goals.map((g) => (
-                <Link
-                  key={g.id}
-                  href={`/goals/${g.id}`}
-                  className="text-accent font-medium hover:underline"
-                >
-                  {g.title}
-                </Link>
-              ))}
-              {weeklyFocus.protectCategory && (
-                <span className="text-muted-foreground">
-                  Protecting:{" "}
-                  <span className="font-medium text-foreground">
-                    {LIFE_CATEGORIES.find((c) => c.id === weeklyFocus.protectCategory)?.label ?? weeklyFocus.protectCategory}
-                  </span>
+  const sidebar = (
+    <>
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            Today
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm">{today}</p>
+          <div className="flex items-center justify-between text-sm gap-2">
+            <span className="text-muted-foreground">Progress</span>
+            <div className="flex items-center gap-2">
+              {allDone && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 text-emerald-700 dark:text-emerald-400 text-[10px] font-medium uppercase tracking-wide">
+                  <CheckCircle2 className="h-3 w-3" />
+                  All done
                 </span>
               )}
+              <span className="font-medium tabular-nums">{completed}/{total}</span>
             </div>
           </div>
-        </div>
+          <Progress value={progress} className="h-2" />
+        </CardContent>
+      </Card>
+
+      {weeklyFocus && (weeklyFocus.projects.length > 0 || weeklyFocus.protectCategory) && (
+        <Card className="border-accent/20 bg-accent/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-1.5">
+              <Compass className="h-3.5 w-3.5 text-accent" />
+              This week&apos;s focus
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {weeklyFocus.projects.map((g) => (
+              <Link
+                key={g.id}
+                href={`/projects/${g.id}`}
+                className="block text-accent font-medium hover:underline"
+              >
+                {g.title}
+              </Link>
+            ))}
+            {weeklyFocus.protectCategory && (
+              <p className="text-muted-foreground text-xs">
+                Protecting{" "}
+                <span className="font-medium text-foreground">
+                  {LIFE_CATEGORIES.find((c) => c.id === weeklyFocus.protectCategory)?.label ??
+                    weeklyFocus.protectCategory}
+                </span>
+              </p>
+            )}
+            <Button variant="outline" size="sm" className="w-full mt-2" asChild>
+              <Link href="/rhythm/weekly">Open weekly planner</Link>
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Goal groups */}
-      <div className="space-y-3">
-        {Object.entries(byGoal).map(([goalId, goalSystems]) => {
+      <HabitsHeatmap />
+    </>
+  )
+
+  return (
+    <RhythmWorkspaceShell sidebar={sidebar} sidebarFirstOnMobile={false}>
+      {weeklyFocus &&
+        (weeklyFocus.projects.length > 0 || weeklyFocus.protectCategory) && (
+          <WeeklyFocusBanner
+            projects={weeklyFocus.projects}
+            protectCategory={weeklyFocus.protectCategory}
+          />
+        )}
+      <div className="space-y-3 mt-4">
+        {Object.entries(byGoal).map(([projectId, goalSystems]) => {
           const goal = goalSystems[0]!.goal
           const catInfo = LIFE_CATEGORIES.find((c) => c.id === goal.category)
           const goalCompleted = goalSystems.filter((s) => s.isCompleted).length
           const goalTotal = goalSystems.length
           const goalDone = goalCompleted === goalTotal
-          const isCollapsed = collapsedGoals.has(goalId)
+          const isCollapsed = collapsedGoals.has(projectId)
 
           return (
-            <Card key={goalId} className="overflow-hidden">
+            <Card key={projectId} className="overflow-hidden">
               <button
-                onClick={() => toggleGoalCollapse(goalId)}
+                onClick={() => toggleGoalCollapse(projectId)}
                 className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted/50 transition-colors"
               >
                 <div
@@ -303,8 +323,6 @@ export function SystemsTracker() {
           )
         })}
       </div>
-
-      <HabitsHeatmap />
-    </div>
+    </RhythmWorkspaceShell>
   )
 }
