@@ -91,12 +91,17 @@ In **production** prefer SQL or Studio for the first admin — don't ship `SEED_
 
 ### Cron jobs
 
-`vercel.json`:
+**Vercel Hobby limit:** cron jobs may run **at most once per day**. An hourly expression such as `0 * * * *` causes deployment to fail with:
+
+> *Hobby accounts are limited to daily cron jobs. This cron expression would run more than once per day.*
+
+See [Vercel cron usage & pricing](https://vercel.com/docs/cron-jobs/usage-and-pricing).
+
+#### In `vercel.json` (Hobby-safe — daily / weekly only)
 
 ```json
 {
   "crons": [
-    { "path": "/api/cron/rhythm-hourly",     "schedule": "0 * * * *" },
     { "path": "/api/cron/streak-calculator", "schedule": "0 1 * * *" },
     { "path": "/api/cron/lifecycle",         "schedule": "0 10 * * *" },
     { "path": "/api/cron/email-health",      "schedule": "0 9 * * 1" }
@@ -104,7 +109,16 @@ In **production** prefer SQL or Studio for the first admin — don't ship `SEED_
 }
 ```
 
-Rhythm emails (weekly/monthly/quarterly/daily) run hourly and filter by each user's timezone. See [`EMAIL.md`](./EMAIL.md).
+#### Rhythm emails (hourly — not in Hobby `vercel.json`)
+
+Timezone-aware rhythm emails (`/api/cron/rhythm-hourly`) must run **every hour**. Pick one:
+
+| Option | Setup |
+|--------|--------|
+| **Vercel Pro** | Add to `vercel.json`: `{ "path": "/api/cron/rhythm-hourly", "schedule": "0 * * * *" }` |
+| **External cron (Hobby)** | [cron-job.org](https://cron-job.org) or similar — `GET https://your-domain/api/cron/rhythm-hourly` every hour with header `Authorization: Bearer <CRON_SECRET>` |
+
+Rhythm emails filter by each user's local send window. Without an hourly trigger, weekly/monthly/daily nudges will not send. See [`EMAIL.md`](./EMAIL.md).
 
 Cron endpoints check the `Authorization: Bearer ${CRON_SECRET}` header.
 
