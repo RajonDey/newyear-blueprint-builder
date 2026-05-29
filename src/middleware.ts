@@ -16,6 +16,7 @@ const publicRoutes = [
   "/how-it-works",
   "/about",
   "/faq",
+  "/help",
   "/blog",
   "/terms",
   "/privacy",
@@ -67,7 +68,12 @@ export default async function middleware(req: NextRequest) {
   }
 
   if (isLoggedIn && (pathname === "/login" || pathname === "/signup")) {
-    return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin))
+    const continueUrl = new URL("/auth/continue", req.nextUrl.origin)
+    const callbackUrl = req.nextUrl.searchParams.get("callbackUrl")
+    if (callbackUrl) {
+      continueUrl.searchParams.set("callbackUrl", callbackUrl)
+    }
+    return NextResponse.redirect(continueUrl)
   }
 
   if (pathname.startsWith("/admin")) {

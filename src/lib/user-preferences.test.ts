@@ -44,6 +44,24 @@ describe("parseUserPreferences", () => {
       },
     })
   })
+
+  it("parses lifecycle emailMeta fields", () => {
+    expect(
+      parseUserPreferences({
+        emailMeta: {
+          welcomeSentAt: "2026-05-27T10:00:00.000Z",
+          newYearSetupYear: 2026,
+          yearReflectionYear: 2025,
+        },
+      }),
+    ).toEqual({
+      emailMeta: {
+        welcomeSentAt: "2026-05-27T10:00:00.000Z",
+        newYearSetupYear: 2026,
+        yearReflectionYear: 2025,
+      },
+    })
+  })
 })
 
 describe("mergeUserPreferences", () => {

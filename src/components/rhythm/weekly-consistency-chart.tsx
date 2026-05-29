@@ -6,11 +6,11 @@ import {
   Bar,
   BarChart,
   Cell,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts"
+import { ChartContainer } from "@/components/charts/chart-container"
 import { chartColors, axisDefaults, tooltipDefaults } from "@/lib/charts-theme"
 import type { WeeklyConsistencyWeek } from "@/lib/queries/rhythm-stats"
 import { TrendingUp } from "lucide-react"
@@ -44,9 +44,8 @@ export function WeeklyConsistencyChart({
         </div>
       </header>
       <div className="px-4 py-4">
-        <div className="h-[140px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
+        <ChartContainer height={140}>
+          <BarChart data={data} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
               <XAxis
                 dataKey="label"
                 tick={axisDefaults.tick}
@@ -74,8 +73,7 @@ export function WeeklyConsistencyChart({
                 ))}
               </Bar>
             </BarChart>
-          </ResponsiveContainer>
-        </div>
+        </ChartContainer>
         <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
           {consistencyPct >= 75
             ? "Strong rhythm — keep closing each week."

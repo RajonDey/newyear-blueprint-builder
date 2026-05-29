@@ -33,6 +33,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: { params: { prompt: "consent select_account" } },
+      /** Same verified email via magic link maps to one user. */
+      allowDangerousEmailAccountLinking: true,
     }),
     Resend({
       apiKey: process.env.RESEND_API_KEY,
@@ -45,6 +47,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/login",
   },
   callbacks: {
+    redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      if (url.startsWith(baseUrl)) return url
+      return baseUrl
+    },
     async signIn({ user }) {
       if (!user?.id) return true;
       const row = await db.user.findUnique({

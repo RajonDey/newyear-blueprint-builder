@@ -8,8 +8,8 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   Radar,
-  ResponsiveContainer,
 } from "recharts"
+import { ChartContainer } from "@/components/charts/chart-container"
 import { chartColors, axisDefaults, gridDefaults } from "@/lib/charts-theme"
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -54,9 +54,8 @@ export function WheelChart({ scores }: WheelChartProps) {
           <div className="text-[11px] text-muted-foreground mt-1">Average</div>
         </div>
       </header>
-      <div className="h-[280px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <RadarChart data={data} cx="50%" cy="50%" outerRadius="78%">
+      <ChartContainer height={280}>
+        <RadarChart data={data} cx="50%" cy="50%" outerRadius="78%">
             <PolarGrid {...gridDefaults} />
             <PolarAngleAxis
               dataKey="category"
@@ -76,9 +75,8 @@ export function WheelChart({ scores }: WheelChartProps) {
               fillOpacity={0.22}
               strokeWidth={2}
             />
-          </RadarChart>
-        </ResponsiveContainer>
-      </div>
+        </RadarChart>
+      </ChartContainer>
     </section>
   )
 }

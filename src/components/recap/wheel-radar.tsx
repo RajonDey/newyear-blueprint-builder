@@ -10,8 +10,8 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  ResponsiveContainer,
 } from "recharts"
+import { ChartContainer } from "@/components/charts/chart-container"
 import type { LifeCategory } from "@prisma/client"
 import { chartColors, axisDefaults, gridDefaults } from "@/lib/charts-theme"
 
@@ -43,9 +43,8 @@ export function WheelRadar({
     Now: entries.find((e) => e.category === c)?.rating ?? 0,
   }))
   return (
-    <div className="h-56 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <RadarChart data={data} outerRadius="80%">
+    <ChartContainer height={224}>
+      <RadarChart data={data} outerRadius="80%">
           <PolarGrid {...gridDefaults} />
           <PolarAngleAxis dataKey="category" tick={axisDefaults.tick} />
           <PolarRadiusAxis domain={[0, 10]} tick={false} axisLine={false} />
@@ -56,8 +55,7 @@ export function WheelRadar({
             fillOpacity={0.25}
             strokeWidth={2}
           />
-        </RadarChart>
-      </ResponsiveContainer>
-    </div>
+      </RadarChart>
+    </ChartContainer>
   )
 }

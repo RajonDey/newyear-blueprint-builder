@@ -6,6 +6,7 @@ import { Topbar } from "@/components/shared/topbar"
 import { getUnresolvedDriftCount } from "@/lib/queries/drifts"
 import { getIsoWeekContextInTimeZone } from "@/lib/utils"
 import { getQuarterLabel } from "@/lib/nav-config"
+import { TimezoneSync } from "@/components/shared/timezone-sync"
 
 export default async function AppLayout({
   children,
@@ -40,6 +41,7 @@ export default async function AppLayout({
 
   return (
     <div className="flex h-screen overflow-hidden">
+      <TimezoneSync initialTimezone={user?.timezone ?? "UTC"} />
       <AppSidebar user={session.user} driftInboxCount={driftInboxCount} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar

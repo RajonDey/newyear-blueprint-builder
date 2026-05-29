@@ -11,8 +11,8 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  ResponsiveContainer,
 } from "recharts"
+import { ChartContainer } from "@/components/charts/chart-container"
 import { ArrowDownRight, ArrowUpRight, Minus, Sparkles } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
@@ -150,9 +150,8 @@ export function WheelEditor({
               </span>
             </div>
           </div>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={chartData} outerRadius="78%">
+          <ChartContainer height={320}>
+            <RadarChart data={chartData} outerRadius="78%">
                 <PolarGrid {...gridDefaults} />
                 <PolarAngleAxis
                   dataKey="category"
@@ -177,9 +176,8 @@ export function WheelEditor({
                   fillOpacity={0.25}
                   strokeWidth={2}
                 />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
+            </RadarChart>
+          </ChartContainer>
         </div>
 
         <aside className="lg:col-span-2 grid gap-0 border border-border divide-y divide-border lg:self-start">

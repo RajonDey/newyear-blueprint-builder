@@ -14,6 +14,7 @@ const primaryNav = [
 ] as const
 
 const legalNav = [
+  { href: "/help", label: "Help & Support" },
   { href: "/terms", label: "Terms of Service" },
   { href: "/privacy", label: "Privacy Policy" },
   { href: "/cookies", label: "Cookie Policy" },

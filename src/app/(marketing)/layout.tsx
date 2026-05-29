@@ -93,6 +93,9 @@ export default function MarketingLayout({
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground/80">
                 <span>&copy; {new Date().getFullYear()} YearInReview</span>
+                <Link href="/help" className="hover:text-foreground transition-colors">
+                  Help
+                </Link>
                 {legalNav.map((item) => (
                   <Link
                     key={item.href}

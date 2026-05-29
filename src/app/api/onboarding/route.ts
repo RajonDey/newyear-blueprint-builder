@@ -8,6 +8,7 @@ import {
   ensureDefaultAreasForUser,
   findDefaultAreaIdForCategory,
 } from "@/lib/areas/default-areas";
+import { sendWelcomeEmailOnce } from "@/lib/cron/lifecycle-email";
 
 /**
  * POST /api/onboarding
@@ -152,6 +153,21 @@ export async function POST(req: Request) {
       },
       { timeout: 15_000, maxWait: 10_000 },
     );
+
+    if (session.user.email) {
+      const dbUser = await db.user.findUnique({
+        where: { id: userId },
+        select: { preferences: true },
+      });
+      void sendWelcomeEmailOnce(
+        userId,
+        session.user.email,
+        data.name ?? session.user.name ?? undefined,
+        dbUser?.preferences,
+      ).catch((err) => {
+        console.error("[/api/onboarding] welcome email failed:", err);
+      });
+    }
 
     return NextResponse.json({ data: result }, { status: 201 });
   } catch (err) {

@@ -96,14 +96,15 @@ In **production** prefer SQL or Studio for the first admin — don't ship `SEED_
 ```json
 {
   "crons": [
-    { "path": "/api/cron/weekly-reminder",  "schedule": "0 18 * * 5" },
-    { "path": "/api/cron/daily-nudge",      "schedule": "0 14 * * *" },
+    { "path": "/api/cron/rhythm-hourly",     "schedule": "0 * * * *" },
     { "path": "/api/cron/streak-calculator", "schedule": "0 1 * * *" },
-    { "path": "/api/cron/monthly-nudge",    "schedule": "0 9 1 * *" },
-    { "path": "/api/cron/quarterly-nudge",  "schedule": "0 9 1 1,4,7,10 *" }
+    { "path": "/api/cron/lifecycle",         "schedule": "0 10 * * *" },
+    { "path": "/api/cron/email-health",      "schedule": "0 9 * * 1" }
   ]
 }
 ```
+
+Rhythm emails (weekly/monthly/quarterly/daily) run hourly and filter by each user's timezone. See [`EMAIL.md`](./EMAIL.md).
 
 Cron endpoints check the `Authorization: Bearer ${CRON_SECRET}` header.
 
@@ -116,6 +117,9 @@ Use this alongside [`AUTH_PRODUCTION.md`](./AUTH_PRODUCTION.md) and [`plan/MVP_L
 - [ ] Google OAuth redirect URI configured for production
 - [ ] `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` set (auth, search, export rate limits)
 - [ ] Account deletion flow tested (`DELETE /api/user/account` from Settings)
+- [ ] Pro user deletion cancels Lemon subscription (test in LS test mode)
+- [ ] Magic link arrives from production `EMAIL_FROM`; Resend domain verified
+- [ ] New sign-up lands on `/onboarding`; returning login lands on `/dashboard`
 - [ ] Disabled users blocked at sign-in (`User.disabledAt`)
 - [ ] Non-GET `/api/auth/*` rate-limited when Upstash is configured
 

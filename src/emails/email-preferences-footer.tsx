@@ -1,14 +1,15 @@
 import { Link, Text } from "@react-email/components"
+import { emailColors } from "@/emails/email-styles"
 
 const footerStyle = {
-  color: "#8b7355",
+  color: emailColors.sand,
   fontSize: "12px",
-  marginTop: "32px",
   lineHeight: "18px",
+  marginTop: "8px",
 } as const
 
 const linkStyle = {
-  color: "#8b7355",
+  color: emailColors.sand,
   textDecoration: "underline",
 } as const
 

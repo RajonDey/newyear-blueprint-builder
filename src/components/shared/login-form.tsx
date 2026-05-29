@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2, Mail } from "lucide-react"
+import { buildAuthContinueUrl } from "@/lib/post-auth-redirect"
 
 /* Hallmark · design-system: design.md · designed-as-app
  * Conversion login/signup — left-aligned Letter form on page paper (§11).
@@ -21,15 +22,11 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
     "Authentication is misconfigured. Please try again later or contact support.",
   Verification:
     "The sign-in link expired or was already used. Request a new magic link.",
+  OAuthAccountNotLinked:
+    "This email is already registered with a different sign-in method. Use the same method you signed up with, or try the other option below.",
+  EmailSignin:
+    "We couldn't send the sign-in email. Check the address, try Google instead, or look in spam.",
   Default: "Something went wrong while signing in. Please try again.",
-}
-
-async function freshSignIn(
-  provider: "google" | "resend",
-  options?: Parameters<typeof signIn>[1],
-) {
-  await signOut({ redirect: false })
-  await signIn(provider, options)
 }
 
 function useDelayedSpinner(active: boolean, delayMs = 200) {
@@ -48,6 +45,7 @@ function useDelayedSpinner(active: boolean, delayMs = 200) {
 interface LoginFormProps {
   mode?: "login" | "signup"
   authError?: string
+  callbackUrl?: string
   /** JWT cookie present but user row missing / session neutered — clear before sign-in */
   clearStaleSession?: boolean
 }
@@ -55,12 +53,16 @@ interface LoginFormProps {
 export function LoginForm({
   mode = "login",
   authError,
+  callbackUrl,
   clearStaleSession = false,
 }: LoginFormProps) {
   const isSignup = mode === "signup"
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState<"google" | "email" | null>(null)
+  const [emailSent, setEmailSent] = useState(false)
+  const [localError, setLocalError] = useState<string | null>(null)
   const showSpinner = useDelayedSpinner(loading !== null)
+  const continueUrl = buildAuthContinueUrl(callbackUrl)
 
   useEffect(() => {
     if (clearStaleSession || authError === "SessionInvalid") {
@@ -68,20 +70,87 @@ export function LoginForm({
     }
   }, [clearStaleSession, authError])
 
-  const errorMessage = authError
-    ? (AUTH_ERROR_MESSAGES[authError] ?? AUTH_ERROR_MESSAGES.Default)
-    : null
+  const errorMessage =
+    localError ??
+    (authError
+      ? (AUTH_ERROR_MESSAGES[authError] ?? AUTH_ERROR_MESSAGES.Default)
+      : null)
 
   async function handleGoogle() {
+    setLocalError(null)
     setLoading("google")
-    await freshSignIn("google", { callbackUrl: "/dashboard" })
+    await signOut({ redirect: false })
+    await signIn("google", { callbackUrl: continueUrl })
   }
 
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault()
     if (!email.trim()) return
+    setLocalError(null)
     setLoading("email")
-    await freshSignIn("resend", { email, callbackUrl: "/dashboard" })
+    await signOut({ redirect: false })
+    const result = await signIn("resend", {
+      email: email.trim(),
+      callbackUrl: continueUrl,
+      redirect: false,
+    })
+    setLoading(null)
+    if (result?.error) {
+      setLocalError(
+        AUTH_ERROR_MESSAGES[result.error] ?? AUTH_ERROR_MESSAGES.Default,
+      )
+      return
+    }
+    setEmailSent(true)
+  }
+
+  if (emailSent) {
+    return (
+      <div className="space-y-6">
+        <header className="space-y-3">
+          <p className="font-display italic text-lg text-muted-foreground">
+            Almost there,
+          </p>
+          <h1 className="font-display text-3xl md:text-[2.35rem] tracking-tight text-foreground leading-[1.1]">
+            Check your inbox
+          </h1>
+          <p className="text-base text-muted-foreground leading-relaxed text-pretty max-w-md">
+            We sent a sign-in link to{" "}
+            <span className="font-medium text-foreground">{email.trim()}</span>.
+            It expires after a short while — open it on this device when you can.
+          </p>
+        </header>
+
+        <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground space-y-2">
+          <p>Nothing yet? Check spam or promotions.</p>
+          <p>
+            Prefer one click?{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setEmailSent(false)
+                void handleGoogle()
+              }}
+              className="text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors"
+            >
+              Continue with Google
+            </button>{" "}
+            instead.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            setEmailSent(false)
+            setLocalError(null)
+          }}
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Use a different email
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -193,7 +262,8 @@ export function LoginForm({
               Log in
             </Link>
             <span className="text-muted-foreground/80">
-              {" "}· about ninety seconds to start.
+              {" "}
+              · about ninety seconds to start.
             </span>
           </>
         ) : (

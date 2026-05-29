@@ -8,6 +8,7 @@ const AUTH_GUARD_PATTERNS = [
   /requireSessionUser/,
   /await auth\(\)/,
   /CRON_SECRET/,
+  /verifyCronSecret/,
   /verifyWebhookSignature/,
   /LEMONSQUEEZY_WEBHOOK_SECRET/,
   /rateLimitAuthIfConfigured/,
