@@ -4,6 +4,7 @@ import {
   getLocalWeekday,
   getQuarterInTimeZone,
   isInLocalSendWindow,
+  isInLocalSendWindowForCron,
   isNewYearSetupWindowForUser,
   isYearReflectionWindowForUser,
   RHYTHM_SEND_WINDOWS,
@@ -41,6 +42,31 @@ describe("isInLocalSendWindow", () => {
         RHYTHM_SEND_WINDOWS.quarterlyPlan,
       ),
     ).toBe(true)
+  })
+})
+
+describe("isInLocalSendWindowForCron", () => {
+  it("matches a weekly window that occurred earlier in the lookback", () => {
+    // Sunday 6 PM EDT was 2026-05-24T22:00:00Z; batch runs Monday 06:00 UTC
+    expect(
+      isInLocalSendWindowForCron(
+        new Date("2026-05-25T06:00:00.000Z"),
+        "America/New_York",
+        RHYTHM_SEND_WINDOWS.weeklyPlan,
+        new Date("2026-05-24T03:00:00.000Z"),
+      ),
+    ).toBe(true)
+  })
+
+  it("rejects windows outside the lookback", () => {
+    expect(
+      isInLocalSendWindowForCron(
+        new Date("2026-05-25T06:00:00.000Z"),
+        "America/New_York",
+        RHYTHM_SEND_WINDOWS.weeklyPlan,
+        new Date("2026-05-25T04:00:00.000Z"),
+      ),
+    ).toBe(false)
   })
 })
 

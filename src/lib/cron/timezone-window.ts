@@ -122,6 +122,47 @@ export function isInLocalSendWindow(
   return true
 }
 
+export const DAILY_RHYTHM_LOOKBACK_HOURS = 27
+
+export function anchorUtcHour(date: Date): Date {
+  const anchored = new Date(date)
+  anchored.setUTCMinutes(0, 0, 0)
+  return anchored
+}
+
+/** Start of the lookback window for once-daily rhythm crons on Vercel Hobby. */
+export function dailyRhythmWindowSince(now: Date = new Date()): Date {
+  const anchor = anchorUtcHour(now)
+  return new Date(anchor.getTime() - DAILY_RHYTHM_LOOKBACK_HOURS * 3600_000)
+}
+
+/**
+ * Point-in-time check (hourly cron) or lookback check (daily batch cron).
+ * Daily batch replays each UTC hour since `windowSince` so every timezone
+ * send window is covered without an hourly Vercel cron.
+ */
+export function isInLocalSendWindowForCron(
+  now: Date,
+  timeZone: string,
+  window: RhythmSendWindow,
+  windowSince?: Date,
+): boolean {
+  if (!windowSince) {
+    return isInLocalSendWindow(now, timeZone, window)
+  }
+
+  const until = anchorUtcHour(now)
+  const since = anchorUtcHour(windowSince)
+
+  for (let t = since.getTime(); t <= until.getTime(); t += 3600_000) {
+    if (isInLocalSendWindow(new Date(t), timeZone, window)) {
+      return true
+    }
+  }
+
+  return false
+}
+
 /** Jan 2–7 in the user's local calendar. */
 export function isNewYearSetupWindowForUser(
   date: Date,

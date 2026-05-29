@@ -5,7 +5,7 @@ import {
   sleep,
 } from "@/lib/cron/send-rhythm-email"
 import {
-  isInLocalSendWindow,
+  isInLocalSendWindowForCron,
   normalizeTimeZone,
   RHYTHM_SEND_WINDOWS,
 } from "@/lib/cron/timezone-window"
@@ -25,6 +25,7 @@ type RunDailyNudgeCronInput = {
   send: (email: string, name?: string) => Promise<unknown>
   now?: Date
   requireTimezoneWindow?: boolean
+  windowSince?: Date
 }
 
 /**
@@ -34,6 +35,7 @@ export async function runDailyNudgeCron({
   send,
   now = new Date(),
   requireTimezoneWindow = true,
+  windowSince,
 }: RunDailyNudgeCronInput): Promise<DailyNudgeCronResult> {
   const twoDaysAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000)
   const threeDaysAgo = new Date(now.getTime() - 72 * 60 * 60 * 1000)
@@ -80,7 +82,12 @@ export async function runDailyNudgeCron({
 
     if (
       requireTimezoneWindow &&
-      !isInLocalSendWindow(now, timeZone, RHYTHM_SEND_WINDOWS.dailyNudge)
+      !isInLocalSendWindowForCron(
+        now,
+        timeZone,
+        RHYTHM_SEND_WINDOWS.dailyNudge,
+        windowSince,
+      )
     ) {
       skippedTimezone.push(streak.user.email)
       continue

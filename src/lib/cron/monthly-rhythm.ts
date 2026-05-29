@@ -8,7 +8,7 @@ import {
 import {
   getLocalMonth,
   getLocalYear,
-  isInLocalSendWindow,
+  isInLocalSendWindowForCron,
   normalizeTimeZone,
   RHYTHM_SEND_WINDOWS,
   type RhythmSendWindow,
@@ -36,6 +36,7 @@ type RunMonthlyRhythmCronInput = {
   send: (email: string, monthLabel: string, name?: string) => Promise<unknown>
   now?: Date
   requireTimezoneWindow?: boolean
+  windowSince?: Date
 }
 
 function monthlyWindow(kind: MonthlyRhythmKind): RhythmSendWindow {
@@ -53,6 +54,7 @@ export async function runMonthlyRhythmCron({
   send,
   now = new Date(),
   requireTimezoneWindow = true,
+  windowSince,
 }: RunMonthlyRhythmCronInput): Promise<MonthlyRhythmCronResult> {
   const window = monthlyWindow(kind)
 
@@ -91,7 +93,7 @@ export async function runMonthlyRhythmCron({
 
     if (
       requireTimezoneWindow &&
-      !isInLocalSendWindow(now, timeZone, window)
+      !isInLocalSendWindowForCron(now, timeZone, window, windowSince)
     ) {
       skippedTimezone.push(plan.user.email)
       continue

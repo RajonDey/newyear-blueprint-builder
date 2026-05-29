@@ -3,7 +3,7 @@ import { db } from "@/lib/db"
 import {
   getLocalYear,
   getQuarterInTimeZone,
-  isInLocalSendWindow,
+  isInLocalSendWindowForCron,
   normalizeTimeZone,
   RHYTHM_SEND_WINDOWS,
   type RhythmSendWindow,
@@ -36,6 +36,7 @@ type RunQuarterlyRhythmCronInput = {
   send: (email: string, quarter: QuarterLabel, name?: string) => Promise<unknown>
   now?: Date
   requireTimezoneWindow?: boolean
+  windowSince?: Date
 }
 
 function quarterlyWindow(kind: QuarterlyRhythmKind): RhythmSendWindow {
@@ -53,6 +54,7 @@ export async function runQuarterlyRhythmCron({
   send,
   now = new Date(),
   requireTimezoneWindow = true,
+  windowSince,
 }: RunQuarterlyRhythmCronInput): Promise<QuarterlyRhythmCronResult> {
   const window = quarterlyWindow(kind)
 
@@ -91,7 +93,7 @@ export async function runQuarterlyRhythmCron({
 
     if (
       requireTimezoneWindow &&
-      !isInLocalSendWindow(now, timeZone, window)
+      !isInLocalSendWindowForCron(now, timeZone, window, windowSince)
     ) {
       skippedTimezone.push(plan.user.email)
       continue
