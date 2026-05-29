@@ -1,35 +1,64 @@
 import type { MetadataRoute } from "next"
 import { getBaseUrl } from "@/lib/utils"
-import { getAllWisdomMeta } from "@/lib/wisdom"
+import {
+  getAllWisdomMeta,
+  getLatestWisdomModifiedDate,
+  getWisdomLastModified,
+  parseWisdomDate,
+} from "@/lib/wisdom"
+
+/** Re-read MDX posts and marketing routes on a schedule (new posts appear without a manual rebuild). */
+export const revalidate = 3600
+
+type MarketingRoute = {
+  path: string
+  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]
+  priority: number
+}
+
+const MARKETING_ROUTES: MarketingRoute[] = [
+  { path: "", changeFrequency: "weekly", priority: 1 },
+  { path: "/pricing", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/how-it-works", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/about", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/faq", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/help", changeFrequency: "monthly", priority: 0.65 },
+  { path: "/signup", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/login", changeFrequency: "monthly", priority: 0.5 },
+  { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
+  { path: "/privacy/california", changeFrequency: "yearly", priority: 0.25 },
+  { path: "/cookies", changeFrequency: "yearly", priority: 0.25 },
+  { path: "/refund", changeFrequency: "yearly", priority: 0.3 },
+]
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getBaseUrl()
-
   const now = new Date()
-  const wisdomPosts = getAllWisdomMeta().map((p) => ({
-    url: `${base}/blog/${p.slug}`,
-    lastModified: (() => {
-      const d = new Date(p.date)
-      return Number.isNaN(d.getTime()) ? now : d
-    })(),
+  const latestBlogModified = getLatestWisdomModifiedDate() ?? now
+
+  const wisdomPosts = getAllWisdomMeta().map((post) => ({
+    url: `${base}/blog/${post.slug}`,
+    lastModified: parseWisdomDate(getWisdomLastModified(post)) ?? now,
     changeFrequency: "monthly" as const,
     priority: 0.55,
   }))
 
+  const marketingEntries = MARKETING_ROUTES.map(({ path, changeFrequency, priority }) => ({
+    url: `${base}${path}`,
+    lastModified: now,
+    changeFrequency,
+    priority,
+  }))
+
   return [
-    { url: base, lastModified: now, changeFrequency: "weekly", priority: 1 },
-    { url: `${base}/pricing`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
-    { url: `${base}/how-it-works`, lastModified: now, changeFrequency: "monthly", priority: 0.85 },
-    { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${base}/faq`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${base}/signup`, lastModified: now, changeFrequency: "monthly", priority: 0.85 },
-    { url: `${base}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
+    ...marketingEntries,
+    {
+      url: `${base}/blog`,
+      lastModified: latestBlogModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    },
     ...wisdomPosts,
-    { url: `${base}/login`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${base}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${base}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${base}/privacy/california`, lastModified: now, changeFrequency: "yearly", priority: 0.25 },
-    { url: `${base}/cookies`, lastModified: now, changeFrequency: "yearly", priority: 0.25 },
-    { url: `${base}/refund`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ]
 }

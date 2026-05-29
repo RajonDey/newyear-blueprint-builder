@@ -5,6 +5,8 @@ import { BookOpen, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
 import { MandalaWatermark } from "@/components/shared/mandala-watermark"
+import { JsonLdScript } from "@/components/seo/json-ld-script"
+import { buildBlogIndexJsonLd } from "@/lib/seo/json-ld"
 import { getAllWisdomMeta } from "@/lib/wisdom"
 
 export const metadata: Metadata = {
@@ -26,6 +28,7 @@ export default function BlogPage() {
 
   return (
     <div className="relative overflow-hidden">
+      <JsonLdScript data={buildBlogIndexJsonLd(posts)} />
       <MandalaWatermark size="md" position="top-right" className="opacity-[0.035]" />
       <div className="container py-16 md:py-24 max-w-3xl relative z-10">
         <header className="text-center max-w-2xl mx-auto mb-14 md:mb-16">
