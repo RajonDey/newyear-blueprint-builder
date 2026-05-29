@@ -36,12 +36,12 @@ All rhythm emails use `src/emails/layout/email-shell.tsx` (ivory paper, ink type
 
 ## Cron architecture (production)
 
-| Cron | Schedule (UTC) | Role |
-|------|----------------|------|
-| **`/api/cron/rhythm-hourly`** | `0 * * * *` (hourly) | All rhythm emails — filters each user by local send window |
-| **`/api/cron/lifecycle`** | `0 10 * * *` (daily) | Finish onboarding, welcome fallback, new year, year reflection |
-| **`/api/cron/streak-calculator`** | `0 1 * * *` (daily) | Streak math (not email) |
-| **`/api/cron/email-health`** | `0 9 * * 1` (Mon 9 AM) | Volume guidance + active-user counts |
+| Cron | Schedule | Role | In `vercel.json` (Hobby) |
+|------|----------|------|--------------------------|
+| **`/api/cron/rhythm-hourly`** | Hourly (`0 * * * *`) | All rhythm emails — filters each user by local send window | **No** — Hobby allows daily crons only; use Vercel Pro or [external hourly cron](./DEPLOYMENT.md#cron-jobs) |
+| **`/api/cron/lifecycle`** | Daily `0 10 * * *` | Finish onboarding, welcome fallback, new year, year reflection | Yes |
+| **`/api/cron/streak-calculator`** | Daily `0 1 * * *` | Streak math (not email) | Yes |
+| **`/api/cron/email-health`** | Mon `0 9 * * 1` | Volume guidance + active-user counts | Yes |
 
 Legacy routes (`/api/cron/weekly-plan`, `/weekly-reminder`, `/daily-nudge`, `/monthly-*`, `/quarterly-*`) skip timezone windows — use only for manual debugging.
 
