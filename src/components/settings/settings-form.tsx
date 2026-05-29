@@ -13,8 +13,10 @@ import {
   BookOpen,
   Calendar,
   Check,
+  CreditCard,
   ExternalLink,
   Globe,
+  HelpCircle,
   Loader2,
   LogOut,
   ShieldAlert,
@@ -49,6 +51,7 @@ import type { YearlyPlanSettingsData } from "@/lib/queries/yearly-plan"
 import type { ResolvedEmailPreferences } from "@/lib/user-preferences"
 import { SITE_LEGAL_NAME, getSupportEmail } from "@/lib/legal"
 import { marketingPlanCopy } from "@/lib/marketing-plan-copy"
+import { SUPPORT_REPLY_SLA, buildSupportMailto } from "@/lib/support"
 import { cn } from "@/lib/utils"
 
 const COMMON_TIMEZONES = [
@@ -90,6 +93,7 @@ export function SettingsForm({
   const [loading, setLoading] = useState(!initialUser)
   const [saving, setSaving] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const [billingPortalLoading, setBillingPortalLoading] = useState(false)
   const isPro = planTier === "PRO"
   const [name, setName] = useState(initialUser?.name ?? "")
   const [email, setEmail] = useState(initialUser?.email ?? "")
@@ -155,7 +159,28 @@ export function SettingsForm({
         description="What you have access to today, and how to change it."
       >
         {isPro ? (
-          <ProActiveCard />
+          <ProActiveCard
+            onManageBilling={async () => {
+              setBillingPortalLoading(true)
+              try {
+                const res = await fetch("/api/billing/portal", { method: "POST" })
+                const json = await res.json()
+                if (!res.ok) throw new Error(json.error || "Failed")
+                if (json.data?.url) {
+                  window.location.href = json.data.url
+                } else {
+                  throw new Error("No portal URL")
+                }
+              } catch (err: unknown) {
+                toast.error(
+                  err instanceof Error ? err.message : "Failed to open billing portal",
+                )
+              } finally {
+                setBillingPortalLoading(false)
+              }
+            }}
+            billingPortalLoading={billingPortalLoading}
+          />
         ) : (
           <ProUpsellCardInline
             onCheckout={async () => {
@@ -299,6 +324,43 @@ export function SettingsForm({
       </Section>
 
       <Section
+        id="help"
+        icon={<HelpCircle className="h-4 w-4 text-amber shrink-0" />}
+        title="Help & Support"
+        description="Questions about billing, exports, or how something works? We reply by email."
+      >
+        <div className="border border-border bg-card p-5 space-y-4">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Email{" "}
+            <a
+              href={buildSupportMailto({ subject: "YearInReview support" })}
+              className="font-medium text-foreground hover:underline underline-offset-2"
+            >
+              {supportEmail}
+            </a>{" "}
+            — we typically reply {SUPPORT_REPLY_SLA}. For billing and refunds, you can also
+            use the links on our help page.
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/help"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-sm hover:bg-muted/30 transition-colors"
+            >
+              Open help page
+              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+            </Link>
+            <a
+              href={buildSupportMailto({ subject: "YearInReview support" })}
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Email support
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+        </div>
+      </Section>
+
+      <Section
         icon={<ShieldAlert className="h-4 w-4 text-amber shrink-0" />}
         title="Sign out & legal"
         description="Sign out on this device. For Google sign-in, you can also revoke the app from your Google account to remove access everywhere."
@@ -344,8 +406,8 @@ export function SettingsForm({
         <div className="border border-status-risk/30 bg-status-risk/10 p-5">
           <p className="text-sm leading-relaxed">
             Export your data first if you want a copy — deletion is permanent.
-            If you have an active Pro subscription, cancel billing in your Lemon
-            Squeezy customer portal first — or email{" "}
+            If you have an active Pro subscription, we&apos;ll cancel billing
+            automatically so you won&apos;t be charged again. Questions? Email{" "}
             <a
               href={`mailto:${supportEmail}`}
               className="font-medium text-foreground hover:underline underline-offset-2"
@@ -481,7 +543,13 @@ function SaveButton({ saving }: { saving: boolean }) {
   )
 }
 
-function ProActiveCard() {
+function ProActiveCard({
+  onManageBilling,
+  billingPortalLoading,
+}: {
+  onManageBilling: () => Promise<void>
+  billingPortalLoading: boolean
+}) {
   return (
     <div className="border border-status-positive/30 bg-status-positive/10 p-5">
       <div className="inline-flex items-center gap-1.5 text-xs font-medium text-status-positive">
@@ -495,15 +563,36 @@ function ProActiveCard() {
         Full access to up to {marketingPlanCopy.proProjects} projects, monthly + quarterly reviews,
         analytics depth, file uploads, and the cinematic Wrapped.
       </p>
-      <div className="mt-3 flex items-center gap-3 text-xs">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={onManageBilling}
+          disabled={billingPortalLoading}
+          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-sm hover:bg-muted/30 transition-colors disabled:opacity-50"
+        >
+          {billingPortalLoading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <CreditCard className="h-3.5 w-3.5" />
+          )}
+          Manage billing
+        </button>
         <Link
           href="/pricing"
-          className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           See plan details
           <ExternalLink className="h-3 w-3" />
         </Link>
       </div>
+      <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed">
+        Update payment method, view invoices, or cancel before renewal. Refund requests
+        within 30 days of purchase — see{" "}
+        <Link href="/refund" className="underline underline-offset-2 hover:text-foreground">
+          refund policy
+        </Link>
+        .
+      </p>
     </div>
   )
 }
@@ -517,7 +606,9 @@ function ProUpsellCardInline({
 }) {
   return (
     <div className="border border-amber/40 bg-amber-tint p-6">
-      <div className="text-xs font-medium text-amber mb-2">Pro · $49 / year</div>
+      <div className="text-xs font-medium text-amber mb-2">
+        Pro · {marketingPlanCopy.proAnnualPrice} / year
+      </div>
       <h3 className="font-display text-2xl tracking-tight leading-snug">
         The whole year, without the caps
       </h3>

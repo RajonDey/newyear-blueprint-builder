@@ -13,6 +13,20 @@
 - **Edge vs Node (important)** — Middleware resolves the JWT on **Edge**, where **Prisma must not run**. The `jwt` callback skips the DB refresh when `NEXT_RUNTIME === "edge"`; the **Node** part of the request (RSC `auth()`, etc.) performs the ~30s role / `disabledAt` sync. Without this guard, after ~30s every navigation can throw in `jwt` and look like a logout.
 - **Rate limit scope** — Only non-GET `/api/auth/*` traffic is limited so `/api/auth/session` isn’t starved during normal use.
 - **Login errors** — `?error=SessionInvalid` and other Auth.js codes surfaced on `/login` and `/signup` (`LoginForm`).
+- **Post-auth routing** — After sign-in, users land on `/auth/continue`, which sends **new users** (zero yearly plans) to `/onboarding` and **returning users** to `/dashboard` or a safe `callbackUrl` from middleware (`src/lib/post-auth-redirect.ts`, `src/app/auth/continue/page.tsx`). `(app)/layout.tsx` still redirects zero-plan users as a fallback.
+- **Account linking** — `allowDangerousEmailAccountLinking: true` on the **Google** provider in `src/lib/auth.ts`: signing in with Google when the same email already exists (e.g. from magic link) links to the existing user instead of `OAuthAccountNotLinked`. Magic link sign-in already resolves users by verified email. `OAuthAccountNotLinked` and `EmailSignin` errors have user-facing copy in `LoginForm`.
+- **Delete + billing** — `DELETE /api/user/account` cancels an **active** Lemon Squeezy subscription via API before deleting the user (`src/lib/lemonsqueezy.ts`). If Lemon cancel fails, deletion is blocked (502).
+- **Magic link UX** — After submitting email, `LoginForm` shows a **Check your inbox** interstitial (spam tip + Google fallback) instead of a silent wait.
+
+### Magic link deliverability (ops)
+
+Auth emails use the NextAuth Resend provider with `EMAIL_FROM`. Product emails reuse the same sender (`src/lib/email.ts`). Full rhythm email spec: [`docs/EMAIL.md`](./EMAIL.md).
+
+- [ ] Resend sending domain verified (SPF, DKIM, DMARC) — not `@resend.dev` in production
+- [ ] `EMAIL_FROM` matches the verified domain (see `.env.example`)
+- [ ] `NEXTAUTH_URL` exactly matches the public origin (wrong value breaks magic links)
+- [ ] Monitor bounces/complaints in the Resend dashboard weekly
+- [ ] Google OAuth works as a fallback when email delivery fails
 
 After pulling schema changes, apply the database:
 

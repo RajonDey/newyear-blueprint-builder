@@ -21,18 +21,21 @@ const EMAIL_TOGGLES: {
 }[] = [
   {
     key: "weeklyReviewReminder",
-    label: "Weekly review reminder",
-    description: "Fridays when you haven't logged this week's review yet.",
+    label: "Weekly rhythm",
+    description:
+      "Sunday plan when the week isn't set yet, Friday review when you haven't reflected.",
   },
   {
     key: "monthlyNudge",
-    label: "Monthly recap nudge",
-    description: "First of the month — Pro only, when your monthly review is open.",
+    label: "Monthly rhythm",
+    description:
+      "Pro only — 1st plan when the month isn't set, 25th review when you haven't reflected.",
   },
   {
     key: "quarterlyNudge",
-    label: "Quarterly check-in",
-    description: "Start of each quarter — Pro only.",
+    label: "Quarterly rhythm",
+    description:
+      "Pro only — first Monday plan each quarter, mid-quarter review when still open.",
   },
   {
     key: "dailyNudge",

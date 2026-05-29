@@ -13,11 +13,11 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
   Legend,
   AreaChart,
   Area,
 } from "recharts"
+import { ChartContainer } from "@/components/charts/chart-container"
 import { WheelChart } from "@/components/dashboard/wheel-chart"
 import { EmptyState } from "@/components/shared/empty-state"
 import { WeeklyConsistencyChart } from "@/components/rhythm/weekly-consistency-chart"
@@ -173,9 +173,8 @@ export function AnalyticsDashboard({
             title="Daily mood & energy"
             description="From Today check-ins over the last 30 days (1–5)"
           >
-            <div className="h-[260px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data.dailyStateTrend}>
+            <ChartContainer height={260}>
+              <LineChart data={data.dailyStateTrend}>
                   <CartesianGrid {...gridDefaults} />
                   <XAxis
                     dataKey="label"
@@ -209,9 +208,8 @@ export function AnalyticsDashboard({
                     dot={{ r: 2 }}
                     connectNulls
                   />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+              </LineChart>
+            </ChartContainer>
           </ChartPanel>
         ) : (
           <ChartPanel
@@ -237,9 +235,8 @@ export function AnalyticsDashboard({
             title="Weekly mood"
             description="Overall mood from weekly reviews (1–5)"
           >
-            <div className="h-[260px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data.moodOverTime}>
+            <ChartContainer height={260}>
+              <AreaChart data={data.moodOverTime}>
                   <defs>
                     <linearGradient id="moodGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor={chartColors.amber} stopOpacity={0.3} />
@@ -260,9 +257,8 @@ export function AnalyticsDashboard({
                     strokeWidth={2}
                     fill="url(#moodGradient)"
                   />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+              </AreaChart>
+            </ChartContainer>
           </ChartPanel>
         )}
       </div>
@@ -279,9 +275,8 @@ export function AnalyticsDashboard({
           title="Project progress over time"
           description="Progress rating per week from your reviews (1–5)"
         >
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
+          <ChartContainer height={300}>
+            <LineChart
                 data={(() => {
                   const weeks = new Set<number>()
                   for (const g of data.goalProgressOverTime) {
@@ -335,9 +330,8 @@ export function AnalyticsDashboard({
                       connectNulls
                     />
                   ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+            </LineChart>
+          </ChartContainer>
         </ChartPanel>
       )}
 

@@ -1,8 +1,5 @@
 import { MarketingLogoLink } from "@/components/marketing/marketing-logo-link"
 import { AuthLetterVisual } from "@/components/auth/auth-letter-visual"
-import { auth } from "@/lib/auth"
-import { resolveSessionUser } from "@/lib/auth-guard"
-import { redirect } from "next/navigation"
 
 /* Hallmark · design-system: design.md · designed-as-app
  * Conversion shell — left-aligned Letter + Tier-A orbit art (§11).
@@ -13,13 +10,6 @@ export default async function AuthLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth()
-  const verified = await resolveSessionUser(session)
-
-  if (verified) {
-    redirect("/dashboard")
-  }
-
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="shrink-0 border-b border-border/70 bg-background">

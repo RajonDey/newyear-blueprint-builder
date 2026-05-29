@@ -10,6 +10,19 @@ export type UserPreferences = {
     quarterlyNudge?: boolean
     dailyNudge?: boolean
   }
+  /** Internal send bookkeeping for rhythm crons (Phase 1 dedupe). */
+  emailMeta?: {
+    /** UTC calendar date YYYY-MM-DD of last rhythm email sent. */
+    lastRhythmEmailDate?: string
+    /** ISO timestamp — finish onboarding nudge (once). */
+    finishOnboardingSentAt?: string
+    /** ISO timestamp — welcome after first plan (once). */
+    welcomeSentAt?: string
+    /** Calendar year when new-year setup email was last sent. */
+    newYearSetupYear?: number
+    /** Calendar year when year-end reflection email was last sent. */
+    yearReflectionYear?: number
+  }
 }
 
 export type EmailPreferenceKey =
@@ -54,16 +67,42 @@ function parseEmailPreferences(
   return Object.keys(prefs).length > 0 ? prefs : undefined
 }
 
+function parseEmailMeta(
+  raw: unknown,
+): UserPreferences["emailMeta"] | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined
+  const m = raw as Record<string, unknown>
+  const meta: NonNullable<UserPreferences["emailMeta"]> = {}
+  if (typeof m.lastRhythmEmailDate === "string") {
+    meta.lastRhythmEmailDate = m.lastRhythmEmailDate
+  }
+  if (typeof m.finishOnboardingSentAt === "string") {
+    meta.finishOnboardingSentAt = m.finishOnboardingSentAt
+  }
+  if (typeof m.welcomeSentAt === "string") {
+    meta.welcomeSentAt = m.welcomeSentAt
+  }
+  if (typeof m.newYearSetupYear === "number") {
+    meta.newYearSetupYear = m.newYearSetupYear
+  }
+  if (typeof m.yearReflectionYear === "number") {
+    meta.yearReflectionYear = m.yearReflectionYear
+  }
+  return Object.keys(meta).length > 0 ? meta : undefined
+}
+
 export function parseUserPreferences(raw: unknown): UserPreferences {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {}
   const obj = raw as Record<string, unknown>
 
   const weekOneChecklist = parseWeekOneChecklist(obj.weekOneChecklist)
   const emailPreferences = parseEmailPreferences(obj.emailPreferences)
+  const emailMeta = parseEmailMeta(obj.emailMeta)
 
   return {
     ...(weekOneChecklist ? { weekOneChecklist } : {}),
     ...(emailPreferences ? { emailPreferences } : {}),
+    ...(emailMeta ? { emailMeta } : {}),
   }
 }
 
@@ -71,16 +110,33 @@ export function mergeUserPreferences(
   current: UserPreferences,
   patch: UserPreferences,
 ): UserPreferences {
-  return {
-    weekOneChecklist: {
-      ...current.weekOneChecklist,
-      ...patch.weekOneChecklist,
-    },
-    emailPreferences: {
-      ...current.emailPreferences,
-      ...patch.emailPreferences,
-    },
+  const merged: UserPreferences = {}
+
+  const weekOneChecklist = {
+    ...current.weekOneChecklist,
+    ...patch.weekOneChecklist,
   }
+  if (Object.keys(weekOneChecklist).length > 0) {
+    merged.weekOneChecklist = weekOneChecklist
+  }
+
+  const emailPreferences = {
+    ...current.emailPreferences,
+    ...patch.emailPreferences,
+  }
+  if (Object.keys(emailPreferences).length > 0) {
+    merged.emailPreferences = emailPreferences
+  }
+
+  const emailMeta = {
+    ...current.emailMeta,
+    ...patch.emailMeta,
+  }
+  if (Object.keys(emailMeta).length > 0) {
+    merged.emailMeta = emailMeta
+  }
+
+  return merged
 }
 
 export function getEmailPreferences(
