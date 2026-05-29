@@ -102,6 +102,7 @@ See [Vercel cron usage & pricing](https://vercel.com/docs/cron-jobs/usage-and-pr
 ```json
 {
   "crons": [
+    { "path": "/api/cron/rhythm-daily",     "schedule": "0 6 * * *" },
     { "path": "/api/cron/streak-calculator", "schedule": "0 1 * * *" },
     { "path": "/api/cron/lifecycle",         "schedule": "0 10 * * *" },
     { "path": "/api/cron/email-health",      "schedule": "0 9 * * 1" }
@@ -109,16 +110,13 @@ See [Vercel cron usage & pricing](https://vercel.com/docs/cron-jobs/usage-and-pr
 }
 ```
 
-#### Rhythm emails (hourly — not in Hobby `vercel.json`)
+#### Rhythm emails on Hobby (no Pro required)
 
-Timezone-aware rhythm emails (`/api/cron/rhythm-hourly`) must run **every hour**. Pick one:
+`/api/cron/rhythm-daily` runs **once per day** and replays the last ~27 UTC hours in software. That covers every user's local send window (Sunday 6 PM plan, Friday 5 PM review, etc.) without an hourly Vercel cron.
 
-| Option | Setup |
-|--------|--------|
-| **Vercel Pro** | Add to `vercel.json`: `{ "path": "/api/cron/rhythm-hourly", "schedule": "0 * * * *" }` |
-| **External cron (Hobby)** | [cron-job.org](https://cron-job.org) or similar — `GET https://your-domain/api/cron/rhythm-hourly` every hour with header `Authorization: Bearer <CRON_SECRET>` |
+Optional: on **Vercel Pro**, you can use `/api/cron/rhythm-hourly` with `0 * * * *` for tighter timing instead.
 
-Rhythm emails filter by each user's local send window. Without an hourly trigger, weekly/monthly/daily nudges will not send. See [`EMAIL.md`](./EMAIL.md).
+Rhythm emails filter by each user's local send window. See [`EMAIL.md`](./EMAIL.md).
 
 Cron endpoints check the `Authorization: Bearer ${CRON_SECRET}` header.
 

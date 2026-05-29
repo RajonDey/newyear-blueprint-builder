@@ -5,7 +5,7 @@ import {
   sleep,
 } from "@/lib/cron/send-rhythm-email"
 import {
-  isInLocalSendWindow,
+  isInLocalSendWindowForCron,
   normalizeTimeZone,
   RHYTHM_SEND_WINDOWS,
   type RhythmSendWindow,
@@ -34,6 +34,8 @@ type RunWeeklyRhythmCronInput = {
   now?: Date
   /** When true, only users in the local send window receive email. */
   requireTimezoneWindow?: boolean
+  /** Daily batch: match if the window occurred since this instant. */
+  windowSince?: Date
 }
 
 function weeklyWindow(kind: WeeklyRhythmKind): RhythmSendWindow {
@@ -51,6 +53,7 @@ export async function runWeeklyRhythmCron({
   send,
   now = new Date(),
   requireTimezoneWindow = true,
+  windowSince,
 }: RunWeeklyRhythmCronInput): Promise<WeeklyRhythmCronResult> {
   const window = weeklyWindow(kind)
 
@@ -85,7 +88,7 @@ export async function runWeeklyRhythmCron({
 
     if (
       requireTimezoneWindow &&
-      !isInLocalSendWindow(now, timeZone, window)
+      !isInLocalSendWindowForCron(now, timeZone, window, windowSince)
     ) {
       skippedTimezone.push(plan.user.email)
       continue

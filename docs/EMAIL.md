@@ -4,7 +4,7 @@ Product and lifecycle email spec, cost notes, and implementation. Auth magic lin
 
 ## Status: complete
 
-All planned email phases are implemented. Rhythm sends are **timezone-aware** (user `timezone`, default UTC). Legacy per-cadence cron routes remain for manual triggers; **production uses the hourly rhythm cron**.
+All planned email phases are implemented. Rhythm sends are **timezone-aware** (user `timezone`, default UTC). Production on **Vercel Hobby** uses the daily rhythm cron; hourly is optional on Pro.
 
 | Phase | Scope | Status |
 |-------|--------|--------|
@@ -36,9 +36,10 @@ All rhythm emails use `src/emails/layout/email-shell.tsx` (ivory paper, ink type
 
 ## Cron architecture (production)
 
-| Cron | Schedule | Role | In `vercel.json` (Hobby) |
-|------|----------|------|--------------------------|
-| **`/api/cron/rhythm-hourly`** | Hourly (`0 * * * *`) | All rhythm emails — filters each user by local send window | **No** — Hobby allows daily crons only; use Vercel Pro or [external hourly cron](./DEPLOYMENT.md#cron-jobs) |
+| Cron | Schedule | Role | Hobby `vercel.json` |
+|------|----------|------|---------------------|
+| **`/api/cron/rhythm-daily`** | Daily `0 6 * * *` | All rhythm emails — replays ~27 UTC hours so every timezone window is covered | **Yes (production on Hobby)** |
+| **`/api/cron/rhythm-hourly`** | Hourly `0 * * * *` | Same emails, point-in-time windows — tighter timing on Vercel Pro | Pro only |
 | **`/api/cron/lifecycle`** | Daily `0 10 * * *` | Finish onboarding, welcome fallback, new year, year reflection | Yes |
 | **`/api/cron/streak-calculator`** | Daily `0 1 * * *` | Streak math (not email) | Yes |
 | **`/api/cron/email-health`** | Mon `0 9 * * 1` | Volume guidance + active-user counts | Yes |

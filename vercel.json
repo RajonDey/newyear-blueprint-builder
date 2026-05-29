@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/cron/rhythm-daily",
+      "schedule": "0 6 * * *"
+    },
+    {
       "path": "/api/cron/streak-calculator",
       "schedule": "0 1 * * *"
     },
