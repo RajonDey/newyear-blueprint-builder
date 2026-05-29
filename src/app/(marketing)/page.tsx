@@ -1,5 +1,8 @@
 import type { Metadata } from "next"
+import { JsonLdScript } from "@/components/seo/json-ld-script"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
+import { buildSoftwareApplicationJsonLd } from "@/lib/seo/json-ld"
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from "@/lib/seo/site"
 import { Hero } from "@/components/marketing/sections/hero"
 import { Problem } from "@/components/marketing/sections/problem"
 import { Guide } from "@/components/marketing/sections/guide"
@@ -18,19 +21,18 @@ import { CtaBand } from "@/components/marketing/sections/cta-band"
  */
 
 export const metadata: Metadata = {
-  title: "YearInReview — End the year proud, with proof",
-  description:
-    "A calm planning system that connects your yearly plan, weekly rhythm, and daily systems — so intentions turn into habits, not guilt.",
+  title: `${SITE_NAME} — End the year proud, with proof`,
+  description: SITE_DESCRIPTION,
   openGraph: {
-    title: "YearInReview — Design a life worth living",
-    description:
-      "One calm place where your yearly plan, weekly rhythm, and daily systems all live together.",
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
   },
 }
 
 export default function HomePage() {
   return (
     <div>
+      <JsonLdScript data={buildSoftwareApplicationJsonLd()} />
       <Hero />
       <Problem />
       <Guide />

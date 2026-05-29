@@ -2,6 +2,9 @@ import type { Metadata } from "next"
 import { Inter, Fraunces, JetBrains_Mono } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { Providers } from "@/components/providers"
+import { JsonLdScript } from "@/components/seo/json-ld-script"
+import { buildWebSiteJsonLd } from "@/lib/seo/json-ld"
+import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_TAGLINE } from "@/lib/seo/site"
 import "./globals.css"
 
 const inter = Inter({
@@ -25,30 +28,19 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL ?? "https://yearinreview.online",
   ),
   title: {
-    default: "YearInReview — Design a Life Worth Living",
-    template: "%s | YearInReview",
+    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "A mindful annual planning platform — reflect on your journey, set intentional goals, and walk your path with clarity all year long.",
-  keywords: [
-    "year planning",
-    "annual goals",
-    "mindful planning",
-    "life design",
-    "wheel of life",
-    "intentional living",
-    "personal growth",
-    "annual review",
-  ],
-  authors: [{ name: "YearInReview" }],
+  description: SITE_DESCRIPTION,
+  keywords: [...SITE_KEYWORDS],
+  authors: [{ name: SITE_NAME }],
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://yearinreview.online",
-    siteName: "YearInReview",
-    title: "YearInReview — Design a Life Worth Living",
-    description:
-      "A mindful annual planning platform. Reflect. Plan. Walk your path with clarity.",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
     images: [
       {
         url: "/opengraph-image",
@@ -60,9 +52,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "YearInReview — Design a Life Worth Living",
-    description:
-      "Reflect on your journey. Set intentional goals. Walk your path all year long.",
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
     images: ["/opengraph-image"],
   },
   icons: {
@@ -81,6 +72,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${fraunces.variable} ${mono.variable} font-sans antialiased`}
       >
+        <JsonLdScript data={buildWebSiteJsonLd()} />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -7,9 +7,16 @@ import matter from "gray-matter"
 import { ArrowLeft } from "lucide-react"
 import { MandalaWatermark } from "@/components/shared/mandala-watermark"
 import { OrnamentDivider } from "@/components/shared/ornament-divider"
+import { JsonLdScript } from "@/components/seo/json-ld-script"
 import { wisdomMdxComponents } from "@/components/wisdom/wisdom-mdx-components"
 import {
+  buildArticleJsonLd,
+  buildBreadcrumbJsonLd,
+} from "@/lib/seo/json-ld"
+import { getSiteUrl } from "@/lib/seo/site"
+import {
   estimateReadingMinutes,
+  getWisdomLastModified,
   getWisdomSlugs,
   getWisdomSourceBySlug,
   type WisdomFrontmatter,
@@ -27,12 +34,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!raw) return { title: "Article" }
   const { data } = matter(raw)
   const fm = data as WisdomFrontmatter
+  const url = getSiteUrl(`/blog/${slug}`)
+
   return {
     title: fm.title,
     description: fm.description,
+    keywords: fm.keywords,
+    alternates: {
+      canonical: url,
+    },
     openGraph: {
       title: `${fm.title} | YearInReview Wisdom`,
       description: fm.description,
+      type: "article",
+      publishedTime: fm.date,
+      modifiedTime: getWisdomLastModified(fm),
+      url,
     },
   }
 }
@@ -62,6 +79,20 @@ export default async function WisdomArticlePage({ params }: Props) {
 
   return (
     <div className="relative overflow-hidden">
+      <JsonLdScript
+        data={[
+          buildArticleJsonLd({
+            ...fm,
+            slug,
+            readingMinutes: minutes,
+          }),
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Wisdom", path: "/blog" },
+            { name: fm.title, path: `/blog/${slug}` },
+          ]),
+        ]}
+      />
       <MandalaWatermark size="lg" position="top-right" className="opacity-[0.04]" />
       <article className="container max-w-3xl py-12 md:py-16 relative z-10">
         <Link

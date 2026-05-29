@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next"
+import { getBaseUrl } from "@/lib/utils"
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://yearinreview.online"
+  const baseUrl = getBaseUrl()
 
   return {
     rules: [
@@ -12,5 +13,6 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl.replace(/^https?:\/\//, ""),
   }
 }
